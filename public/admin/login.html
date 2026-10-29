@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="theme-color" content="#000000">
+  <title>Sign in · NCS admin</title>
+  <link rel="icon" href="/icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/admin/admin.css">
+</head>
+<body>
+  <main class="login">
+    <section class="login-art" aria-hidden="true">
+      <div class="brand">
+        <svg viewBox="0 0 420 420"><path d="M210 8L297.35 95.35V301.72L148.09 69.91ZM210 412L122.65 324.65V118.28L271.91 350.09Z"/><path d="M10.18 210L68.05 152.13V267.87ZM409.82 210L351.95 152.13V267.87Z"/></svg>
+        <span><b><i>NEW</i>CONCEPT</b><small>Security</small></span>
+      </div>
+      <div>
+        <h2>Your website, at a glance.</h2>
+        <p>Visitors, where they come from, enquiries, speed and uptime, the blog and every document, in one place.</p>
+      </div>
+    </section>
+    <section class="login-box">
+      <div class="brand" style="padding:0">
+        <svg viewBox="0 0 420 420" aria-hidden="true"><path d="M210 8L297.35 95.35V301.72L148.09 69.91ZM210 412L122.65 324.65V118.28L271.91 350.09Z"/><path d="M10.18 210L68.05 152.13V267.87ZM409.82 210L351.95 152.13V267.87Z"/></svg>
+        <span><b style="color:var(--red)"><i style="color:var(--ink)">NEW</i>CONCEPT</b><small style="color:var(--ink-3)">Admin</small></span>
+      </div>
+      <h1>Sign in.</h1>
+      <p>Enter your access code.</p>
+      <form id="login" class="form" novalidate>
+        <label class="field"><span class="sr-only">Access code</span><input id="code" name="code" autocomplete="current-password" spellcheck="false" autocapitalize="characters" placeholder="NCS-XXXX-XXXX-XXXX" required></label>
+        <p class="login-error" role="alert" hidden></p>
+        <button class="btn" type="submit">Sign in</button>
+      </form>
+    </section>
+  </main>
+  <script>
+    /* Signs in, then goes back to the admin page that asked, or the overview. */
+    const form = document.getElementById("login");
+    const error = form.querySelector(".login-error");
+    const next = new URLSearchParams(location.search).get("next") || "";
+    const target = /^\/admin(\/[^/][\w./#?=&-]*|\/?#[\w./?=&-]*)?$/.test(next) ? next : "/admin";
+    fetch("/api/login").then((r) => r.json()).then((s) => s.signedIn && location.replace(target)).catch(() => {});
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const button = form.querySelector("button");
+      button.disabled = true;
+      error.hidden = true;
+      try {
+        const res = await fetch("/api/login", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ code: form.code.value }) });
+        const data = await res.json().catch(() => ({}));
+        if (res.ok) return location.replace(target);
+        error.textContent = data.error || "Something went wrong. Try again.";
+        error.hidden = false;
+        form.code.select();
+      } catch {
+        error.textContent = "Couldn’t reach the server. Check your connection.";
+        error.hidden = false;
+      }
+      button.disabled = false;
+    });
+    form.code.focus();
+  </script>
+</body>
+</html>

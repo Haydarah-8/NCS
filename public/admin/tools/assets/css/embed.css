@@ -1,0 +1,134 @@
+/* The brand tools (the document makers, business cards and design kit) in
+   the admin's look: the light grey workspace, white cards with a hairline
+   and soft corners, pill buttons in NCS red, and the website's system type.
+   Their own top bar goes; the admin's sidebar does that job. The documents
+   themselves are not touched. */
+
+:root {
+  --ds-btn: #a01010;
+  --ds-btn-ink: #ffffff;
+  --ds-btn-hover: #c41616;
+  --ds-ink: #1d1d1f;
+  --ds-ink-2: #6e6e73;
+  --ds-ink-3: #86868b;
+  --ds-line: #e8e8ed;
+  --ds-line-strong: #d2d2d7;
+  --ds-r-xl: 20px;
+  --ds-r-lg: 18px;
+  --ds-r-md: 14px;
+  --ds-r-sm: 12px;
+  --font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Inter, Helvetica, Arial, sans-serif;
+}
+
+.tl-top {
+  display: none !important;
+}
+
+body,
+body.doc-app {
+  background: #f5f5f7 !important;
+  color: #1d1d1f;
+  font-family: var(--font);
+  letter-spacing: -0.01em;
+}
+
+::selection {
+  background: #a01010;
+  color: #fff;
+}
+
+.dc-eyebrow,
+[class*="eyebrow"] {
+  color: #a01010 !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.02em !important;
+  text-transform: none;
+}
+
+.dc-title,
+.ds-title {
+  font-weight: 600 !important;
+  letter-spacing: -0.03em !important;
+}
+
+.ds-btn {
+  border-radius: 999px !important;
+  font-weight: 500 !important;
+}
+
+.ds-btn.is-solid {
+  border-color: #a01010 !important;
+  background: #a01010 !important;
+  color: #fff !important;
+}
+
+.ds-btn.is-solid:hover {
+  border-color: #c41616 !important;
+  background: #c41616 !important;
+}
+
+.ds-btn.is-outline,
+.dc-actions .ds-btn.is-outline {
+  border-color: #d2d2d7 !important;
+  background: #fff !important;
+  color: #1d1d1f !important;
+}
+
+.ds-btn.is-outline:hover {
+  background: #f5f5f7 !important;
+}
+
+/* Each editor panel is a white card, as in the admin. */
+.dc-card {
+  border: 1px solid #e8e8ed !important;
+  border-radius: 20px !important;
+  background: #fff !important;
+  box-shadow: none !important;
+}
+
+.dc-field input,
+.dc-field select,
+.dc-field textarea {
+  border: 1px solid #d2d2d7 !important;
+  border-radius: 12px !important;
+  background: #fff !important;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  border-color: #a01010 !important;
+  outline: none !important;
+  box-shadow: 0 0 0 4px rgba(160, 16, 16, 0.1) !important;
+}
+
+.kit-design,
+.dc-template {
+  border: 1px solid #e8e8ed !important;
+  border-radius: 14px !important;
+  background: #fff !important;
+}
+
+.kit-design[aria-pressed="true"],
+.dc-template[aria-pressed="true"] {
+  border-color: #a01010 !important;
+  box-shadow: 0 0 0 3px rgba(160, 16, 16, 0.15) !important;
+}
+
+.kit-types button {
+  border-radius: 999px !important;
+  background: #ececee !important;
+  border-color: transparent !important;
+}
+
+.kit-types button[aria-pressed="true"] {
+  background: #1d1d1f !important;
+  color: #fff !important;
+}
+
+.dc-stage,
+.kit-stage {
+  border-radius: 20px !important;
+  background: #ececee !important;
+}

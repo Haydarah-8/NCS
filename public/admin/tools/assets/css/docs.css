@@ -1,0 +1,2271 @@
+/* New Concept Security: invoice, receipt and quote studio.
+   The editor sits on the left, the live page on the right. The page itself
+   is plain HTML at its printed size, scaled to fit the preview. */
+
+body.doc-app {
+  background: #f5f5f7;
+  color: #1d1d1f;
+}
+
+/* ---------- Tool bar shared by the brand tools ---------- */
+
+.tl-top {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: rgba(245, 245, 247, 0.86);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  backdrop-filter: saturate(180%) blur(18px);
+  -webkit-backdrop-filter: saturate(180%) blur(18px);
+}
+
+.tl-top-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  min-height: 3.75rem;
+}
+
+.tl-top .site-logo {
+  color: #1d1d1f;
+  --mark-w: #A01010;
+}
+
+.tl-top .site-logo svg {
+  height: 1.75rem;
+}
+
+.tl-tabs {
+  display: inline-flex;
+  gap: 2px;
+  padding: 3px;
+  border-radius: 999px;
+  background: #e8e8ed;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.tl-tabs a {
+  padding: 0.45rem 1rem;
+  border-radius: 999px;
+  color: #1d1d1f;
+  font-size: 0.875rem;
+  font-weight: 500;
+  white-space: nowrap;
+  text-decoration: none;
+}
+
+.tl-tabs a[aria-current="page"] {
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+}
+
+.tl-back {
+  font-size: 0.875rem;
+}
+
+@media (max-width: 760px) {
+  .tl-top .site-logo-word,
+  .tl-back {
+    display: none;
+  }
+
+  .tl-tabs a {
+    padding: 0.45rem 0.7rem;
+    font-size: 0.8125rem;
+  }
+}
+
+/* ---------- Studio layout ---------- */
+
+.dc-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1.25rem 2rem;
+  padding-top: clamp(2.5rem, 5vw, 4rem);
+  padding-bottom: 1.75rem;
+}
+
+.dc-eyebrow {
+  color: var(--gold-deep);
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.dc-title {
+  margin-top: 0.35rem;
+  font-size: clamp(2.5rem, 5vw, 4rem);
+  font-weight: 600;
+  line-height: 1.02;
+  letter-spacing: -0.044em;
+}
+
+.dc-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+.dc-actions .ds-btn {
+  height: 2.75rem;
+  padding: 0 1.2rem;
+  font-size: 0.9375rem;
+}
+
+.dc-actions .ds-btn.is-outline {
+  background: #fff;
+}
+
+.dc-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1.5rem;
+  padding-bottom: 5rem;
+}
+
+.dc-editor,
+.dc-preview {
+  min-width: 0;
+}
+
+@media (max-width: 1099px) {
+  .dc-preview {
+    position: static;
+  }
+}
+
+@media (min-width: 1100px) {
+  .dc-layout {
+    grid-template-columns: minmax(0, 440px) minmax(0, 1fr);
+    align-items: start;
+  }
+}
+
+.dc-editor {
+  display: grid;
+  gap: 1rem;
+}
+
+.dc-card {
+  padding: 1.35rem 1.35rem 1.5rem;
+  border-radius: 1.1rem;
+  background: #fff;
+  box-shadow: 0 0 0 0.5px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+.dc-card h2 {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  font-size: 1.0625rem;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+}
+
+.dc-card h2 small {
+  color: #86868b;
+  font-size: 0.8125rem;
+  font-weight: 400;
+}
+
+.dc-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.dc-grid .is-wide {
+  grid-column: 1 / -1;
+}
+
+.dc-field {
+  display: grid;
+  gap: 0.3rem;
+  min-width: 0;
+  color: #6e6e73;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.dc-field input,
+.dc-field select,
+.dc-field textarea {
+  width: 100%;
+  min-width: 0;
+  padding: 0.6rem 0.7rem;
+  border: 1px solid #d2d2d7;
+  border-radius: 0.6rem;
+  background: #fff;
+  color: #1d1d1f;
+  font: inherit;
+  font-size: 0.9375rem;
+  font-weight: 400;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.dc-field textarea {
+  min-height: 4.5rem;
+  resize: vertical;
+  line-height: 1.45;
+}
+
+.dc-field input:focus,
+.dc-field select:focus,
+.dc-field textarea:focus {
+  border-color: #0071e3;
+  box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.18);
+  outline: none;
+}
+
+.dc-field input[type="color"] {
+  height: 2.6rem;
+  padding: 0.2rem;
+  cursor: pointer;
+}
+
+.dc-check {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  color: #1d1d1f;
+  font-size: 0.9375rem;
+  cursor: pointer;
+}
+
+.dc-check input {
+  width: 1.1rem;
+  height: 1.1rem;
+  accent-color: #0A0A0A;
+}
+
+/* Colour themes, as on the business card. */
+.dc-card h2 .dc-link {
+  font-size: 0.8125rem;
+  font-weight: 500;
+}
+
+.dc-sub {
+  margin-top: 1.1rem;
+  color: #6e6e73;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.dc-swatches {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+  margin-top: 0.55rem;
+}
+
+.dc-swatch {
+  position: relative;
+  cursor: pointer;
+}
+
+.dc-swatch input {
+  position: absolute;
+  opacity: 0;
+}
+
+.dc-swatch span {
+  display: block;
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.12);
+  transition: box-shadow 0.2s ease;
+}
+
+.dc-swatch span.is-custom {
+  background: conic-gradient(from 200deg, #C41616, #c0392b, #8e44ad, #0A0A0A, #16a085, #C41616);
+}
+
+.dc-swatch input:checked + span {
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.12), 0 0 0 2px #ffffff, 0 0 0 4px #0071e3;
+}
+
+.dc-swatch input:focus-visible + span {
+  box-shadow: 0 0 0 2px #ffffff, 0 0 0 4px var(--gold);
+}
+
+.dc-field input[type="range"] {
+  padding: 0;
+  border: 0;
+  accent-color: #0A0A0A;
+}
+
+.dc-field input[type="range"]:focus {
+  box-shadow: none;
+}
+
+.dc-tagline {
+  display: grid;
+  gap: 0.6rem;
+  margin-top: 0.9rem;
+}
+
+/* Timesheet templates. */
+.dc-formats {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.6rem;
+  margin-top: 1rem;
+}
+
+.dc-format {
+  display: grid;
+  grid-template-columns: 64px minmax(0, 1fr);
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.5rem;
+  border: 0;
+  border-radius: 0.75rem;
+  background: #f5f5f7;
+  color: #1d1d1f;
+  font: inherit;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  line-height: 1.3;
+  text-align: left;
+  cursor: pointer;
+}
+
+.dc-format[aria-pressed="true"] {
+  background: #e8f0f8;
+  box-shadow: inset 0 0 0 2px #0071e3;
+}
+
+.dc-format-art svg {
+  display: block;
+  width: 64px;
+  border-radius: 4px;
+  box-shadow: 0 0 0 1px #d2d2d7;
+}
+
+[data-signin-options][hidden] {
+  display: none;
+}
+
+/* Template chips. */
+.dc-templates {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  row-gap: 0.8rem;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.dc-template {
+  display: grid;
+  gap: 0.4rem;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: #1d1d1f;
+  font: inherit;
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-align: center;
+  cursor: pointer;
+}
+
+.dc-template-art {
+  display: block;
+  aspect-ratio: 0.71;
+  overflow: hidden;
+  border-radius: 0.4rem;
+  background: #fff;
+  box-shadow: 0 0 0 1px #d2d2d7;
+  transition: box-shadow 0.2s ease, transform 0.3s var(--ds-ease);
+}
+
+.dc-template:hover .dc-template-art {
+  transform: translateY(-2px);
+}
+
+.dc-template[aria-pressed="true"] .dc-template-art {
+  box-shadow: 0 0 0 2px #fff, 0 0 0 4px #0071e3;
+}
+
+.dc-template-art svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* The featured five, then the rest as a compact list. */
+.dc-templates.is-featured {
+  margin-top: 0.5rem;
+}
+
+.dc-more {
+  margin-top: 1rem;
+}
+
+.dc-more summary {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #1d1d1f;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  list-style: none;
+}
+
+.dc-more summary::-webkit-details-marker {
+  display: none;
+}
+
+.dc-more summary::before {
+  content: "+";
+  display: grid;
+  width: 1.25rem;
+  height: 1.25rem;
+  place-items: center;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.08);
+  font-weight: 500;
+}
+
+.dc-more[open] summary::before {
+  content: "\2212";
+}
+
+.dc-more summary small {
+  color: #86868b;
+  font-weight: 500;
+}
+
+.dc-more-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(9.5rem, 1fr));
+  gap: 0.35rem;
+  margin-top: 0.75rem;
+}
+
+.dc-template.is-mini {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.35rem 0.5rem 0.35rem 0.35rem;
+  border-radius: 0.6rem;
+  background: rgba(0, 0, 0, 0.04);
+  text-align: left;
+}
+
+.dc-template.is-mini .dc-template-art {
+  width: 1.6rem;
+  flex: none;
+  border-radius: 0.2rem;
+}
+
+.dc-template.is-mini:hover .dc-template-art {
+  transform: none;
+}
+
+.dc-template.is-mini[aria-pressed="true"] {
+  background: #1d1d1f;
+  color: #fff;
+}
+
+.dc-template.is-mini[aria-pressed="true"] .dc-template-art {
+  box-shadow: none;
+}
+
+/* Line items. */
+.dc-items {
+  display: grid;
+  gap: 0.6rem;
+  margin-top: 1rem;
+}
+
+.dc-item {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+  gap: 0.45rem;
+  padding: 0.75rem;
+  border-radius: 0.8rem;
+  background: #f5f5f7;
+}
+
+.dc-item .dc-field input {
+  padding: 0.5rem 0.6rem;
+  font-size: 0.875rem;
+}
+
+.dc-item .is-desc {
+  grid-column: 1 / -1;
+}
+
+.dc-item.is-shift .dc-field input,
+.dc-item.is-shift .dc-field select {
+  padding: 0.45rem 0.5rem;
+  font-size: 0.8125rem;
+}
+
+.dc-days {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-top: 0.9rem;
+}
+
+.dc-day {
+  padding: 0.4rem 0.65rem;
+  border-radius: 999px;
+  background: #f5f5f7;
+  font-size: 0.8125rem;
+}
+
+.dc-day:has(input:checked) {
+  background: #e3ecf4;
+  color: #0A0A0A;
+}
+
+.dc-generate {
+  width: 100%;
+  height: 2.75rem;
+  margin-top: 1rem;
+  font-size: 0.9375rem;
+}
+
+.dc-quick {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem 0.9rem;
+  margin-top: 0.9rem;
+  color: #86868b;
+  font-size: 0.8125rem;
+}
+
+.dc-item .is-detail {
+  grid-column: 1 / -1;
+}
+
+.dc-item-bar {
+  display: flex;
+  grid-column: 1 / -1;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  color: #6e6e73;
+  font-size: 0.8125rem;
+}
+
+.dc-item-bar strong {
+  color: #1d1d1f;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.dc-mini {
+  display: inline-flex;
+  gap: 0.25rem;
+}
+
+.dc-mini button {
+  display: grid;
+  width: 1.9rem;
+  height: 1.9rem;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: 0.5rem;
+  background: #fff;
+  color: #1d1d1f;
+  font-size: 0.875rem;
+  cursor: pointer;
+  box-shadow: 0 0 0 1px #d2d2d7;
+}
+
+.dc-mini button:hover {
+  box-shadow: 0 0 0 1px #1d1d1f;
+}
+
+.dc-mini button:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.dc-add {
+  width: 100%;
+  margin-top: 0.75rem;
+  padding: 0.7rem;
+  border: 1px dashed #b0b0b8;
+  border-radius: 0.8rem;
+  background: none;
+  color: #0066cc;
+  font: inherit;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.dc-add:hover {
+  border-color: #0066cc;
+  background: rgba(0, 102, 204, 0.04);
+}
+
+.dc-logo-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.dc-logo-row .ds-btn {
+  height: 2.4rem;
+  padding: 0 1rem;
+  background: #fff;
+  font-size: 0.875rem;
+}
+
+.dc-link {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: #0066cc;
+  font: inherit;
+  font-size: 0.875rem;
+  cursor: pointer;
+}
+
+.dc-link:hover {
+  text-decoration: underline;
+}
+
+/* Saved documents. */
+.dc-saved {
+  display: grid;
+  gap: 0.4rem;
+  margin-top: 0.9rem;
+}
+
+.dc-saved-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.55rem 0.7rem;
+  border-radius: 0.6rem;
+  background: #f5f5f7;
+  font-size: 0.875rem;
+}
+
+.dc-saved-row span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dc-saved-row small {
+  color: #86868b;
+}
+
+.dc-empty {
+  margin-top: 0.75rem;
+  color: #86868b;
+  font-size: 0.875rem;
+}
+
+/* ---------- The preview ---------- */
+
+.dc-preview {
+  position: sticky;
+  top: 4.75rem;
+}
+
+.dc-stage {
+  overflow: hidden;
+  padding: clamp(1rem, 2.5vw, 2rem);
+  border-radius: 1.25rem;
+  background: #e8e8ed;
+}
+
+.dc-scaler {
+  transform-origin: top left;
+}
+
+.dc-paper {
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08), 0 18px 40px -16px rgba(0, 0, 0, 0.3);
+}
+
+.dc-meta {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 0.75rem;
+  color: #6e6e73;
+  font-size: 0.8125rem;
+}
+
+.dc-toast {
+  position: fixed;
+  bottom: 1.5rem;
+  left: 50%;
+  z-index: 100;
+  padding: 0.7rem 1.1rem;
+  border-radius: 999px;
+  background: #1d1d1f;
+  color: #fff;
+  font-size: 0.875rem;
+  opacity: 0;
+  transform: translate(-50%, 10px);
+  transition: opacity 0.3s ease, transform 0.3s var(--ds-ease);
+  pointer-events: none;
+}
+
+.dc-toast.is-on {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
+/* ---------- The document ---------- */
+
+.doc {
+  --a: #0A0A0A;
+  --a2: #C41616;
+  --tint: #eef3f7;
+  position: relative;
+  box-sizing: border-box;
+  overflow: hidden;
+  background: var(--page, #fff);
+  color: #1d1d1f;
+  font-family: var(--doc-font, "Geist"), "Helvetica Neue", Arial, sans-serif;
+  font-size: 13px;
+  line-height: 1.45;
+  letter-spacing: -0.005em;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+
+.doc.is-a4 {
+  width: 794px;
+  min-height: 1123px;
+}
+
+.doc.is-letter {
+  width: 816px;
+  min-height: 1056px;
+}
+
+.doc.is-a4l {
+  width: 1123px;
+  min-height: 794px;
+}
+
+.doc.is-letterl {
+  width: 1056px;
+  min-height: 816px;
+}
+
+.doc-in {
+  padding: 56px 60px 64px;
+}
+
+/* Timesheet: the shift table and the summaries under it. */
+.doc-table.is-ts {
+  font-size: 12px;
+}
+
+.doc-table.is-ts td {
+  padding: 8px 8px;
+}
+
+.doc-table.is-ts th {
+  padding: 8px 8px;
+}
+
+.doc-ts-sum {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.35fr);
+  gap: 32px;
+  align-items: start;
+  margin-top: 26px;
+  break-inside: avoid;
+}
+
+.doc-mini {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+.doc-mini th {
+  padding: 5px 6px;
+  border-bottom: 1px solid #d2d2d7;
+  color: #86868b;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-align: left;
+  text-transform: uppercase;
+}
+
+.doc-mini td {
+  padding: 5px 6px;
+  border-bottom: 1px solid #f0f0f2;
+}
+
+.doc-mini .is-num {
+  text-align: right;
+  white-space: nowrap;
+}
+
+.doc-ts-sum .doc-sum {
+  margin-top: 14px;
+}
+
+.doc-ts-sum .doc-totals {
+  margin-top: 0;
+}
+
+/* A timesheet packs a week onto one page. */
+.doc.is-tsdoc .doc-in {
+  padding: 36px 44px 26px;
+}
+
+.doc.is-tsdoc.t-sidebar .doc-in {
+  padding: 42px 32px 40px;
+}
+
+.doc.is-tsdoc .doc-parties {
+  margin-top: 24px;
+}
+
+.doc.is-tsdoc .doc-table {
+  margin-top: 22px;
+}
+
+.doc.is-tsdoc .doc-table.is-ts td {
+  padding: 5px 7px;
+}
+
+.doc.is-tsdoc .doc-table.is-ts th {
+  padding: 6px 7px;
+}
+
+.doc.is-tsdoc .doc-ts-sum {
+  gap: 24px;
+  margin-top: 14px;
+}
+
+.doc.is-tsdoc .doc-notes {
+  margin-top: 20px;
+}
+
+.doc.is-tsdoc .doc-sign {
+  margin-top: 16px;
+}
+
+.doc.is-tsdoc .doc-sign > div {
+  padding-top: 32px;
+}
+
+.doc.is-tsdoc .doc-sign + .doc-foot {
+  margin-top: 26px;
+}
+
+.doc.is-tsdoc .doc-foot {
+  margin-top: 24px;
+}
+
+.doc-ts-sum .doc-stamp {
+  margin: 18px 0 0;
+}
+
+.doc h1,
+.doc h2,
+.doc h3,
+.doc p {
+  margin: 0;
+}
+
+.doc-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 32px;
+}
+
+.doc-logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.doc-logo svg {
+  width: auto;
+  height: var(--logo-h, 40px);
+}
+
+.doc-logo img {
+  max-width: calc(var(--logo-h, 40px) * 4.5);
+  max-height: calc(var(--logo-h, 40px) * 1.4);
+  object-fit: contain;
+}
+
+.doc-tagline {
+  display: block;
+  margin-top: 4px;
+  color: var(--a2);
+  font-size: 10.5px;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+}
+
+.doc-logo-name {
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  line-height: 1.15;
+}
+
+.doc-logo-name small {
+  display: block;
+  color: #6e6e73;
+  font-size: 9.5px;
+  font-weight: 500;
+  letter-spacing: 0.24em;
+}
+
+.doc-kind {
+  color: var(--a);
+  font-size: 34px;
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  line-height: 1;
+  text-align: right;
+}
+
+.doc-number {
+  margin-top: 8px;
+  color: #6e6e73;
+  font-size: 13px;
+  text-align: right;
+}
+
+.doc-label {
+  margin-bottom: 6px;
+  color: #86868b;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.doc-block {
+  white-space: pre-line;
+}
+
+.doc-block strong {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.doc-parties {
+  margin-top: 40px;
+}
+
+.doc-parties > div {
+  flex: 1;
+}
+
+.doc-facts {
+  display: grid;
+  grid-template-columns: auto auto;
+  gap: 4px 18px;
+  justify-content: end;
+  align-content: start;
+}
+
+.doc-facts dt {
+  color: #86868b;
+}
+
+.doc-facts dd {
+  margin: 0;
+  font-weight: 500;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.doc-table {
+  width: 100%;
+  margin-top: 34px;
+  border-collapse: collapse;
+  font-variant-numeric: tabular-nums;
+}
+
+.doc-table thead {
+  display: table-header-group;
+}
+
+.doc-table th {
+  padding: 9px 10px;
+  color: #6e6e73;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-align: left;
+  text-transform: uppercase;
+  border-bottom: 1.5px solid #1d1d1f;
+}
+
+.doc-table td {
+  padding: 11px 10px;
+  border-bottom: 1px solid #e5e5ea;
+  vertical-align: top;
+}
+
+.doc-table tr {
+  break-inside: avoid;
+}
+
+.doc-table .is-ref {
+  white-space: nowrap;
+}
+
+.doc-table .is-num {
+  text-align: right;
+  white-space: nowrap;
+}
+
+.doc-table td small {
+  display: block;
+  margin-top: 2px;
+  color: #86868b;
+  font-size: 11.5px;
+}
+
+.doc-totals {
+  display: grid;
+  grid-template-columns: auto auto;
+  gap: 6px 36px;
+  justify-content: end;
+  margin-top: 18px;
+  font-variant-numeric: tabular-nums;
+}
+
+.doc-totals dt {
+  color: #6e6e73;
+}
+
+.doc-totals dd {
+  margin: 0;
+  text-align: right;
+}
+
+.doc-totals .is-grand {
+  padding-top: 10px;
+  border-top: 1.5px solid #1d1d1f;
+  color: #1d1d1f;
+  font-size: 17px;
+  font-weight: 600;
+}
+
+.doc-totals .is-due {
+  color: var(--a);
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.doc-notes {
+  margin-top: 36px;
+  break-inside: avoid;
+}
+
+.doc-notes > div {
+  flex: 1;
+}
+
+.doc-notes p {
+  white-space: pre-line;
+  color: #3a3a3f;
+}
+
+.doc-pay {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 3px 14px;
+}
+
+.doc-pay dt {
+  color: #86868b;
+}
+
+.doc-pay dd {
+  margin: 0;
+}
+
+.doc-sign {
+  display: flex;
+  gap: 28px;
+  margin-top: 40px;
+  break-inside: avoid;
+}
+
+.doc-sign > div {
+  flex: 1;
+  padding-top: 44px;
+  border-bottom: 1px solid #1d1d1f;
+  color: #86868b;
+  font-size: 11px;
+}
+
+.doc-sign > div span {
+  position: relative;
+  top: 18px;
+}
+
+.doc-foot {
+  margin-top: 48px;
+  padding-top: 14px;
+  border-top: 1px solid #e5e5ea;
+  color: #86868b;
+  font-size: 11px;
+  text-align: center;
+}
+
+.doc-sum {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.doc-sum .doc-totals {
+  margin-left: auto;
+}
+
+.doc-sign + .doc-foot {
+  margin-top: 64px;
+}
+
+.doc.t-sidebar .doc-side {
+  overflow-wrap: anywhere;
+  font-size: 12px;
+}
+
+.doc-stamp {
+  align-self: center;
+  margin: 26px 0 0 18px;
+  padding: 6px 18px;
+  border: 3px solid currentColor;
+  border-radius: 8px;
+  color: #1f8a4c;
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  opacity: 0.85;
+  transform: rotate(-12deg);
+}
+
+.doc-stamp.is-overdue {
+  color: #c0392b;
+}
+
+.doc-stamp.is-draft {
+  color: #86868b;
+}
+
+/* Template: Modern, a band of colour across the top. */
+.doc.t-modern .doc-band {
+  padding: 40px 60px 34px;
+  background: var(--a);
+  color: var(--ink, #fff);
+}
+
+.doc.t-modern .doc-band .doc-kind,
+.doc.t-modern .doc-band .doc-number,
+.doc.t-modern .doc-band .doc-logo-name small {
+  color: var(--ink, #fff);
+}
+
+.doc.t-modern .doc-band .doc-number,
+.doc.t-modern .doc-band .doc-logo-name small {
+  opacity: 0.7;
+}
+
+.doc.t-modern .doc-rule {
+  height: 5px;
+  background: var(--a2);
+}
+
+.doc.t-modern .doc-table th {
+  border-bottom: 0;
+  background: var(--tint);
+  color: var(--a);
+}
+
+.doc.t-modern .doc-totals .is-grand {
+  border-top-color: var(--a);
+}
+
+/* Template: Minimal, hairlines and air. */
+.doc.t-minimal .doc-kind {
+  color: #1d1d1f;
+  font-size: 44px;
+  font-weight: 300;
+  letter-spacing: -0.04em;
+}
+
+.doc.t-minimal .doc-table th {
+  border-bottom: 1px solid #d2d2d7;
+}
+
+.doc.t-minimal .doc-table td {
+  border-bottom-color: #f0f0f2;
+}
+
+.doc.t-minimal .doc-totals .is-grand {
+  border-top: 1px solid #d2d2d7;
+  font-weight: 500;
+}
+
+/* Template: Sidebar, a column of colour down the left. */
+.doc.t-sidebar {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+}
+
+.doc.t-sidebar .doc-side {
+  padding: 56px 28px;
+  background: var(--a);
+  color: var(--ink, #fff);
+}
+
+.doc.t-sidebar .doc-side .doc-label {
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.doc.t-sidebar .doc-side .doc-block,
+.doc.t-sidebar .doc-side .doc-pay dd {
+  color: rgba(255, 255, 255, 0.92);
+}
+
+.doc.t-sidebar .doc-side .doc-pay {
+  grid-template-columns: 1fr;
+  gap: 0 0;
+}
+
+.doc.t-sidebar .doc-side .doc-pay dt {
+  margin-top: 8px;
+  color: rgba(255, 255, 255, 0.55);
+  font-size: 10.5px;
+}
+
+.doc.t-sidebar .doc-side .doc-logo-name small {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.doc.t-sidebar .doc-side > * + * {
+  margin-top: 30px;
+}
+
+.doc.t-sidebar .doc-in {
+  padding: 56px 44px 64px;
+}
+
+.doc.t-sidebar .doc-kind {
+  text-align: left;
+}
+
+.doc.t-sidebar .doc-number {
+  text-align: left;
+}
+
+.doc.t-sidebar .doc-accentbar {
+  width: 56px;
+  height: 4px;
+  margin-top: 16px;
+  background: var(--a2);
+}
+
+/* Template: Compact, small type and a dense table. */
+.doc.t-compact {
+  font-size: 11.5px;
+}
+
+.doc.t-compact .doc-in {
+  padding: 40px 44px 48px;
+}
+
+.doc.t-compact .doc-kind {
+  font-size: 24px;
+}
+
+.doc.t-compact .doc-table td {
+  padding: 6px 8px;
+}
+
+.doc.t-compact .doc-table th {
+  padding: 6px 8px;
+  background: var(--a);
+  border-bottom: 0;
+  color: var(--ink, #fff);
+}
+
+.doc.t-compact .doc-table tbody tr:nth-child(even) td {
+  background: #f7f7f9;
+}
+
+.doc.t-compact .doc-parties {
+  margin-top: 24px;
+}
+
+/* Classic gets the accent on its rules. */
+.doc.t-classic .doc-table th {
+  border-bottom-color: var(--a);
+  color: var(--a);
+}
+
+.doc.t-classic .doc-topline {
+  height: 6px;
+  background: linear-gradient(90deg, var(--a) 0 78%, var(--a2) 78% 100%);
+}
+
+/* ---------- The business card's designs, as page styles ---------- */
+
+.doc-title {
+  flex: none;
+}
+
+.doc-qr {
+  display: flex;
+  flex: none !important;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  color: #86868b;
+  font-size: 10px;
+}
+
+/* Monogram: an accent edge and a large watermark mark. */
+.doc-edge {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 10px;
+}
+
+.doc-watermark {
+  position: absolute;
+  top: -40px;
+  right: -70px;
+  width: 460px;
+  opacity: 0.05;
+  pointer-events: none;
+}
+
+.doc-watermark svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.doc.t-monogram .doc-in {
+  position: relative;
+  padding-left: 72px;
+}
+
+.doc-mono svg {
+  display: block;
+  width: auto;
+  height: calc(var(--logo-h, 40px) * 0.75);
+}
+
+.doc-mono-name {
+  margin-top: 12px;
+  color: var(--a);
+  font-size: 30px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1;
+}
+
+.doc-mono-sub {
+  margin-top: 5px;
+  color: #6e6e73;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.3em;
+}
+
+/* Split: the mark on a block of colour, the title beside it. */
+.doc-split {
+  display: grid;
+  grid-template-columns: 38% 1fr;
+  min-height: 150px;
+}
+
+.doc-split-left {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.doc-split-left .doc-logo-name,
+.doc-split-left .doc-logo-name small {
+  color: var(--ink, #fff);
+}
+
+.doc-split-mark svg {
+  display: block;
+  width: auto;
+  height: calc(var(--logo-h, 40px) * 1.7);
+}
+
+.doc-split-right {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 0 60px 0 44px;
+}
+
+.doc-split-name {
+  margin-top: 12px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.26em;
+}
+
+/* Diagonal: a slab of colour cut on the W's slope. */
+.doc-diag {
+  position: relative;
+  height: 170px;
+}
+
+.doc-diag-art {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.doc-diag-in {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 100%;
+  padding: 0 60px;
+}
+
+.doc-diag-mark .doc-logo-name,
+.doc-diag-mark .doc-logo-name small {
+  color: var(--ink, #fff);
+}
+
+/* Executive: a dark band, the name set large. */
+.doc-exec {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 40px 60px 34px;
+}
+
+.doc-exec .doc-logo-name,
+.doc-exec .doc-logo-name small {
+  color: var(--ink, #fff);
+}
+
+.doc-exec-mark svg {
+  display: block;
+  width: auto;
+  height: calc(var(--logo-h, 40px) * 0.7);
+}
+
+.doc-exec-name {
+  margin-top: 14px;
+  font-size: 46px;
+  font-weight: 600;
+  letter-spacing: -0.035em;
+  line-height: 1;
+}
+
+.doc-exec-sub {
+  margin-top: 6px;
+  font-size: 10.5px;
+  font-weight: 500;
+  letter-spacing: 0.3em;
+  opacity: 0.65;
+}
+
+.doc-exec-rule {
+  width: 60px;
+  height: 3px;
+  margin-top: 12px;
+}
+
+/* Badge: the mark in a shield, everything centred. */
+.doc-badge {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid #e5e5ea;
+  text-align: center;
+}
+
+.doc-badge-art {
+  width: calc(var(--logo-h, 40px) * 2.3);
+  height: auto;
+  margin-bottom: 4px;
+}
+
+.doc-badge .doc-number {
+  margin-top: 4px;
+  letter-spacing: 0.06em;
+}
+
+/* Hi-vis: a band with two reflective stripes, and one at the foot. */
+.doc-hv {
+  padding: 32px 60px 26px;
+}
+
+.doc-hv .doc-logo-name,
+.doc-hv .doc-logo-name small {
+  color: inherit;
+}
+
+.doc-hv-stripe {
+  position: relative;
+  height: 16px;
+  margin-top: 6px;
+}
+
+.doc-hv-stripe span,
+.doc-hv-foot span {
+  position: absolute;
+  right: 0;
+  left: 0;
+  top: 6px;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.55);
+}
+
+.doc-hv-foot {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 14px;
+}
+
+.doc-hv-foot span {
+  top: 5px;
+}
+
+.doc.t-hivis .doc-in {
+  padding-bottom: 80px;
+}
+
+/* Blueprint and Night: drawn headers. */
+.doc-bp,
+.doc-night {
+  position: relative;
+}
+
+.doc-bp {
+  height: 190px;
+}
+
+.doc-night {
+  height: 200px;
+}
+
+.doc-bp-art,
+.doc-night-art {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.doc-bp-in {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 100%;
+  padding: 0 60px;
+}
+
+.doc-bp-in .doc-logo-name,
+.doc-bp-in .doc-logo-name small {
+  color: inherit;
+}
+
+.doc-night-in {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 38px 60px 0;
+}
+
+.doc-night-in .doc-logo-name,
+.doc-night-in .doc-logo-name small {
+  color: #fff;
+}
+
+/* Wordmark: the name set very large, with the dot. */
+.doc-wm-name {
+  display: inline-flex;
+  align-items: flex-end;
+  gap: 6px;
+  font-size: 54px;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 0.95;
+}
+
+.doc-wm-name span {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  margin-bottom: 7px;
+  border-radius: 50%;
+}
+
+.doc-wm-sub {
+  margin-top: 10px;
+  color: #6e6e73;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.38em;
+}
+
+.doc-wm-rule {
+  height: 3px;
+  margin-top: 22px;
+}
+
+/* ---------- Timesheet formats ---------- */
+
+.doc-table.is-grid th,
+.doc-table.is-grid td {
+  text-align: center;
+}
+
+.doc-table.is-grid th:first-child,
+.doc-table.is-grid td:first-child {
+  text-align: left;
+  white-space: nowrap;
+}
+
+.doc-table.is-grid th:last-child,
+.doc-table.is-grid td:last-child {
+  text-align: right;
+}
+
+.doc-table.is-grid th span {
+  color: #1d1d1f;
+  font-size: 13px;
+  letter-spacing: 0;
+}
+
+.doc-table.is-grid tfoot td {
+  border-top: 1.5px solid #1d1d1f;
+  border-bottom: 0;
+  font-weight: 600;
+}
+
+.doc-table.is-grid.is-dense {
+  font-size: 10px;
+}
+
+.doc-table.is-grid.is-dense th,
+.doc-table.is-grid.is-dense td {
+  padding: 4px 3px;
+}
+
+.doc-dash {
+  color: #c7c7cc;
+}
+
+.doc-table.is-signin {
+  table-layout: fixed;
+  font-size: 11px;
+}
+
+.doc-table.is-signin th {
+  font-size: 9px;
+  letter-spacing: 0.06em;
+}
+
+.doc-table.is-signin td {
+  height: 27px;
+  overflow: hidden;
+  border-right: 1px solid #e5e5ea;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.doc-table.is-signin td.is-plan {
+  color: #86868b;
+}
+
+.doc-table.is-signin td:last-child {
+  border-right: 0;
+}
+
+.doc-table.is-byofficer tr.is-group td {
+  padding-top: 10px;
+  background: var(--tint);
+  color: var(--a);
+  font-weight: 600;
+}
+
+.doc-table.is-byofficer tr.is-sub td {
+  border-bottom: 1.5px solid #d2d2d7;
+  font-weight: 600;
+}
+
+.doc-signin-total {
+  display: grid;
+  grid-template-columns: auto 150px auto 220px;
+  align-items: end;
+  justify-content: end;
+  gap: 12px;
+  margin-top: 18px;
+  color: #6e6e73;
+  font-size: 12px;
+}
+
+.doc-signin-total span:nth-child(even) {
+  height: 22px;
+  border-bottom: 1px solid #1d1d1f;
+}
+
+/* Till roll: an 80 mm receipt. */
+.doc.is-thermal {
+  width: 302px;
+  min-height: 0;
+  font-family: var(--doc-font, "Geist"), ui-monospace, Menlo, monospace;
+  font-size: 11.5px;
+}
+
+.doc.is-thermal .doc-in {
+  padding: 22px 18px 26px;
+  text-align: center;
+}
+
+.doc.is-thermal .doc-logo {
+  justify-content: center;
+}
+
+.doc.is-thermal .doc-cut {
+  margin: 12px 0;
+  border-top: 1.5px dashed #b0b0b8;
+}
+
+.doc.is-thermal .doc-line {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  text-align: left;
+  font-variant-numeric: tabular-nums;
+}
+
+.doc.is-thermal .doc-line + .doc-line {
+  margin-top: 4px;
+}
+
+.doc.is-thermal .doc-line.is-grand {
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.doc.is-thermal .doc-line span:last-child {
+  white-space: nowrap;
+}
+
+.doc.is-thermal .doc-item small {
+  display: block;
+  color: #6e6e73;
+  text-align: left;
+}
+
+/* ---------- Ledger, Frame, Column, Stripe, Letterhead, Corner ---------- */
+
+.doc.t-ledger .doc-kind {
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+.doc-ledger-rule {
+  height: 2px;
+  margin-top: 22px;
+  background: linear-gradient(90deg, var(--a) 0 72%, var(--a2) 72%);
+}
+
+.doc.t-ledger .doc-parties {
+  gap: 0;
+  margin-top: 26px;
+  border: 1px solid #e5e5ea;
+}
+
+.doc.t-ledger .doc-parties > div {
+  padding: 16px 18px;
+}
+
+.doc.t-ledger .doc-parties > div + div {
+  border-left: 1px solid #e5e5ea;
+}
+
+.doc.t-ledger .doc-facts {
+  justify-content: start;
+}
+
+.doc.t-ledger .doc-table th {
+  border-bottom-color: var(--a);
+  color: var(--a);
+}
+
+.doc.t-ledger .doc-table tbody tr:nth-child(odd) td {
+  background: var(--tint);
+}
+
+.doc.t-ledger .doc-table td {
+  border-bottom: 0;
+}
+
+.doc-frame {
+  position: absolute;
+  inset: 20px;
+  border: 1.5px solid var(--a);
+  pointer-events: none;
+}
+
+.doc-frame::after {
+  position: absolute;
+  inset: 5px;
+  border: 0.75px solid var(--a2);
+  content: "";
+}
+
+.doc.t-frame .doc-in {
+  padding: 60px 70px 70px;
+}
+
+.doc-frame-head {
+  display: grid;
+  justify-items: center;
+  gap: 16px;
+  text-align: center;
+}
+
+.doc-frame-rule {
+  width: 120px;
+  height: 1px;
+  background: var(--a2);
+}
+
+.doc.t-frame .doc-kind {
+  font-size: 28px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+}
+
+.doc-col {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 210px;
+  gap: 28px;
+  margin-top: 34px;
+}
+
+.doc-col-main .doc-table {
+  margin-top: 0;
+}
+
+.doc-col-side {
+  display: grid;
+  align-content: start;
+  gap: 18px;
+  padding: 20px 18px;
+  background: var(--tint);
+  font-size: 12px;
+}
+
+.doc-col-big {
+  margin-top: -14px;
+  color: var(--a);
+  font-size: 26px;
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums;
+}
+
+.doc-col-side .doc-facts {
+  justify-content: start;
+  padding-bottom: 16px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.doc-col-side .doc-facts dd {
+  text-align: left;
+}
+
+.doc-col-side .doc-pay {
+  grid-template-columns: 1fr;
+  gap: 0;
+}
+
+.doc.t-column .doc-notes {
+  flex-direction: column;
+  gap: 16px;
+}
+
+.doc-stripe {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 14px;
+  background: var(--a);
+}
+
+.doc-stripe span {
+  position: absolute;
+  inset: 0 -4px 0 auto;
+  width: 4px;
+  background: var(--a2);
+}
+
+.doc.t-stripe .doc-in {
+  padding-left: 76px;
+}
+
+.doc.t-stripe .doc-kind {
+  font-size: 44px;
+  font-weight: 600;
+  letter-spacing: -0.045em;
+}
+
+.doc-lh {
+  display: grid;
+  justify-items: center;
+  gap: 10px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid #e5e5ea;
+  text-align: center;
+}
+
+.doc-lh-line {
+  color: #6e6e73;
+  font-size: 11px;
+  letter-spacing: 0.02em;
+}
+
+.doc-lh-title {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  margin-top: 30px;
+}
+
+.doc-lh-title span {
+  flex: 1;
+  height: 1px;
+  background: var(--a2);
+}
+
+.doc.t-letterhead .doc-kind {
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.doc-corner {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 178px;
+  height: 178px;
+}
+
+.doc-corner-mark {
+  position: absolute;
+  top: 28px;
+  right: 28px;
+}
+
+.doc.t-corner .doc-parties {
+  margin-top: 52px;
+}
+
+.doc-corner-mark .doc-logo-name {
+  display: none;
+}
+
+.doc-corner-mark .doc-logo svg {
+  height: calc(var(--logo-h, 40px) * 1.05);
+}
+
+.doc-corner-title {
+  max-width: 60%;
+  padding-top: 26px;
+}
+
+.doc.t-corner .doc-kind {
+  font-size: 40px;
+}
+
+/* ---------- Hairline, Poster, Seal, Ribbon ---------- */
+
+.doc-hl-kind .doc-kind {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+}
+
+.doc-hl-rule {
+  height: 0.5px;
+  margin-top: 22px;
+  background: #1d1d1f;
+}
+
+.doc.t-hairline .doc-table th {
+  border-bottom-width: 0.5px;
+}
+
+.doc.t-hairline .doc-table td {
+  border-bottom-width: 0.5px;
+}
+
+.doc-poster-kind {
+  margin-top: 38px;
+  font-size: 76px;
+  letter-spacing: -0.055em;
+  line-height: 0.9;
+  text-align: left;
+}
+
+.doc-poster-bar {
+  width: 90px;
+  height: 8px;
+  margin-top: 20px;
+  background: var(--a2);
+}
+
+.doc-seal-row {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+.doc-seal {
+  width: 74px;
+  height: 74px;
+  flex: none;
+}
+
+.doc-seal-row > div:nth-child(2) {
+  flex: 1;
+}
+
+.doc-seal-name {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+}
+
+.doc-ribbon {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 180px;
+  height: 180px;
+}
+
+.doc-tick {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border: 1.2px solid #1d1d1f;
+  border-radius: 3px;
+}
+
+/* ---------- Banner, Elegant, Block, Underline, Tab, Grid ---------- */
+
+.doc-banner {
+  padding: 46px 60px 40px;
+}
+
+.doc.t-banner .doc-banner .doc-number {
+  color: var(--a);
+  opacity: 0.75;
+}
+
+.doc-banner-rule {
+  height: 4px;
+}
+
+.doc-eleg {
+  display: grid;
+  justify-items: center;
+  gap: 18px;
+}
+
+.doc-eleg-rule {
+  width: 100%;
+  height: 5px;
+  border-top: 1px solid var(--a2);
+  border-bottom: 1px solid var(--a2);
+}
+
+.doc.t-elegant .doc-kind {
+  font-family: "Fraunces", "Playfair Display", Georgia, serif;
+  font-size: 40px;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+}
+
+.doc.t-elegant .doc-label {
+  color: var(--a);
+  letter-spacing: 0.2em;
+}
+
+.doc-blk {
+  display: flex;
+  align-items: stretch;
+}
+
+.doc-blk-fill {
+  width: 58%;
+  padding: 58px 40px 30px 60px;
+  border-bottom: 5px solid var(--a2);
+  background: var(--a);
+}
+
+.doc-blk-fill .doc-kind {
+  color: #fff;
+}
+
+.doc-blk-fill .doc-number {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.doc-blk-logo {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 0 60px;
+  border-bottom: 1px solid #e5e5ea;
+}
+
+.doc.t-underline .doc-kind {
+  font-size: 52px;
+  letter-spacing: -0.045em;
+}
+
+.doc-ul-bar {
+  width: 120px;
+  height: 6px;
+  margin-top: 18px;
+  background: var(--a2);
+}
+
+.doc-tab-row {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  padding: 44px 60px 0;
+}
+
+.doc-tab {
+  padding: 18px 28px 16px;
+  border-radius: 12px 12px 0 0;
+  background: var(--a);
+}
+
+.doc-tab .doc-kind {
+  color: #fff;
+  font-size: 28px;
+}
+
+.doc-tab .doc-number {
+  margin-top: 6px;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.doc-tab-logo {
+  padding-bottom: 16px;
+}
+
+.doc-tab-line {
+  height: 3px;
+  margin: 0 60px;
+  background: var(--a);
+}
+
+.doc-in.doc-tab-in {
+  padding-top: 10px;
+}
+
+.doc-gridhead {
+  position: relative;
+  border-bottom: 2px solid var(--a);
+}
+
+.doc-gridhead-art {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.doc-gridhead-in {
+  position: relative;
+  padding: 52px 60px 44px;
+}
+
+.doc.t-grid .doc-table th {
+  border-bottom: 0;
+  background: var(--a);
+  color: #fff;
+}
+
+/* ---------- Print: only the page ---------- */
+
+.dc-print {
+  display: none;
+}
+
+@media print {
+  body.doc-app > *:not(.dc-print) {
+    display: none !important;
+  }
+
+  body.doc-app {
+    background: #fff;
+  }
+
+  .dc-print {
+    display: block;
+  }
+
+  .dc-print .doc {
+    box-shadow: none;
+  }
+}

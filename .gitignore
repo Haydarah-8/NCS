@@ -1,0 +1,16 @@
+node_modules
+dist
+.next
+.scrape
+public/images/logo-preview.jpg
+__pycache__
+
+.ncs-dev/
+
+.next-ncs/
+.next-dev*.log
+
+.env
+.env*.local
+
+*.tsbuildinfo

@@ -1,0 +1,4 @@
+{
+  "rewrites": [],
+  "crons": [{ "path": "/api/uptime", "schedule": "0 7 * * *" }]
+}

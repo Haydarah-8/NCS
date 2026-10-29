@@ -1,0 +1,1024 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Business Card · New Concept Security</title>
+  <meta name="description" content="The New Concept Security business card: edit the details and download print-ready PDF, PNG or SVG files.">
+  <meta name="robots" content="noindex">
+  <meta name="theme-color" content="#F5F5F7">
+  <link rel="icon" href="assets/img/logo/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@300..700&family=Inter:wght@300..700&family=Manrope:wght@300..700&family=DM+Sans:wght@300..700&family=Montserrat:wght@300..700&family=Space+Grotesk:wght@300..700&family=Playfair+Display:wght@400..700&family=Fraunces:wght@300..700&display=swap">
+  <link rel="stylesheet" href="assets/css/site.css">
+  <link rel="stylesheet" href="assets/css/docs.css">
+  <style>
+    body {
+      background: #ffffff;
+      color: #1d1d1f;
+    }
+
+    .bc-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      padding-block: 1.25rem;
+    }
+
+    .bc-top .site-logo {
+      color: #1d1d1f;
+      --mark-w: #A01010;
+    }
+
+    .bc-top .site-logo svg {
+      height: 2rem;
+    }
+
+    /* ---------- Hero ---------- */
+
+    .bc-hero {
+      padding-top: clamp(3rem, 7vw, 5.5rem);
+      text-align: center;
+    }
+
+    .bc-eyebrow {
+      color: var(--gold-deep);
+      font-size: clamp(1.0625rem, 1.4vw, 1.3125rem);
+      font-weight: 600;
+      letter-spacing: -0.01em;
+    }
+
+    .bc-title {
+      margin-top: 0.5rem;
+      font-size: clamp(3rem, 7vw, 5.5rem);
+      font-weight: 600;
+      line-height: 1.02;
+      letter-spacing: -0.045em;
+    }
+
+    .bc-lede {
+      max-width: 34rem;
+      margin: 1.25rem auto 0;
+      color: #6e6e73;
+      font-size: clamp(1.1875rem, 1.6vw, 1.5rem);
+      line-height: 1.35;
+      letter-spacing: -0.015em;
+    }
+
+    /* ---------- Stage: the card in space ---------- */
+
+    .bc-stage {
+      position: relative;
+      display: grid;
+      place-items: center;
+      margin-top: clamp(2.5rem, 5vw, 4rem);
+      padding: clamp(3.5rem, 8vw, 7rem) var(--ds-pad) clamp(4.5rem, 9vw, 7.5rem);
+      background: radial-gradient(120% 90% at 50% 0%, #ffffff 0%, #f5f5f7 55%, #ececef 100%);
+      perspective: 2200px;
+      overflow: hidden;
+    }
+
+    .bc-tilt {
+      width: min(100%, 46rem);
+      transform-style: preserve-3d;
+      transition: transform 0.8s var(--ds-ease);
+    }
+
+    .bc-flip {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 1050 / 600;
+      transform-style: preserve-3d;
+      transition: transform 1.1s cubic-bezier(0.2, 0.8, 0.2, 1);
+      cursor: pointer;
+    }
+
+    .bc-flip.is-back {
+      transform: rotateY(180deg);
+    }
+
+    .bc-flip:focus-visible {
+      outline: 2px solid var(--gold);
+      outline-offset: 10px;
+      border-radius: 12px;
+    }
+
+    .bc-face {
+      position: absolute;
+      inset: 0;
+      overflow: hidden;
+      border-radius: 9px;
+      background: #fff;
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
+      box-shadow:
+        0 0 0 0.5px rgba(0, 0, 0, 0.06),
+        0 2px 4px rgba(0, 0, 0, 0.06),
+        0 22px 40px -12px rgba(0, 0, 0, 0.22),
+        0 60px 90px -40px rgba(0, 0, 0, 0.35);
+    }
+
+    .bc-face.is-back {
+      transform: rotateY(180deg);
+    }
+
+    .bc-face svg {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+
+    .bc-shadow {
+      position: absolute;
+      bottom: clamp(2.25rem, 5vw, 4rem);
+      left: 50%;
+      width: min(70%, 34rem);
+      height: 2.5rem;
+      border-radius: 50%;
+      background: radial-gradient(closest-side, rgba(0, 0, 0, 0.16), rgba(0, 0, 0, 0));
+      transform: translateX(-50%);
+      pointer-events: none;
+    }
+
+    /* ---------- Controls under the stage ---------- */
+
+    .bc-controls {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1.25rem;
+      padding: 2rem var(--ds-pad) 0;
+    }
+
+    .bc-seg {
+      display: inline-grid;
+      grid-auto-flow: column;
+      gap: 2px;
+      padding: 3px;
+      border-radius: 999px;
+      background: #e8e8ed;
+    }
+
+    .bc-seg button,
+    .bc-seg label span {
+      display: block;
+      min-width: 6.5rem;
+      padding: 0.55rem 1.25rem;
+      border: 0;
+      border-radius: 999px;
+      background: transparent;
+      color: #1d1d1f;
+      font: inherit;
+      font-size: 0.9375rem;
+      font-weight: 500;
+      text-align: center;
+      cursor: pointer;
+      transition: background-color 0.25s ease, box-shadow 0.25s ease;
+    }
+
+    .bc-seg button[aria-pressed="true"],
+    .bc-seg input:checked + span {
+      background: #ffffff;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 0 0 0.5px rgba(0, 0, 0, 0.04);
+    }
+
+    .bc-seg label {
+      position: relative;
+    }
+
+    .bc-seg input {
+      position: absolute;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .bc-seg button:focus-visible,
+    .bc-seg input:focus-visible + span {
+      outline: 2px solid var(--gold);
+      outline-offset: 2px;
+    }
+
+    .bc-finish {
+      display: flex;
+      gap: 0.9rem;
+      margin: 0;
+      padding: 0;
+      border: 0;
+    }
+
+    .bc-swatch {
+      position: relative;
+      display: block;
+      cursor: pointer;
+    }
+
+    .bc-swatch input {
+      position: absolute;
+      opacity: 0;
+    }
+
+    .bc-swatch span {
+      display: block;
+      width: 1.75rem;
+      height: 1.75rem;
+      border-radius: 50%;
+      box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.12);
+      transition: box-shadow 0.25s ease;
+    }
+
+    .bc-swatch.is-black span { background: linear-gradient(160deg, #1c1c1e, #000000); }
+    .bc-swatch.is-red span { background: linear-gradient(160deg, #c41616, #7a0a0a); }
+    .bc-swatch.is-charcoal span { background: linear-gradient(160deg, #3a3a3c, #1c1c1e); }
+    .bc-swatch.is-steel span { background: linear-gradient(160deg, #4b535c, #22272d); }
+    .bc-swatch.is-oxblood span { background: linear-gradient(160deg, #5e1414, #250505); }
+    .bc-swatch.is-silver span { background: linear-gradient(160deg, #f4f4f6, #d4d4d9); }
+    .bc-swatch.is-bone span { background: linear-gradient(160deg, #f5f3ee, #e3dfd6); }
+    .bc-swatch.is-paper span { background: linear-gradient(160deg, #ffffff, #f1f1f1); }
+    .bc-swatch.is-custom span { background: conic-gradient(from 200deg, #C41616, #c0392b, #8e44ad, #0A0A0A, #16a085, #C41616); }
+
+    .bc-finish {
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    /* ---------- The designs ---------- */
+
+    .bc-gallery {
+      padding-top: clamp(3.5rem, 7vw, 5rem);
+    }
+
+    .bc-gallery-head {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 0.5rem 1.5rem;
+    }
+
+    .bc-gallery-head h2 {
+      font-size: clamp(1.75rem, 2.6vw, 2.25rem);
+      font-weight: 600;
+      letter-spacing: -0.03em;
+    }
+
+    .bc-gallery-head p {
+      color: #6e6e73;
+      font-size: 0.9375rem;
+    }
+
+    .bc-designs {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 1.25rem 1rem;
+      margin-top: 1.75rem;
+    }
+
+    @media (min-width: 640px) {
+      .bc-designs { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    }
+
+    @media (min-width: 1024px) {
+      .bc-designs { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+    }
+
+    .bc-design {
+      display: flex;
+      flex-direction: column;
+      gap: 0.65rem;
+      padding: 0;
+      border: 0;
+      background: none;
+      color: inherit;
+      font: inherit;
+      text-align: left;
+      cursor: pointer;
+    }
+
+    .bc-design-art {
+      display: block;
+      overflow: hidden;
+      border-radius: 7px;
+      box-shadow: 0 0 0 0.5px rgba(0, 0, 0, 0.08), 0 8px 18px -10px rgba(0, 0, 0, 0.35);
+      transition: transform 0.4s var(--ds-ease), box-shadow 0.25s ease;
+    }
+
+    .bc-design-art svg {
+      display: block;
+      width: 100%;
+      height: auto;
+    }
+
+    .bc-design:hover .bc-design-art {
+      transform: translateY(-3px);
+    }
+
+    .bc-design.is-on .bc-design-art {
+      box-shadow: 0 0 0 2px #ffffff, 0 0 0 4px #0071e3, 0 10px 22px -10px rgba(0, 0, 0, 0.4);
+    }
+
+    .bc-design:focus-visible {
+      outline: none;
+    }
+
+    .bc-design:focus-visible .bc-design-art {
+      box-shadow: 0 0 0 2px #ffffff, 0 0 0 4px var(--gold);
+    }
+
+    /* The rest of the designs, after the featured five: a compact list. */
+    .bc-more {
+      margin-top: 2.25rem;
+    }
+
+    .bc-more-title {
+      margin-bottom: 0.9rem;
+      color: #6e6e73;
+      font-size: 0.875rem;
+      font-weight: 600;
+    }
+
+    .bc-more-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(13rem, 1fr));
+      gap: 0.5rem;
+    }
+
+    .bc-design.is-mini {
+      flex-direction: row;
+      align-items: center;
+      gap: 0.8rem;
+      padding: 0.45rem 0.75rem 0.45rem 0.45rem;
+      border-radius: 0.75rem;
+      background: rgba(0, 0, 0, 0.045);
+    }
+
+    .bc-design.is-mini .bc-design-art {
+      width: 4.25rem;
+      flex: none;
+      border-radius: 4px;
+    }
+
+    .bc-design.is-mini:hover .bc-design-art {
+      transform: none;
+    }
+
+    .bc-design.is-mini.is-on {
+      background: #1d1d1f;
+      color: #fff;
+    }
+
+    .bc-design.is-mini .bc-design-name {
+      font-size: 0.875rem;
+    }
+
+    .bc-design-name {
+      display: flex;
+      gap: 0.5rem;
+      font-size: 0.9375rem;
+      font-weight: 600;
+    }
+
+    .bc-design-name span {
+      color: #86868b;
+      font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+      font-size: 0.8125rem;
+      font-weight: 400;
+    }
+
+    .bc-flip.is-rounded .bc-face {
+      border-radius: 3.6% / 6.3%;
+    }
+
+    /* ---------- Style controls ---------- */
+
+    .bc-style {
+      display: grid;
+      gap: 1.25rem 1.5rem;
+      margin-top: 1rem;
+    }
+
+    @media (min-width: 640px) {
+      .bc-style { grid-template-columns: 1fr 1fr; }
+    }
+
+    .bc-control {
+      display: grid;
+      gap: 0.5rem;
+      color: #6e6e73;
+      font-size: 0.75rem;
+      font-weight: 500;
+    }
+
+    .bc-control select,
+    .bc-control input[type="range"] {
+      width: 100%;
+      font: inherit;
+      font-size: 1rem;
+      color: #1d1d1f;
+    }
+
+    .bc-control select {
+      height: 2.75rem;
+      padding: 0 0.75rem;
+      border: 1px solid #d2d2d7;
+      border-radius: 0.6rem;
+      background: #fff;
+    }
+
+    .bc-control input[type="range"] {
+      accent-color: #0A0A0A;
+    }
+
+    .bc-colours {
+      display: flex;
+      gap: 1rem;
+    }
+
+    .bc-colour {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: #1d1d1f;
+      font-size: 0.9375rem;
+    }
+
+    .bc-colour input {
+      width: 2.25rem;
+      height: 2.25rem;
+      padding: 0;
+      border: 1px solid #d2d2d7;
+      border-radius: 50%;
+      background: none;
+      cursor: pointer;
+    }
+
+    .bc-colour input::-webkit-color-swatch-wrapper { padding: 2px; }
+    .bc-colour input::-webkit-color-swatch { border: 0; border-radius: 50%; }
+
+    .bc-seg.is-small label span {
+      min-width: 4.5rem;
+      padding: 0.45rem 0.9rem;
+    }
+
+    .bc-swatch input:checked + span {
+      box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.12), 0 0 0 2px #ffffff, 0 0 0 4px #0071e3;
+    }
+
+    .bc-swatch input:focus-visible + span {
+      box-shadow: 0 0 0 2px #ffffff, 0 0 0 4px var(--gold);
+    }
+
+    .bc-caption {
+      color: #6e6e73;
+      font-size: 0.875rem;
+    }
+
+    .bc-caption strong {
+      color: #1d1d1f;
+      font-weight: 600;
+    }
+
+    /* ---------- Details and downloads ---------- */
+
+    .bc-panel {
+      display: grid;
+      gap: clamp(3rem, 6vw, 5rem);
+      max-width: 68rem;
+      margin-inline: auto;
+      padding-block: clamp(4.5rem, 9vw, 7rem);
+    }
+
+    @media (min-width: 900px) {
+      .bc-panel {
+        grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+      }
+    }
+
+    .bc-panel h2 {
+      font-size: clamp(1.75rem, 2.6vw, 2.25rem);
+      font-weight: 600;
+      letter-spacing: -0.03em;
+    }
+
+    .bc-panel h3 {
+      margin: 2.5rem 0 0.75rem;
+      color: #6e6e73;
+      font-size: 0.8125rem;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+    }
+
+    .bc-fields {
+      display: grid;
+      gap: 0 1.5rem;
+      margin-top: 1.5rem;
+    }
+
+    @media (min-width: 640px) {
+      .bc-fields {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    .bc-field {
+      display: block;
+      padding: 0.9rem 0 0.7rem;
+      border-bottom: 1px solid #d2d2d7;
+      transition: border-color 0.25s ease;
+    }
+
+    .bc-field:focus-within {
+      border-color: #1d1d1f;
+    }
+
+    .bc-field span {
+      display: block;
+      color: #6e6e73;
+      font-size: 0.75rem;
+      font-weight: 500;
+    }
+
+    .bc-field input {
+      width: 100%;
+      margin-top: 0.3rem;
+      padding: 0;
+      border: 0;
+      background: transparent;
+      color: #1d1d1f;
+      font: inherit;
+      font-size: 1.0625rem;
+      letter-spacing: -0.01em;
+      outline: none;
+    }
+
+    .bc-options {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 1rem 1.75rem;
+    }
+
+    .bc-toggle {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.6rem;
+      color: #1d1d1f;
+      font-size: 0.9375rem;
+      cursor: pointer;
+    }
+
+    .bc-toggle input {
+      appearance: none;
+      position: relative;
+      width: 2.6rem;
+      height: 1.6rem;
+      margin: 0;
+      border-radius: 999px;
+      background: #e8e8ed;
+      cursor: pointer;
+      transition: background-color 0.25s ease;
+    }
+
+    .bc-toggle input::after {
+      content: "";
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      width: calc(1.6rem - 4px);
+      height: calc(1.6rem - 4px);
+      border-radius: 50%;
+      background: #fff;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+      transition: transform 0.25s var(--ds-ease);
+    }
+
+    .bc-toggle input:checked {
+      background: #34c759;
+    }
+
+    .bc-toggle input:checked::after {
+      transform: translateX(1rem);
+    }
+
+    .bc-toggle input:focus-visible {
+      outline: 2px solid var(--gold);
+      outline-offset: 2px;
+    }
+
+    .bc-download {
+      align-self: start;
+      padding: clamp(1.75rem, 3vw, 2.5rem);
+      border-radius: var(--ds-r-lg);
+      corner-shape: squircle;
+      background: #f5f5f7;
+    }
+
+    .bc-download .ds-btn {
+      width: 100%;
+    }
+
+    .bc-download .bc-grid2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.6rem;
+      margin-top: 0.6rem;
+    }
+
+    .bc-download .bc-grid2 .ds-btn {
+      height: 2.75rem;
+      padding: 0 0.75rem;
+      background: #fff;
+      font-size: 0.9375rem;
+    }
+
+    .bc-download .bc-print-btn {
+      margin-top: 0.6rem;
+      background: #fff;
+    }
+
+    .bc-download p {
+      margin-top: 1.25rem;
+      color: #6e6e73;
+      font-size: 0.8125rem;
+      line-height: 1.5;
+    }
+
+    .bc-reset {
+      margin-top: 1.5rem;
+      padding: 0;
+      border: 0;
+      background: none;
+      color: #0066cc;
+      font: inherit;
+      font-size: 0.9375rem;
+      cursor: pointer;
+    }
+
+    .bc-reset:hover {
+      text-decoration: underline;
+    }
+
+    /* ---------- Logo files ---------- */
+
+    .bc-logos {
+      padding-block: clamp(4rem, 8vw, 6rem) clamp(5rem, 10vw, 8rem);
+      border-top: 1px solid #d2d2d7;
+    }
+
+    .bc-logo-grid {
+      display: grid;
+      gap: var(--ds-gap);
+      margin-top: 2rem;
+    }
+
+    @media (min-width: 640px) {
+      .bc-logo-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+
+    @media (min-width: 1024px) {
+      .bc-logo-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    }
+
+    .bc-logo {
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      border-radius: var(--ds-r-md);
+      corner-shape: squircle;
+      background: #f5f5f7;
+    }
+
+    .bc-logo-art {
+      display: grid;
+      aspect-ratio: 16 / 10;
+      place-items: center;
+      padding: 1.5rem;
+    }
+
+    .bc-logo-art img {
+      width: 58%;
+      max-height: 100%;
+    }
+
+    .bc-logo-art.is-navy { background: #000000; }
+    .bc-logo-art.is-light { background: #fff; }
+    .bc-logo-art.is-full { padding: 0; }
+    .bc-logo-art.is-full img { width: 100%; height: 100%; object-fit: cover; }
+
+    .bc-logo-body {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+      padding: 1rem 1.25rem;
+    }
+
+    .bc-logo-body p {
+      font-size: 0.9375rem;
+      font-weight: 600;
+    }
+
+    .bc-logo-body small {
+      display: block;
+      color: #6e6e73;
+      font-size: 0.8125rem;
+      font-weight: 400;
+    }
+
+    .bc-logo-body .ds-btn {
+      height: 2.25rem;
+      padding: 0 1rem;
+      background: #fff;
+      font-size: 0.875rem;
+    }
+
+    .bc-print {
+      display: none;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .bc-flip,
+      .bc-tilt {
+        transition: none;
+      }
+    }
+
+    @media print {
+      body > *:not(.bc-print) { display: none !important; }
+      body { background: #fff; }
+      .bc-print { display: block; }
+      .bc-print-page { overflow: hidden; break-after: page; page-break-after: always; }
+      .bc-print-page svg { display: block; width: 100%; height: 100%; }
+    }
+    .bc-logo-art.is-red { background: #a01010; }
+    .bc-kit-h { margin: 2.75rem 0 1rem; font-size: 1.15rem; font-weight: 600; letter-spacing: -0.01em; }
+    .bc-kit-h small { margin-left: 0.5rem; color: #86868b; font-size: 0.8rem; font-weight: 400; }
+    .bc-colours { display: grid; grid-template-columns: repeat(auto-fill, minmax(11.5rem, 1fr)); gap: 0.75rem; }
+    .bc-colour { display: block; padding: 0; border: 0; border-radius: 14px; background: #fff; color: inherit; text-align: left; overflow: hidden; cursor: pointer; box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.08); }
+    .bc-colour span { display: block; height: 4.5rem; box-shadow: inset 0 -1px 0 rgba(0, 0, 0, 0.06); }
+    .bc-colour p { margin: 0; padding: 0.7rem 0.85rem 0.85rem; font-weight: 600; font-size: 0.9rem; }
+    .bc-colour small { display: block; margin-top: 0.15rem; color: #6e6e73; font: 500 0.72rem/1.4 ui-monospace, "SF Mono", Menlo, Consolas, monospace; }
+    .bc-colour em { display: block; margin-top: 0.35rem; color: #6e6e73; font-size: 0.75rem; font-style: normal; font-weight: 400; }
+    .bc-type { display: grid; grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr)); gap: 0.75rem; }
+    .bc-type > div { padding: 1.5rem; border-radius: 14px; background: #fff; box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.08); }
+    .bc-type small { display: block; margin-top: 1rem; color: #6e6e73; font-size: 0.8rem; line-height: 1.5; }
+    .bc-type-logo { margin: 0; font-family: Montserrat, "Segoe UI", Arial, sans-serif; font-size: 2.4rem; line-height: 1; }
+    .bc-type-logo b { font-weight: 800; }
+    .bc-type-logo span { font-weight: 400; color: #a01010; }
+    .bc-type-sub { margin: 0.35rem 0 0; font-family: Montserrat, "Segoe UI", Arial, sans-serif; font-size: 1.35rem; letter-spacing: 0.32em; }
+    .bc-type-head { margin: 0; font-size: 1.6rem; font-weight: 600; letter-spacing: -0.02em; line-height: 1.15; }
+    .bc-rules { margin: 0; padding-left: 1.1rem; color: #48484a; font-size: 0.92rem; line-height: 1.7; max-width: 48rem; }
+  </style>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@500&amp;display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;800&amp;display=swap">
+  <link rel="stylesheet" href="assets/css/embed.css">
+  <meta name="robots" content="noindex, nofollow">
+</head>
+<body>
+  <svg class="sr-only" aria-hidden="true" focusable="false">
+    <symbol id="ncs-mark" viewBox="0 0 420 420">
+      <path class="mark-w" d="M210 8L297.35 95.35V301.72L148.09 69.91ZM210 412L122.65 324.65V118.28L271.91 350.09Z"/>
+      <g class="mark-r"><path d="M10.18 210L68.05 152.13V267.87ZM409.82 210L351.95 152.13V267.87Z"/></g>
+    </symbol>
+  </svg>
+
+  <header class="tl-top">
+    <div class="ds-container tl-top-inner">
+      <a class="site-logo" href="index.html" aria-label="New Concept Security, home">
+        <svg viewBox="0 0 420 420" aria-hidden="true"><use href="#ncs-mark"/></svg>
+        <span class="site-logo-word"><b class="ncs-new">NEW</b><span class="ncs-concept">CONCEPT</span><small>Security</small></span>
+      </a>
+      <nav class="tl-tabs" aria-label="Brand tools">
+        <a href="business-card.html" aria-current="page">Business card</a>
+        <a href="invoice.html">Invoice</a>
+        <a href="receipt.html">Receipt</a>
+        <a href="quote.html">Quote</a>
+        <a href="timesheet.html">Timesheet</a>
+        <a href="credit-note.html">Credit note</a>
+        <a href="purchase-order.html">Purchase order</a>
+        <a href="statement.html">Statement</a>
+        <a href="proforma.html">Pro-forma</a>
+        <a href="debit-note.html">Debit note</a>
+        <a href="delivery-note.html">Delivery note</a>
+        <a href="remittance.html">Remittance</a>
+        <a href="job-sheet.html">Job sheet</a>
+        <a href="payslip.html">Payslip</a>
+        <a href="kit.html">Design kit</a>
+      </nav>
+      <a class="ds-link tl-back" href="index.html">Back to the site</a>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="ds-container bc-hero">
+      <p class="bc-eyebrow">Brand kit</p>
+      <h1 class="bc-title">Business card.</h1>
+      <p class="bc-lede">Twenty-four designs, any colour, eight typefaces. Make it yours, then download it ready for print.</p>
+    </section>
+
+    <section class="bc-stage" aria-label="Card preview">
+      <div class="bc-tilt">
+        <div class="bc-flip" tabindex="0" role="button" aria-label="Turn the card over">
+          <div class="bc-face is-front" id="card-front" role="img" aria-label="Front of the card"></div>
+          <div class="bc-face is-back" id="card-back" role="img" aria-label="Back of the card"></div>
+        </div>
+      </div>
+      <div class="bc-shadow" aria-hidden="true"></div>
+    </section>
+
+    <div class="bc-controls">
+      <div class="bc-seg" role="group" aria-label="Side shown">
+        <button type="button" data-side="front" aria-pressed="true">Front</button>
+        <button type="button" data-side="back" aria-pressed="false">Back</button>
+      </div>
+      <fieldset class="bc-finish" aria-label="Colour">
+        <label class="bc-swatch is-black" title="Black"><input type="radio" name="palette" value="black" checked aria-label="Black"><span></span></label>
+        <label class="bc-swatch is-red" title="NCS Red"><input type="radio" name="palette" value="red" aria-label="NCS Red"><span></span></label>
+        <label class="bc-swatch is-charcoal" title="Charcoal"><input type="radio" name="palette" value="charcoal" aria-label="Charcoal"><span></span></label>
+        <label class="bc-swatch is-steel" title="Steel"><input type="radio" name="palette" value="steel" aria-label="Steel"><span></span></label>
+        <label class="bc-swatch is-oxblood" title="Oxblood"><input type="radio" name="palette" value="oxblood" aria-label="Oxblood"><span></span></label>
+        <label class="bc-swatch is-silver" title="Silver"><input type="radio" name="palette" value="silver" aria-label="Silver"><span></span></label>
+        <label class="bc-swatch is-bone" title="Bone"><input type="radio" name="palette" value="bone" aria-label="Bone"><span></span></label>
+        <label class="bc-swatch is-paper" title="Paper"><input type="radio" name="palette" value="paper" aria-label="Paper"><span></span></label>
+        <label class="bc-swatch is-custom" title="Custom colours"><input type="radio" name="palette" value="custom" aria-label="Custom colours"><span></span></label>
+      </fieldset>
+      <p class="bc-caption"><strong data-finish-label>Classic · Black</strong> · <span data-size-label>85 × 55 mm</span></p>
+    </div>
+
+    <section class="ds-container bc-gallery" aria-labelledby="designs-title">
+      <div class="bc-gallery-head">
+        <h2 id="designs-title">Twenty-four designs.</h2>
+        <p>Pick one. Every colour, font and option below works with all of them.</p>
+      </div>
+      <div class="bc-designs"></div>
+    </section>
+
+    <section class="ds-container">
+      <div class="bc-panel">
+        <form id="card-form" autocomplete="off">
+          <h2>Your details.</h2>
+          <div class="bc-fields">
+            <label class="bc-field"><span>Name</span><input name="name" maxlength="40"></label>
+            <label class="bc-field"><span>Job title</span><input name="title" maxlength="44"></label>
+            <label class="bc-field"><span>Phone</span><input name="phone" maxlength="30"></label>
+            <label class="bc-field"><span>Email</span><input name="email" maxlength="50"></label>
+            <label class="bc-field"><span>Website</span><input name="web" maxlength="50"></label>
+            <label class="bc-field"><span>City or address</span><input name="area" maxlength="48"></label>
+            <label class="bc-field"><span>Extra line (licence no., second phone)</span><input name="extra" maxlength="48"></label>
+            <label class="bc-field"><span>Tagline (front)</span><input name="tagline" maxlength="48"></label>
+          </div>
+
+          <h3>Style</h3>
+          <div class="bc-style">
+            <label class="bc-control">Font
+              <select name="font">
+                <option>Geist</option>
+                <option>Inter</option>
+                <option>Manrope</option>
+                <option>DM Sans</option>
+                <option>Montserrat</option>
+                <option>Space Grotesk</option>
+                <option>Playfair Display</option>
+                <option>Fraunces</option>
+              </select>
+            </label>
+            <div class="bc-control">Back alignment
+              <div class="bc-seg is-small" role="radiogroup" aria-label="Back alignment">
+                <label><input type="radio" name="align" value="left" checked><span>Left</span></label>
+                <label><input type="radio" name="align" value="center"><span>Centre</span></label>
+                <label><input type="radio" name="align" value="right"><span>Right</span></label>
+              </div>
+            </div>
+            <label class="bc-control">Logo size · <span data-logo-value>100%</span>
+              <input type="range" name="logo" min="60" max="150" step="5" value="100">
+            </label>
+            <div class="bc-control">Custom colours
+              <div class="bc-colours">
+                <label class="bc-colour"><input type="color" name="primary" value="#0A0A0A"> Card</label>
+                <label class="bc-colour"><input type="color" name="accent" value="#C41616"> Accent</label>
+              </div>
+            </div>
+            <label class="bc-control">QR code on the back
+              <select name="qr">
+                <option value="none">None</option>
+                <option value="web">Website</option>
+                <option value="contact">Contact card (scan to save)</option>
+              </select>
+            </label>
+          </div>
+          <div class="bc-options" style="margin-top: 1.5rem">
+            <label class="bc-toggle"><input type="checkbox" name="showName" checked> Company name on front</label>
+            <label class="bc-toggle"><input type="checkbox" name="showTagline"> Tagline on front</label>
+            <label class="bc-toggle"><input type="checkbox" name="foil"> Metallic foil</label>
+            <label class="bc-toggle"><input type="checkbox" name="rounded"> Rounded corners</label>
+          </div>
+
+          <h3>Print</h3>
+          <div class="bc-options">
+            <div class="bc-seg" role="radiogroup" aria-label="Card size">
+              <label><input type="radio" name="size" value="us"><span>US · 3.5 × 2 in</span></label>
+              <label><input type="radio" name="size" value="eu" checked><span>UK / EU · 85 × 55 mm</span></label>
+            </div>
+            <label class="bc-toggle"><input type="checkbox" name="bleed"> Bleed for printers</label>
+          </div>
+          <button class="bc-reset" type="button" data-reset>Reset the details</button>
+          <button class="bc-reset" type="button" data-reset-style style="margin-left: 1.25rem">Reset the style</button>
+        </form>
+
+        <div class="bc-download">
+          <h2>Download.</h2>
+          <button class="ds-btn is-solid is-lg" type="button" data-export="pdf" style="margin-top: 1.5rem">Print-ready PDF</button>
+          <div class="bc-grid2">
+            <button class="ds-btn is-outline" type="button" data-export="png-front">PNG front</button>
+            <button class="ds-btn is-outline" type="button" data-export="png-back">PNG back</button>
+            <button class="ds-btn is-outline" type="button" data-export="svg-front">SVG front</button>
+            <button class="ds-btn is-outline" type="button" data-export="svg-back">SVG back</button>
+          </div>
+          <button class="ds-btn is-outline bc-print-btn" type="button" data-export="print">Print from the browser</button>
+          <p>The PDF and PNGs are drawn at 600 dpi. SVGs are vector with the font embedded, for edits in Illustrator, Figma or Inkscape. Turn on bleed when a print shop asks for it.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="ds-container bc-logos" aria-labelledby="logos-title">
+      <h2 id="logos-title" class="ds-title">Brand kit.</h2>
+      <p class="ds-body" style="margin-top: 0.75rem; max-width: 44rem">Everything New Concept Security looks like, in one place: the logo, the diamond N, the colours and the type. The SVGs are drawn from the original artwork and print at any size; the PNGs are the original files.</p>
+
+      <h3 class="bc-kit-h">Logos and marks</h3>
+      <div class="bc-logo-grid">
+        <div class="bc-logo">
+          <div class="bc-logo-art is-light"><img src="assets/img/logo/ncs-logo.svg" alt="The full NCS logo"></div>
+          <div class="bc-logo-body"><p>Logo, light backgrounds<small>SVG</small></p><a class="ds-btn is-outline" href="assets/img/logo/ncs-logo.svg" download="new-concept-security-logo.svg">Download</a></div>
+        </div>
+        <div class="bc-logo">
+          <div class="bc-logo-art is-navy"><img src="assets/img/logo/ncs-logo-dark.svg" alt="The full NCS logo on black"></div>
+          <div class="bc-logo-body"><p>Logo on black<small>SVG</small></p><a class="ds-btn is-outline" href="assets/img/logo/ncs-logo-dark.svg" download="new-concept-security-logo-dark.svg">Download</a></div>
+        </div>
+        <div class="bc-logo">
+          <div class="bc-logo-art is-light"><img src="/images/logo.png" alt="The original NCS logo"></div>
+          <div class="bc-logo-body"><p>Original logo<small>PNG</small></p><a class="ds-btn is-outline" href="/images/logo.png" download="new-concept-security-logo.png">Download</a></div>
+        </div>
+        <div class="bc-logo">
+          <div class="bc-logo-art is-navy"><img src="/images/logo-light.png" alt="The original NCS logo for dark backgrounds"></div>
+          <div class="bc-logo-body"><p>Original logo, dark backgrounds<small>PNG</small></p><a class="ds-btn is-outline" href="/images/logo-light.png" download="new-concept-security-logo-light.png">Download</a></div>
+        </div>
+        <div class="bc-logo">
+          <div class="bc-logo-art is-navy"><img src="/images/brand-mark.png" alt="The stacked NCS North West lockup"></div>
+          <div class="bc-logo-body"><p>Stacked lockup (NW)<small>PNG</small></p><a class="ds-btn is-outline" href="/images/brand-mark.png" download="new-concept-security-nw-stacked.png">Download</a></div>
+        </div>
+        <div class="bc-logo">
+          <div class="bc-logo-art is-light"><img src="assets/img/logo/ncs-mark.svg" alt="The NCS mark in red" style="width: 34%"></div>
+          <div class="bc-logo-body"><p>Mark, NCS red<small>SVG</small></p><a class="ds-btn is-outline" href="assets/img/logo/ncs-mark.svg" download="new-concept-security-mark-red.svg">Download</a></div>
+        </div>
+        <div class="bc-logo">
+          <div class="bc-logo-art is-red"><img src="assets/img/logo/ncs-mark-white.svg" alt="The NCS mark in white" style="width: 34%"></div>
+          <div class="bc-logo-body"><p>Mark, white (on red or photos)<small>SVG</small></p><a class="ds-btn is-outline" href="assets/img/logo/ncs-mark-white.svg" download="new-concept-security-mark-white.svg">Download</a></div>
+        </div>
+        <div class="bc-logo">
+          <div class="bc-logo-art is-light"><img src="assets/img/logo/ncs-mark-black.svg" alt="The NCS mark in black" style="width: 34%"></div>
+          <div class="bc-logo-body"><p>Mark, black (one colour print)<small>SVG</small></p><a class="ds-btn is-outline" href="assets/img/logo/ncs-mark-black.svg" download="new-concept-security-mark-black.svg">Download</a></div>
+        </div>
+        <div class="bc-logo">
+          <div class="bc-logo-art is-light"><img src="assets/img/logo/favicon.svg" alt="The app icon" style="width: 30%"></div>
+          <div class="bc-logo-body"><p>App icon<small>SVG</small></p><a class="ds-btn is-outline" href="/icon.svg" download="new-concept-security-icon.svg">Download</a></div>
+        </div>
+        <div class="bc-logo">
+          <div class="bc-logo-art is-light"><img src="/images/sia-approved.jpg" alt="SIA Approved Contractor badge" style="width: 60%"></div>
+          <div class="bc-logo-body"><p>SIA Approved Contractor<small>JPG</small></p><a class="ds-btn is-outline" href="/images/sia-approved.jpg" download="sia-approved-contractor.jpg">Download</a></div>
+        </div>
+      </div>
+
+      <h3 class="bc-kit-h">Colours <small>click to copy</small></h3>
+      <div class="bc-colours">
+        <button class="bc-colour" type="button" data-copy="#A01010" title="Copy #A01010"><span style="background:#A01010"></span><p>NCS Red<small>#A01010 · RGB 160 16 16</small><em>Primary: buttons, the mark, CONCEPT</em></p></button>
+        <button class="bc-colour" type="button" data-copy="#C41616" title="Copy #C41616"><span style="background:#C41616"></span><p>Bright red<small>#C41616 · RGB 196 22 22</small><em>Hover, focus, accents on black</em></p></button>
+        <button class="bc-colour" type="button" data-copy="#000000" title="Copy #000000"><span style="background:#000000"></span><p>Black<small>#000000 · RGB 0 0 0</small><em>Header, backgrounds, NEW on light</em></p></button>
+        <button class="bc-colour" type="button" data-copy="#1D1D1F" title="Copy #1D1D1F"><span style="background:#1D1D1F"></span><p>Ink<small>#1D1D1F · RGB 29 29 31</small><em>Body text</em></p></button>
+        <button class="bc-colour" type="button" data-copy="#86868B" title="Copy #86868B"><span style="background:#86868B"></span><p>Grey<small>#86868B · RGB 134 134 139</small><em>Secondary text</em></p></button>
+        <button class="bc-colour" type="button" data-copy="#F5F5F7" title="Copy #F5F5F7"><span style="background:#F5F5F7"></span><p>Mist<small>#F5F5F7 · RGB 245 245 247</small><em>Page and panel backgrounds</em></p></button>
+        <button class="bc-colour" type="button" data-copy="#FFFFFF" title="Copy #FFFFFF"><span style="background:#FFFFFF"></span><p>White<small>#FFFFFF · RGB 255 255 255</small><em>NEW on black, cards</em></p></button>
+      </div>
+
+      <h3 class="bc-kit-h">Type</h3>
+      <div class="bc-type">
+        <div><p class="bc-type-logo"><b>NEW</b><span>CONCEPT</span></p><p class="bc-type-sub">SECURITY</p><small>Logotype: NEW heavy (800) in black or white, CONCEPT regular (400) in NCS red, SECURITY regular and widely spaced. Montserrat is the closest web font.</small></div>
+        <div><p class="bc-type-head">Professional security, done properly.</p><small>Headings and text: the system sans (SF Pro on Apple, Segoe UI on Windows), as on newconceptsecurity.co.uk. Semibold for titles, regular for text.</small></div>
+      </div>
+
+      <h3 class="bc-kit-h">Using the logo</h3>
+      <ul class="bc-rules">
+        <li>Keep clear space around the logo at least the width of one side wedge.</li>
+        <li>The mark is NCS red on white or black, or all white on red and photographs. Black only for one colour print.</li>
+        <li>Never stretch, rotate, outline or recolour the mark, and never set NEWCONCEPT in one weight.</li>
+        <li>Smallest size: 24 px (6 mm) tall for the mark, 120 px (30 mm) wide for the full logo.</li>
+        <li>New Concept Security Ltd, Concept House, 283 Church Street, Blackpool FY1 3PG. Company no. 10664067. SIA Approved Contractor (NECOSESC01). 01253 982211.</li>
+      </ul>
+    </section>
+  </main>
+
+  <div class="bc-print" aria-hidden="true"></div>
+
+  <script src="assets/js/business-card.js" defer></script>
+</body>
+</html>

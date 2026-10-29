@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 800" width="1600" height="800" role="img">
+<title>SIA Approved Contractor. The objective of the scheme is to raise performance standards and to assist the private security industry in developing new opportunities.</title>
+<defs><style>@keyframes draw200{0%{stroke-dashoffset:200}40%,78%{stroke-dashoffset:0}100%{stroke-dashoffset:-200}}@keyframes spin{to{transform:rotate(360deg)}}@media (prefers-reduced-motion:reduce){*{animation:none!important}}</style></defs>
+<g style="animation:spin 40s linear -0s infinite;transform-origin:50% 50%;transform-box:fill-box"><circle cx="400" cy="400" r="236" fill="none" stroke="#b9b9bf" stroke-width="2" stroke-dasharray="4 14"/></g>
+<g transform="translate(400 390) scale(1.0000 1.0000)"><path d="M0 -170L140 -120L140 10Q140 120 0 190Q-140 120 -140 10L-140 -120Z" fill="none" stroke="#1d1d1f" stroke-width="6" stroke-linejoin="round"/></g>
+<g transform="translate(400 390) scale(0.8400 0.8400)"><path d="M0 -170L140 -120L140 10Q140 120 0 190Q-140 120 -140 10L-140 -120Z" fill="#a01010"/></g>
+<path d="M340 392L385 438L470 344" fill="none" stroke="#ffffff" stroke-width="24" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="200" style="animation:draw200 5s ease-in-out -0s infinite;transform-origin:50% 50%;transform-box:fill-box"/>
+<text x="780" y="290" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif" font-size="34" font-weight="600" fill="#1d1d1f" text-anchor="start" letter-spacing="-0.5">“The objective of the scheme is to</text>
+<text x="780" y="338" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif" font-size="34" font-weight="600" fill="#1d1d1f" text-anchor="start" letter-spacing="-0.5">raise performance standards and to</text>
+<text x="780" y="386" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif" font-size="34" font-weight="600" fill="#1d1d1f" text-anchor="start" letter-spacing="-0.5">assist the private security industry in</text>
+<text x="780" y="434" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif" font-size="34" font-weight="600" fill="#1d1d1f" text-anchor="start" letter-spacing="-0.5">developing new opportunities.”</text>
+<rect x="780" y="478" width="80" height="4" fill="#a01010"/>
+<text x="780" y="528" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif" font-size="22" font-weight="600" fill="#86868b" text-anchor="start">Security Guarding · Door Supervision · Key Holding</text>
+<text x="780" y="568" font-family="ui-monospace,'SF Mono',Menlo,Consolas,'Courier New',monospace" font-size="16" font-weight="500" fill="#86868b" text-anchor="start" letter-spacing="1.3">ACS REFERENCE  NECOSESC01</text>
+</svg>

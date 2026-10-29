@@ -1,0 +1,1810 @@
+/* New Concept Security: the design kit's items (kit.js). The studio
+   around them (form, buttons, toasts, print) comes from docs.css. Every
+   item is drawn at its printed size in CSS pixels, in the main colour
+   (--a), the accent (--a2) and the chosen font (--kit-font). */
+
+/* ---------- Studio: item tabs, designs, stage ---------- */
+
+.kit-types {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0 0 1.25rem;
+}
+
+.kit-types button {
+  padding: 0.5rem 1rem;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  border-radius: 999px;
+  background: #fff;
+  color: #1d1d1f;
+  font: inherit;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.kit-types button:hover {
+  border-color: rgba(0, 0, 0, 0.3);
+}
+
+.kit-types button[aria-pressed="true"] {
+  border-color: #1d1d1f;
+  background: #1d1d1f;
+  color: #fff;
+}
+
+.kit-designs {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(124px, 1fr));
+  gap: 10px;
+  margin-bottom: 1rem;
+}
+
+.kit-design {
+  display: grid;
+  gap: 6px;
+  padding: 6px 6px 8px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+  background: #fff;
+  color: #1d1d1f;
+  font: inherit;
+  font-size: 0.8125rem;
+  text-align: center;
+  cursor: pointer;
+}
+
+.kit-design[aria-pressed="true"] {
+  border-color: #1d1d1f;
+  box-shadow: 0 0 0 1px #1d1d1f;
+}
+
+.kit-thumb {
+  display: block;
+  width: 120px;
+  overflow: hidden;
+  margin: 0 auto;
+  border-radius: 4px;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.08);
+  pointer-events: none;
+}
+
+.kit-thumb .kit {
+  box-shadow: none;
+}
+
+.kit-photo-row {
+  display: grid;
+  gap: 6px;
+}
+
+.kit-stage {
+  overflow: hidden;
+  padding: 24px;
+  border-radius: 1.25rem;
+  background: #e8e8ed;
+}
+
+.kit-scaler {
+  display: flex;
+  gap: 24px;
+  transform-origin: top left;
+}
+
+/* ---------- Shared ---------- */
+
+.kit {
+  position: relative;
+  flex: none;
+  box-sizing: border-box;
+  overflow: hidden;
+  background: #fff;
+  color: #1d1d1f;
+  font-family: var(--kit-font, "Geist"), "Helvetica Neue", Arial, sans-serif;
+  font-size: 13px;
+  line-height: 1.5;
+  letter-spacing: -0.005em;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08), 0 18px 40px -16px rgba(0, 0, 0, 0.3);
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+
+.kit *,
+.kit *::before,
+.kit *::after {
+  box-sizing: border-box;
+}
+
+.kit h1,
+.kit h2,
+.kit p,
+.kit dl,
+.kit dd,
+.kit ol {
+  margin: 0;
+}
+
+.kit-mark {
+  display: block;
+  width: auto;
+  height: 34px;
+}
+
+.kit-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.kit-brand b {
+  display: block;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  line-height: 1.1;
+}
+
+.kit-brand small {
+  display: block;
+  margin-top: 2px;
+  color: #6e6e73;
+  font-size: 8.5px;
+  font-weight: 500;
+  letter-spacing: 0.26em;
+}
+
+.kit-brand.is-small .kit-mark {
+  height: 24px;
+}
+
+.kit-brand.is-small b {
+  font-size: 12px;
+}
+
+.kit-brand.is-small small {
+  font-size: 7px;
+}
+
+.kit-label {
+  margin-bottom: 4px !important;
+  color: #86868b;
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+/* ---------- Letterhead ---------- */
+
+.kit-lh-classic {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 54px 64px 26px;
+}
+
+.kit-lh-contact {
+  color: #6e6e73;
+  font-size: 11px;
+  line-height: 1.6;
+  text-align: right;
+}
+
+.kit-lh-rule {
+  height: 2px;
+  margin: 0 64px;
+  background: var(--a);
+}
+
+.kit-lh-rule span {
+  display: block;
+  width: 72px;
+  height: 100%;
+  margin-left: auto;
+  background: var(--a2);
+}
+
+.kit-lh-in {
+  padding: 46px 64px 120px;
+}
+
+.kit-lh-in.is-rail {
+  margin-left: 200px;
+  padding: 72px 60px 80px 48px;
+}
+
+.kit-lh-foot {
+  position: absolute;
+  right: 64px;
+  bottom: 40px;
+  left: 64px;
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding-top: 12px;
+  border-top: 1px solid #e5e5ea;
+  color: #86868b;
+  font-size: 9.5px;
+}
+
+.kit-lh-foot.is-line {
+  justify-content: center;
+  border-top-color: var(--a2);
+}
+
+.kit-lh-band {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 40px 64px;
+  background: var(--a);
+  color: #fff;
+}
+
+.kit-lh-band .kit-brand small,
+.kit-lh-band .kit-lh-contact {
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.kit-lh-band .kit-mark g {
+  fill: var(--a2);
+}
+
+.kit-lh-accent {
+  height: 4px;
+  background: var(--a2);
+}
+
+.kit-lh-rail {
+  position: absolute;
+  inset: 0 auto 0 0;
+  display: flex;
+  width: 200px;
+  flex-direction: column;
+  gap: 40px;
+  padding: 64px 26px 40px 34px;
+  border-right: 1px solid #e5e5ea;
+  font-size: 10.5px;
+  line-height: 1.55;
+  overflow-wrap: anywhere;
+}
+
+.kit-lh-rail::after {
+  position: absolute;
+  top: 64px;
+  right: -1px;
+  width: 2px;
+  height: 80px;
+  background: var(--a2);
+  content: "";
+}
+
+.kit-lh-rail-in p:not(.kit-label) {
+  margin-bottom: 14px;
+  color: #3a3a3c;
+}
+
+.kit-lh-reg {
+  margin-top: auto !important;
+  color: #86868b;
+  font-size: 9px;
+}
+
+.kit-lh-min {
+  display: grid;
+  justify-items: center;
+  gap: 10px;
+  padding-top: 52px;
+}
+
+.kit-lh-min p {
+  color: var(--a);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.32em;
+}
+
+.kit-letter {
+  font-size: 12.5px;
+  line-height: 1.65;
+}
+
+.kit-letter > p + p {
+  margin-top: 12px;
+}
+
+.kit-letter-top {
+  display: flex;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 34px;
+}
+
+.kit-letter-meta {
+  color: #6e6e73;
+  text-align: right;
+}
+
+.kit-letter-subject {
+  margin-bottom: 18px !important;
+  font-weight: 600;
+}
+
+.kit-letter-off {
+  margin-top: 26px !important;
+}
+
+.kit-letter-sig {
+  margin-top: 30px !important;
+  font-weight: 600;
+}
+
+.kit-letter-title {
+  margin-top: 0 !important;
+  color: #6e6e73;
+}
+
+/* ---------- Compliment slip ---------- */
+
+.kit-slip-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 38px 48px 22px;
+}
+
+.kit-slip-contact {
+  color: #6e6e73;
+  font-size: 10.5px;
+  line-height: 1.6;
+  text-align: right;
+}
+
+.kit-slip-rule {
+  height: 2px;
+  margin: 0 48px;
+  background: linear-gradient(90deg, var(--a) 0 80%, var(--a2) 80%);
+}
+
+.kit-slip-in {
+  padding: 26px 48px;
+}
+
+.kit-slip-in h1 {
+  color: var(--a);
+  font-size: 30px;
+  font-weight: 500;
+  letter-spacing: -0.03em;
+}
+
+.kit-slip-note {
+  margin-top: 10px !important;
+  color: #3a3a3c;
+  font-size: 12.5px;
+}
+
+.kit-slip-lines {
+  display: grid;
+  gap: 26px;
+  margin-top: 28px;
+}
+
+.kit-slip-lines span {
+  display: block;
+  height: 1px;
+  background: #d2d2d7;
+}
+
+.kit.kit-slip.d-band .kit-slip-in {
+  margin-left: 250px;
+  padding: 44px 48px;
+}
+
+.kit-slip-band {
+  position: absolute;
+  inset: 0 auto 0 0;
+  display: flex;
+  width: 250px;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 38px 30px;
+  border-right: 4px solid var(--a2);
+  background: var(--a);
+  color: #fff;
+}
+
+.kit-slip-band .kit-brand small,
+.kit-slip-band .kit-slip-contact {
+  color: rgba(255, 255, 255, 0.72);
+  text-align: left;
+}
+
+.kit-slip-band .kit-mark g {
+  fill: var(--a2);
+}
+
+.kit-slip-in.is-min {
+  display: grid;
+  height: 100%;
+  justify-items: center;
+  align-content: center;
+  padding: 30px 60px;
+  text-align: center;
+}
+
+.kit-slip-in.is-min .kit-mark {
+  height: 26px;
+  margin-bottom: 14px;
+}
+
+.kit-slip-in.is-min .kit-slip-lines {
+  width: 420px;
+}
+
+.kit-slip-foot {
+  position: absolute;
+  right: 0;
+  bottom: 22px;
+  left: 0;
+  color: #86868b;
+  font-size: 9.5px;
+  text-align: center;
+}
+
+/* ---------- ID badge ---------- */
+
+.kit-badge {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.kit-badge-head {
+  display: flex;
+  width: 100%;
+  justify-content: center;
+  padding: 26px 20px 70px;
+  background: var(--a);
+  color: #fff;
+}
+
+.kit-badge-head .kit-brand small {
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.kit-badge-head .kit-mark g {
+  fill: var(--a2);
+}
+
+.kit-badge-photo {
+  display: grid;
+  width: 132px;
+  height: 132px;
+  overflow: hidden;
+  place-items: center;
+  margin-top: -58px;
+  border: 4px solid #fff;
+  border-radius: 50%;
+  background: #e8e8ed;
+  box-shadow: 0 0 0 2px var(--a2);
+  color: #b0b0b8;
+}
+
+.kit-badge-photo img,
+.kit-badge-photo svg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.kit-badge-photo svg {
+  width: 70%;
+  height: 70%;
+}
+
+.kit-badge-name {
+  margin-top: 16px !important;
+  padding: 0 18px;
+  font-size: 23px;
+  font-weight: 600;
+  letter-spacing: -0.025em;
+  line-height: 1.15;
+}
+
+.kit-badge-role {
+  margin-top: 4px !important;
+  color: var(--a);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.kit-badge-facts {
+  display: grid;
+  width: 100%;
+  grid-template-columns: auto 1fr;
+  gap: 5px 14px;
+  margin-top: 18px !important;
+  padding: 14px 30px 0;
+  border-top: 1px solid #e5e5ea;
+  font-size: 11.5px;
+  text-align: left;
+}
+
+.kit-badge-facts dt {
+  color: #86868b;
+}
+
+.kit-badge-facts dd {
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+
+.kit-badge-foot {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  padding: 9px 0;
+  background: var(--a2);
+  color: var(--a);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.3em;
+}
+
+.kit.kit-badge.d-light .kit-badge-head {
+  border-bottom: 3px solid var(--a2);
+  background: #f5f5f7;
+  color: #1d1d1f;
+}
+
+.kit.kit-badge.d-light .kit-badge-head .kit-brand small {
+  color: #6e6e73;
+}
+
+.kit.kit-badge.d-light .kit-badge-foot {
+  background: var(--a);
+  color: #fff;
+}
+
+.kit-badge-stripes {
+  position: absolute;
+  top: 128px;
+  right: 0;
+  left: 0;
+  display: grid;
+  gap: 6px;
+}
+
+.kit-badge-stripes span {
+  display: block;
+  height: 8px;
+  background: repeating-linear-gradient(90deg, var(--a2) 0 18px, #c9ced4 18px 24px);
+}
+
+.kit.kit-badge.d-stripe .kit-badge-photo {
+  position: relative;
+  z-index: 1;
+  border-radius: 14px;
+}
+
+.kit-badge-back {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  flex-direction: column;
+  align-items: center;
+  padding: 34px 28px 26px;
+  text-align: center;
+}
+
+.kit-badge-back .kit-mark {
+  height: 28px;
+  margin-bottom: 22px;
+}
+
+.kit-badge-addr {
+  font-size: 12px;
+  line-height: 1.55;
+}
+
+.kit-badge-qr {
+  display: grid;
+  justify-items: center;
+  gap: 4px;
+  margin-top: 18px;
+  color: #86868b;
+  font-size: 9.5px;
+}
+
+.kit-badge-terms {
+  margin-top: 18px !important;
+  color: #6e6e73;
+  font-size: 9.5px;
+  line-height: 1.5;
+}
+
+.kit-badge-sign {
+  width: 100%;
+  margin-top: auto;
+  padding-top: 26px;
+  border-bottom: 1px solid #1d1d1f;
+  color: #86868b;
+  font-size: 9px;
+  text-align: left;
+}
+
+.kit-badge-sign span {
+  position: relative;
+  top: 16px;
+}
+
+.kit-badge-issued {
+  align-self: flex-end;
+  margin-top: 20px !important;
+  color: #86868b;
+  font-size: 9px;
+}
+
+/* ---------- Certificate ---------- */
+
+.kit-cert-frame {
+  position: absolute;
+  inset: 26px;
+  border: 2px solid var(--a);
+}
+
+.kit-cert-frame::before {
+  position: absolute;
+  inset: 8px;
+  border: 1px solid var(--a2);
+  content: "";
+}
+
+.kit-cert-in {
+  display: flex;
+  height: 100%;
+  flex-direction: column;
+  align-items: center;
+  padding: 56px 90px 48px;
+  text-align: center;
+}
+
+.kit-cert-in.is-left {
+  align-items: flex-start;
+  text-align: left;
+}
+
+.kit-cert-brand {
+  margin-bottom: 30px;
+}
+
+.kit-cert-brand .kit-mark {
+  height: 30px;
+}
+
+.kit-cert-heading {
+  margin-top: auto !important;
+  color: var(--a);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+}
+
+.kit-cert-pre,
+.kit-cert-line {
+  margin-top: 26px !important;
+  color: #6e6e73;
+  font-size: 15px;
+}
+
+.kit-cert-name {
+  margin-top: 8px !important;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--a2);
+  color: #1d1d1f;
+  font-size: 52px;
+  font-weight: 500;
+  letter-spacing: -0.035em;
+  line-height: 1.1;
+}
+
+.kit-cert-course {
+  margin-top: 8px !important;
+  color: var(--a);
+  font-size: 26px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+.kit-cert-details {
+  margin-top: 8px !important;
+  color: #6e6e73;
+  font-size: 13px;
+}
+
+.kit-cert-bottom {
+  display: grid;
+  width: 100%;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: end;
+  gap: 40px;
+  margin-top: auto;
+}
+
+.kit-cert-sig {
+  display: grid;
+  gap: 2px;
+  text-align: center;
+}
+
+.kit-cert-hand {
+  color: var(--a);
+  font-family: "Fraunces", Georgia, serif;
+  font-size: 24px;
+  font-style: italic;
+}
+
+.kit-cert-sig i {
+  display: block;
+  height: 1px;
+  margin: 4px 0 6px;
+  background: #1d1d1f;
+}
+
+.kit-cert-sig b {
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.kit-cert-sig small {
+  color: #86868b;
+  font-size: 11px;
+}
+
+.kit-cert-meta {
+  display: grid;
+  gap: 2px;
+  color: #6e6e73;
+  font-size: 12px;
+  text-align: center;
+}
+
+.kit-cert-meta small {
+  color: #86868b;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+}
+
+.kit-cert-band {
+  position: absolute;
+  inset: 0 auto 0 0;
+  display: flex;
+  width: 250px;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 56px 36px;
+  border-right: 6px solid var(--a2);
+  background: var(--a);
+  color: #fff;
+}
+
+.kit-cert-band .kit-brand small,
+.kit-cert-band p {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 10.5px;
+}
+
+.kit-cert-band .kit-mark g {
+  fill: var(--a2);
+}
+
+.kit.kit-certificate.d-modern .kit-cert-in {
+  margin-left: 250px;
+  padding: 80px 70px 56px;
+}
+
+.kit.kit-certificate.d-seal .kit-cert-in {
+  padding: 70px 340px 60px 90px;
+}
+
+.kit-cert-seal {
+  position: absolute;
+  top: 210px;
+  right: 90px;
+  width: 210px;
+  height: 210px;
+}
+
+.kit-cert-edge {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 18px;
+  background: linear-gradient(180deg, var(--a) 0 75%, var(--a2) 75%);
+}
+
+.kit.kit-certificate.d-seal .kit-cert-bottom {
+  width: 640px;
+}
+
+/* ---------- Site sign ---------- */
+
+.kit.kit-sign {
+  display: flex;
+  flex-direction: column;
+  border: 14px solid #1d1d1f;
+}
+
+.kit-sign-panel {
+  display: grid;
+  height: 470px;
+  flex: none;
+  place-items: center;
+}
+
+.kit-sign-icon {
+  width: 300px;
+  height: 300px;
+}
+
+.kit-sign-panel.is-warning {
+  position: relative;
+  background: #ffd200;
+  color: #1d1d1f;
+}
+
+.kit-sign-tri {
+  position: absolute;
+  width: 420px;
+  height: 368px;
+  top: 52px;
+}
+
+.kit-sign-tri-icon {
+  position: relative;
+  top: 50px;
+}
+
+.kit-sign-tri-icon .kit-sign-icon {
+  width: 190px;
+  height: 190px;
+}
+
+.kit-sign-panel.is-prohibition {
+  background: #fff;
+  color: #d4111b;
+}
+
+.kit-sign-ring {
+  display: grid;
+  width: 380px;
+  height: 380px;
+  place-items: center;
+  border: 30px solid #d4111b;
+  border-radius: 50%;
+  color: #1d1d1f;
+}
+
+.kit-sign-ring .kit-sign-icon {
+  width: 220px;
+  height: 220px;
+}
+
+.kit-sign-panel.is-info {
+  background: var(--a);
+  color: #fff;
+}
+
+.kit-sign-panel.is-brand {
+  background: var(--a);
+  color: var(--a2);
+}
+
+.kit-sign-text {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  padding: 44px 54px 30px;
+}
+
+.kit.kit-sign.d-warning .kit-sign-text {
+  background: #1d1d1f;
+  color: #ffd200;
+}
+
+.kit.kit-sign.d-prohibition .kit-sign-text {
+  background: #d4111b;
+  color: #fff;
+}
+
+.kit.kit-sign.d-brand .kit-sign-text {
+  background: var(--a);
+  color: #fff;
+  border-top: 6px solid var(--a2);
+}
+
+.kit.kit-sign.d-info .kit-sign-text {
+  border-top: 6px solid var(--a2);
+}
+
+.kit-sign-head {
+  font-size: 64px;
+  font-weight: 700;
+  letter-spacing: -0.035em;
+  line-height: 1.02;
+}
+
+.kit-sign-sub {
+  margin-top: 16px !important;
+  font-size: 26px;
+  font-weight: 500;
+  letter-spacing: -0.015em;
+  line-height: 1.2;
+}
+
+.kit-sign-body {
+  margin-top: 18px !important;
+  font-size: 15px;
+  line-height: 1.45;
+  opacity: 0.85;
+}
+
+.kit-sign-contact {
+  margin-top: auto !important;
+  padding-top: 18px;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.kit-sign-logo {
+  display: flex;
+  flex: none;
+  justify-content: center;
+  padding: 18px;
+  background: #fff;
+}
+
+.kit.kit-sign.d-brand .kit-sign-logo {
+  background: var(--a);
+  border-top: 1px solid rgba(255, 255, 255, 0.15);
+  color: #fff;
+}
+
+.kit.kit-sign.d-brand .kit-sign-logo .kit-brand small {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.kit.kit-sign.d-brand .kit-sign-logo .kit-mark g {
+  fill: var(--a2);
+}
+
+/* ---------- Visitor pass ---------- */
+
+.kit-pass-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 22px;
+  background: var(--a);
+  color: #fff;
+}
+
+.kit-pass-top span {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  font-variant-numeric: tabular-nums;
+}
+
+.kit-pass-top .kit-brand small {
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.kit-pass-top .kit-mark g {
+  fill: var(--a2);
+}
+
+.kit-pass-word {
+  display: grid;
+  justify-items: center;
+  padding: 26px 0 22px;
+  background: var(--day);
+  color: #1d1d1f;
+}
+
+.kit-pass-word b {
+  font-size: 54px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  line-height: 1;
+}
+
+.kit-pass-word small {
+  margin-top: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+}
+
+.kit-pass-name {
+  margin-top: 22px !important;
+  padding: 0 22px;
+  font-size: 24px;
+  font-weight: 600;
+  letter-spacing: -0.025em;
+  line-height: 1.15;
+  text-align: center;
+}
+
+.kit-pass-co {
+  margin-top: 4px !important;
+  color: #6e6e73;
+  font-size: 13px;
+  text-align: center;
+}
+
+.kit-pass-facts {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 6px 14px;
+  margin: 20px 26px 0 !important;
+  padding-top: 14px;
+  border-top: 1px solid #e5e5ea;
+  font-size: 12px;
+}
+
+.kit-pass-facts dt {
+  color: #86868b;
+}
+
+.kit-pass-facts dd {
+  font-weight: 500;
+}
+
+.kit-pass-wear {
+  position: absolute;
+  right: 0;
+  bottom: 30px;
+  left: 0;
+  color: #86868b;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.kit-pass-day {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 16px;
+}
+
+.kit.kit-pass.d-minimal .kit-pass-top {
+  border-bottom: 1px solid #e5e5ea;
+  background: #fff;
+  color: #1d1d1f;
+}
+
+.kit.kit-pass.d-minimal .kit-pass-top .kit-brand small {
+  color: #6e6e73;
+}
+
+.kit.kit-pass.d-minimal .kit-pass-word {
+  margin: 24px 26px 0;
+  padding: 18px 0;
+  border-radius: 10px;
+}
+
+.kit.kit-pass.d-minimal .kit-pass-word b {
+  font-size: 40px;
+}
+
+.kit.kit-pass.d-escort .kit-pass-word {
+  background: #d4111b;
+  color: #fff;
+}
+
+.kit-pass-back {
+  display: flex;
+  height: 100%;
+  flex-direction: column;
+  padding: 34px 30px 28px;
+}
+
+.kit-pass-back .kit-mark {
+  height: 26px;
+  margin-bottom: 24px;
+}
+
+.kit-pass-back ol {
+  display: grid;
+  gap: 10px;
+  padding-left: 18px;
+  font-size: 12.5px;
+  line-height: 1.45;
+}
+
+.kit-pass-emergency {
+  margin-top: 26px !important;
+  padding: 12px 14px;
+  border-left: 3px solid var(--a2);
+  background: #f5f5f7;
+  font-size: 12px;
+}
+
+.kit-pass-out {
+  margin-top: auto !important;
+  color: #86868b;
+  font-size: 10px;
+}
+
+/* ---------- Corner art, shared ---------- */
+
+.kit-corner {
+  position: absolute;
+  top: 0;
+  right: 0;
+}
+
+/* ---------- Letterhead: Corner, Centred ---------- */
+
+.kit-lh-cornerhead {
+  padding: 60px 280px 10px 64px;
+}
+
+.kit-lh-cornerhead b {
+  display: block;
+  color: var(--a);
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+.kit-lh-cornerhead .kit-lh-contact {
+  margin-top: 8px;
+  text-align: left;
+}
+
+.kit-lh-center {
+  display: grid;
+  justify-items: center;
+  gap: 12px;
+  margin: 0 64px;
+  padding: 52px 0 22px;
+  border-bottom: 1px solid #e5e5ea;
+  text-align: center;
+}
+
+.kit-lh-center p {
+  color: #6e6e73;
+  font-size: 10.5px;
+}
+
+.kit-lh-bottom {
+  position: absolute;
+  right: 64px;
+  bottom: 38px;
+  left: 64px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  color: #86868b;
+  font-size: 9.5px;
+}
+
+.kit-lh-bottom span {
+  flex: 1;
+  height: 1px;
+  background: var(--a2);
+}
+
+/* ---------- Compliment slip: Stripe, Corner ---------- */
+
+.kit-slip-stripe {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 14px;
+  background: linear-gradient(180deg, var(--a) 0 70%, var(--a2) 70%);
+}
+
+.kit-slip-top.is-stripe,
+.kit-slip-in.is-stripe {
+  padding-left: 62px;
+}
+
+.kit-slip-in.is-corner {
+  padding: 46px 220px 0 48px;
+}
+
+.kit-slip-in.is-corner h1 {
+  font-size: 34px;
+}
+
+.kit-slip-foot.is-left {
+  left: 48px;
+  text-align: left;
+}
+
+/* ---------- ID badge: Minimal, Portrait ---------- */
+
+.kit.kit-badge.d-minimal {
+  align-items: flex-start;
+  padding: 26px 26px 0;
+  text-align: left;
+}
+
+.kit-badge-mtop {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+  color: #86868b;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+}
+
+.kit-badge-mtop .kit-mark {
+  height: 22px;
+}
+
+.kit-badge-photo.is-square {
+  width: 150px;
+  height: 150px;
+  margin-top: 26px;
+  border: 0;
+  border-radius: 16px;
+  box-shadow: none;
+}
+
+.kit-badge-name.is-left,
+.kit-badge-role.is-left {
+  padding: 0;
+  text-align: left;
+}
+
+.kit-badge-name.is-left {
+  font-size: 27px;
+}
+
+.kit.kit-badge.d-minimal .kit-badge-facts {
+  padding: 14px 0 0;
+}
+
+.kit-badge-mbar {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 10px;
+  background: linear-gradient(90deg, var(--a) 0 70%, var(--a2) 70%);
+}
+
+.kit-badge-hero {
+  position: relative;
+  width: 100%;
+  height: 300px;
+  overflow: hidden;
+  background: #d9dbe0;
+}
+
+.kit-badge-hero > img,
+.kit-badge-hero > svg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.kit-badge-hero > svg {
+  padding: 40px 60px 70px;
+}
+
+.kit-badge-shade {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.55) 0, rgba(0, 0, 0, 0) 35%, rgba(0, 0, 0, 0) 50%, rgba(0, 0, 0, 0.85) 100%);
+}
+
+.kit-badge-over {
+  position: absolute;
+  inset: 20px 22px 18px;
+  display: flex;
+  flex-direction: column;
+  color: #fff;
+  text-align: left;
+}
+
+.kit-badge-over .kit-brand small {
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.kit-badge-over h1 {
+  margin-top: auto !important;
+  font-size: 26px;
+  font-weight: 600;
+  letter-spacing: -0.025em;
+  line-height: 1.1;
+}
+
+.kit-badge-over p {
+  margin-top: 4px !important;
+  color: var(--a2);
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+/* ---------- Certificate: Elegant, Dark ---------- */
+
+.kit-cert-frame.is-elegant {
+  border-width: 1px;
+}
+
+.kit-cert-frame.is-elegant::before {
+  inset: 10px;
+  border-width: 3px;
+  border-style: double;
+}
+
+.kit-cert-frame.is-elegant > i {
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  background: var(--a2);
+}
+
+.kit-cert-frame.is-elegant > i:nth-child(1) {
+  top: -9px;
+  left: -9px;
+}
+
+.kit-cert-frame.is-elegant > i:nth-child(2) {
+  top: -9px;
+  right: -9px;
+}
+
+.kit-cert-frame.is-elegant > i:nth-child(3) {
+  bottom: -9px;
+  left: -9px;
+}
+
+.kit-cert-frame.is-elegant > i:nth-child(4) {
+  right: -9px;
+  bottom: -9px;
+}
+
+.kit.kit-certificate.d-elegant .kit-cert-name,
+.kit.kit-certificate.d-elegant .kit-cert-course {
+  font-family: "Fraunces", "Playfair Display", Georgia, serif;
+  font-weight: 400;
+}
+
+.kit.kit-certificate.d-elegant .kit-cert-name {
+  font-size: 58px;
+  font-style: italic;
+  letter-spacing: -0.01em;
+}
+
+.kit.kit-certificate.d-dark {
+  background: var(--a);
+  color: #fff;
+}
+
+.kit-cert-frame.is-dark {
+  border-color: var(--a2);
+}
+
+.kit-cert-frame.is-dark::before {
+  border-color: rgba(255, 255, 255, 0.25);
+}
+
+.kit.kit-certificate.d-dark .kit-brand small,
+.kit.kit-certificate.d-dark .kit-cert-pre,
+.kit.kit-certificate.d-dark .kit-cert-line,
+.kit.kit-certificate.d-dark .kit-cert-details,
+.kit.kit-certificate.d-dark .kit-cert-meta,
+.kit.kit-certificate.d-dark .kit-cert-sig small,
+.kit.kit-certificate.d-dark .kit-cert-meta small {
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.kit.kit-certificate.d-dark .kit-cert-heading,
+.kit.kit-certificate.d-dark .kit-cert-course,
+.kit.kit-certificate.d-dark .kit-cert-hand {
+  color: var(--a2);
+}
+
+.kit.kit-certificate.d-dark .kit-cert-name {
+  color: #fff;
+}
+
+.kit.kit-certificate.d-dark .kit-cert-sig i {
+  background: rgba(255, 255, 255, 0.6);
+}
+
+/* ---------- Site sign: Mandatory, Minimal ---------- */
+
+.kit-sign-panel.is-mandatory {
+  background: #fff;
+}
+
+.kit-sign-disc {
+  display: grid;
+  width: 380px;
+  height: 380px;
+  place-items: center;
+  border-radius: 50%;
+  background: #005eb8;
+}
+
+.kit-sign-disc .kit-sign-icon {
+  width: 230px;
+  height: 230px;
+}
+
+.kit.kit-sign.d-mandatory .kit-sign-text {
+  background: #005eb8;
+  color: #fff;
+}
+
+.kit.kit-sign.d-minimal {
+  border-width: 0;
+  border-top: 22px solid var(--a);
+}
+
+.kit-sign-min {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  padding: 70px 64px 36px;
+}
+
+.kit-sign-tile {
+  display: grid;
+  width: 170px;
+  height: 170px;
+  place-items: center;
+  border-radius: 24px;
+  background: #eef2f6;
+}
+
+.kit-sign-tile .kit-sign-icon {
+  width: 120px;
+  height: 120px;
+}
+
+.kit-sign-rule {
+  width: 96px;
+  height: 8px;
+  margin: 46px 0 34px;
+  background: var(--a2);
+}
+
+.kit.kit-sign.d-minimal .kit-sign-head {
+  color: var(--a);
+  font-size: 72px;
+}
+
+.kit.kit-sign.d-minimal .kit-sign-contact {
+  color: var(--a);
+}
+
+/* ---------- Visitor pass: Contractor, Vertical ---------- */
+
+.kit.kit-pass.d-contractor .kit-pass-word b {
+  font-size: 36px;
+  letter-spacing: 0.04em;
+}
+
+.kit.kit-pass.d-vertical .kit-pass-name,
+.kit.kit-pass.d-vertical .kit-pass-co,
+.kit.kit-pass.d-vertical .kit-pass-facts,
+.kit.kit-pass.d-vertical .kit-pass-wear {
+  margin-left: 78px !important;
+  text-align: left;
+}
+
+.kit.kit-pass.d-vertical .kit-pass-name {
+  margin-top: 30px !important;
+  padding: 0 22px 0 0;
+}
+
+.kit.kit-pass.d-vertical .kit-pass-facts {
+  grid-template-columns: 1fr;
+  gap: 2px;
+  margin-right: 22px !important;
+}
+
+.kit.kit-pass.d-vertical .kit-pass-facts dd {
+  margin-bottom: 6px;
+}
+
+.kit.kit-pass.d-vertical .kit-pass-day {
+  display: none;
+}
+
+.kit-pass-side {
+  position: absolute;
+  top: 74px;
+  bottom: 0;
+  left: 0;
+  display: grid;
+  width: 64px;
+  place-items: center;
+}
+
+.kit-pass-side svg {
+  width: 64px;
+  height: 100%;
+}
+
+/* ---------- Monogram, top bar, stripes ---------- */
+
+.kit-wm {
+  position: absolute;
+  right: -60px;
+  bottom: -30px;
+  opacity: 0.05;
+  pointer-events: none;
+}
+
+.kit-wm .kit-mark {
+  width: 560px;
+  height: auto;
+}
+
+.kit-slip .kit-wm .kit-mark {
+  width: 340px;
+}
+
+.kit-certificate .kit-wm {
+  right: 50%;
+  bottom: 50%;
+  transform: translate(50%, 50%);
+}
+
+.kit-badge .kit-wm .kit-mark,
+.kit-pass .kit-wm .kit-mark {
+  width: 260px;
+}
+
+.kit-topbar {
+  height: 14px;
+  background: linear-gradient(90deg, var(--a) 0 78%, var(--a2) 78%);
+}
+
+.kit-stripes {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+/* Certificate: Bars, Monogram */
+.kit-cert-bars i {
+  position: absolute;
+  right: 0;
+  left: 0;
+  height: 22px;
+  background: var(--a);
+}
+
+.kit-cert-bars i:first-child {
+  top: 0;
+  border-bottom: 5px solid var(--a2);
+}
+
+.kit-cert-bars i:last-child {
+  bottom: 0;
+  border-top: 5px solid var(--a2);
+}
+
+.kit.kit-certificate.d-bars .kit-cert-in {
+  padding: 70px 100px 60px;
+}
+
+.kit-cert-frame.is-thin {
+  border-width: 1px;
+}
+
+.kit-cert-frame.is-thin::before {
+  display: none;
+}
+
+/* ID badge: Night, Side bar */
+.kit.kit-badge.d-dark {
+  background: var(--a);
+  color: #fff;
+}
+
+.kit.kit-badge.d-dark .kit-badge-head {
+  background: transparent;
+}
+
+.kit.kit-badge.d-dark .kit-badge-photo {
+  border-color: var(--a);
+}
+
+.kit.kit-badge.d-dark .kit-badge-role {
+  color: var(--a2);
+}
+
+.kit.kit-badge.d-dark .kit-badge-facts {
+  border-top-color: rgba(255, 255, 255, 0.18);
+}
+
+.kit.kit-badge.d-dark .kit-badge-facts dt {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.kit.kit-badge.d-bar::before {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 16px;
+  background: linear-gradient(180deg, var(--a2) 0 30%, var(--a) 30%);
+  content: "";
+}
+
+.kit.kit-badge.d-bar .kit-badge-head {
+  background: #fff;
+  color: #1d1d1f;
+}
+
+.kit.kit-badge.d-bar .kit-badge-photo {
+  margin-top: -40px;
+  border-radius: 18px;
+}
+
+/* Site sign: Hazard border, Night */
+.kit.kit-sign.d-hazard {
+  border: 0;
+  padding: 30px;
+}
+
+.kit-sign-inner {
+  position: relative;
+  display: flex;
+  height: 100%;
+  flex-direction: column;
+  background: #fff;
+}
+
+.kit-sign-panel.is-hazard {
+  height: 430px;
+  background: #fff;
+  color: #1d1d1f;
+}
+
+.kit.kit-sign.d-hazard .kit-sign-text {
+  color: #1d1d1f;
+}
+
+.kit.kit-sign.d-dark {
+  border-color: #000;
+  background: #0b0d10;
+  color: #fff;
+}
+
+.kit-sign-panel.is-dark {
+  background: #0b0d10;
+}
+
+.kit.kit-sign.d-dark .kit-sign-text {
+  border-top: 6px solid var(--a2);
+  color: #fff;
+}
+
+.kit.kit-sign.d-dark .kit-sign-head {
+  color: var(--a2);
+}
+
+.kit.kit-sign.d-dark .kit-sign-logo {
+  background: #0b0d10;
+  color: #fff;
+}
+
+.kit.kit-sign.d-dark .kit-sign-logo .kit-brand small {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+/* Visitor pass: Night, Stripes */
+.kit.kit-pass.d-dark {
+  background: var(--a);
+  color: #fff;
+}
+
+.kit.kit-pass.d-dark .kit-pass-top {
+  background: transparent;
+}
+
+.kit.kit-pass.d-dark .kit-pass-co,
+.kit.kit-pass.d-dark .kit-pass-facts dt,
+.kit.kit-pass.d-dark .kit-pass-wear {
+  color: rgba(255, 255, 255, 0.65);
+}
+
+.kit.kit-pass.d-dark .kit-pass-facts {
+  border-top-color: rgba(255, 255, 255, 0.18);
+}
+
+.kit-pass-word.is-stripes {
+  position: relative;
+  background: none;
+}
+
+.kit-pass-word.is-stripes b {
+  position: relative;
+  padding: 2px 16px;
+  background: #fff;
+}
+
+/* ---------- The picker: five designs, then the rest ---------- */
+
+.kit-more {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(9rem, 1fr));
+  gap: 0.35rem;
+  margin: 0.5rem 0 1rem;
+}
+
+.kit-design.is-mini {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.35rem 0.6rem 0.35rem 0.35rem;
+  text-align: left;
+}
+
+.kit-design.is-mini .kit-thumb {
+  width: 46px;
+  margin: 0;
+}
+
+.kit-design.is-mini[aria-pressed="true"] {
+  background: #1d1d1f !important;
+  color: #fff;
+  box-shadow: none;
+}
+
+/* ---------- Print: sheets of cards ---------- */
+
+.kit-sheet {
+  display: grid;
+  grid-template-columns: repeat(3, 54mm);
+  gap: 5mm;
+  justify-content: center;
+  break-after: page;
+}
+
+.kit-sheet-card {
+  width: 54mm;
+  height: 85.6mm;
+  overflow: hidden;
+  outline: 0.2mm dashed #b0b0b8;
+}
+
+.kit-sheet .kit,
+.dc-print .kit {
+  box-shadow: none;
+}
+
+/* NEWCONCEPT in the brand block: NEW heavy, CONCEPT light. */
+.kit-brand .ncs-word b {
+  display: inline;
+  font-weight: 800;
+}
+
+.kit-brand .ncs-word span {
+  font-weight: 400;
+}

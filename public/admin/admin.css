@@ -1949,6 +1949,35 @@ button {
   font-size: 15px;
 }
 
+.login-box input[type="email"],
+.login-box input[type="password"] {
+  font: 400 16px var(--sans);
+  letter-spacing: normal;
+  text-align: left;
+  text-transform: none;
+}
+
+.login-link {
+  justify-self: center;
+  padding: 4px 8px;
+  border: 0;
+  background: none;
+  color: var(--red);
+  font-size: 14px;
+}
+
+.login-link:hover {
+  text-decoration: underline;
+}
+
+.login-ok {
+  padding: 10px 14px;
+  border-radius: var(--r-sm);
+  background: var(--good-bg);
+  color: var(--good);
+  font-size: 14px;
+}
+
 .login-error {
   padding: 10px 14px;
   border-radius: var(--r-sm);
@@ -2126,4 +2155,12 @@ button {
     animation: none !important;
     transition: none !important;
   }
+}
+
+.card code {
+  padding: 1px 6px;
+  border-radius: 6px;
+  background: var(--fill);
+  font: 12.5px var(--mono);
+  word-break: break-all;
 }

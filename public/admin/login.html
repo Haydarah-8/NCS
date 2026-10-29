@@ -26,41 +26,120 @@
         <svg viewBox="0 0 420 420" aria-hidden="true"><path d="M210 8L297.35 95.35V301.72L148.09 69.91ZM210 412L122.65 324.65V118.28L271.91 350.09Z"/><path d="M10.18 210L68.05 152.13V267.87ZM409.82 210L351.95 152.13V267.87Z"/></svg>
         <span><b style="color:var(--red)"><i style="color:var(--ink)">NEW</i>CONCEPT</b><small style="color:var(--ink-3)">Admin</small></span>
       </div>
-      <h1>Sign in.</h1>
-      <p>Enter your access code.</p>
-      <form id="login" class="form" novalidate>
-        <label class="field"><span class="sr-only">Access code</span><input id="code" name="code" autocomplete="current-password" spellcheck="false" autocapitalize="characters" placeholder="NCS-XXXX-XXXX-XXXX" required></label>
+
+      <h1 data-title>Sign in.</h1>
+      <p data-lead>With your admin email and password.</p>
+
+      <form class="form" data-mode="signin" novalidate>
+        <label class="field"><span>Email</span><input name="email" type="email" autocomplete="username" required></label>
+        <label class="field" data-password><span>Password</span><input name="password" type="password" autocomplete="current-password" required></label>
         <p class="login-error" role="alert" hidden></p>
         <button class="btn" type="submit">Sign in</button>
+        <button class="login-link" type="button" data-go="forgot">Forgot your password?</button>
+      </form>
+
+      <form class="form" data-mode="forgot" novalidate hidden>
+        <label class="field"><span>Email</span><input name="email" type="email" autocomplete="username" required></label>
+        <p class="login-error" role="alert" hidden></p>
+        <p class="login-ok" role="status" hidden>If that address has an admin account, a reset link is on its way. Check your inbox and spam folder.</p>
+        <button class="btn" type="submit">Email me a reset link</button>
+        <button class="login-link" type="button" data-go="signin">Back to sign in</button>
+      </form>
+
+      <form class="form" data-mode="set" novalidate hidden>
+        <label class="field"><span>New password <em>at least 10 characters</em></span><input name="password" type="password" autocomplete="new-password" minlength="10" required></label>
+        <label class="field"><span>Type it again</span><input name="again" type="password" autocomplete="new-password" required></label>
+        <p class="login-error" role="alert" hidden></p>
+        <button class="btn" type="submit">Save and sign in</button>
       </form>
     </section>
   </main>
   <script>
-    /* Signs in, then goes back to the admin page that asked, or the overview. */
-    const form = document.getElementById("login");
-    const error = form.querySelector(".login-error");
+    /* Signs in with Supabase email and password (checked on the server), sends
+       reset links, and takes the one-time token a reset or invite link brings
+       back to choose a password. Then goes to the admin page that asked. */
     const next = new URLSearchParams(location.search).get("next") || "";
     const target = /^\/admin(\/[^/][\w./#?=&-]*|\/?#[\w./?=&-]*)?$/.test(next) ? next : "/admin";
-    fetch("/api/login").then((r) => r.json()).then((s) => s.signedIn && location.replace(target)).catch(() => {});
-    form.addEventListener("submit", async (event) => {
-      event.preventDefault();
-      const button = form.querySelector("button");
-      button.disabled = true;
-      error.hidden = true;
-      try {
-        const res = await fetch("/api/login", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ code: form.code.value }) });
-        const data = await res.json().catch(() => ({}));
-        if (res.ok) return location.replace(target);
-        error.textContent = data.error || "Something went wrong. Try again.";
-        error.hidden = false;
-        form.code.select();
-      } catch {
-        error.textContent = "Couldn’t reach the server. Check your connection.";
-        error.hidden = false;
-      }
-      button.disabled = false;
+    const forms = Object.fromEntries([...document.querySelectorAll("form[data-mode]")].map((f) => [f.dataset.mode, f]));
+    const title = document.querySelector("[data-title]");
+    const lead = document.querySelector("[data-lead]");
+    const TEXT = {
+      signin: ["Sign in.", "With your admin email and password."],
+      forgot: ["Reset your password.", "We'll email you a link to choose a new one."],
+      set: ["Choose a password.", "You'll use it with your email to sign in from now on."],
+    };
+    function show(mode) {
+      for (const [m, f] of Object.entries(forms)) f.hidden = m !== mode;
+      [title.textContent, lead.textContent] = TEXT[mode];
+      forms[mode].querySelector("input")?.focus();
+    }
+    const fail = (form, text) => {
+      const e = form.querySelector(".login-error");
+      e.textContent = text;
+      e.hidden = false;
+    };
+
+    // A reset or invite link lands here with its token in the address.
+    const wantsReset = location.hash === "#forgot";
+    const hash = new URLSearchParams(location.hash.slice(1));
+    const token = hash.get("access_token");
+    history.replaceState(null, "", location.pathname + location.search);
+    if (token && ["recovery", "invite", "signup", "magiclink"].includes(hash.get("type"))) show("set");
+    else if (wantsReset) show("forgot");
+    else if (hash.get("error_description")) {
+      show("forgot");
+      fail(forms.forgot, `${hash.get("error_description").replace(/\+/g, " ")}. Ask for a new link below.`);
+    } else {
+      fetch("/api/login").then((r) => r.json()).then((s) => {
+        if (s.signedIn) return location.replace(target);
+        if (s.localDev) {
+          lead.textContent = "Local development: Supabase isn't set up, so any email opens the panel.";
+          forms.signin.querySelector("[data-password]").hidden = true;
+        }
+      }).catch(() => {});
+      forms.signin.email.focus();
+    }
+
+    document.addEventListener("click", (e) => {
+      const go = e.target.closest("[data-go]");
+      if (!go) return;
+      if (go.dataset.go === "forgot") forms.forgot.email.value = forms.signin.email.value;
+      show(go.dataset.go);
     });
-    form.code.focus();
+
+    async function send(form, action, body) {
+      const button = form.querySelector("button[type=submit]");
+      button.disabled = true;
+      form.querySelector(".login-error").hidden = true;
+      try {
+        const res = await fetch(`/api/login${action ? `?action=${action}` : ""}`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body) });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) fail(form, data.error || "Something went wrong. Try again.");
+        return res.ok;
+      } catch {
+        fail(form, "Couldn’t reach the server. Check your connection.");
+        return false;
+      } finally {
+        button.disabled = false;
+      }
+    }
+
+    forms.signin.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      if (await send(forms.signin, "", { email: forms.signin.email.value, password: forms.signin.password.value })) location.replace(target);
+      else forms.signin.password.select();
+    });
+    forms.forgot.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      if (await send(forms.forgot, "forgot", { email: forms.forgot.email.value })) forms.forgot.querySelector(".login-ok").hidden = false;
+    });
+    forms.set.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const f = forms.set;
+      if (f.password.value.length < 10) return fail(f, "Use at least 10 characters.");
+      if (f.password.value !== f.again.value) return fail(f, "The two passwords don't match.");
+      if (await send(f, "set-password", { access_token: token, password: f.password.value })) location.replace("/admin");
+    });
   </script>
 </body>
 </html>

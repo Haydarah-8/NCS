@@ -8,12 +8,11 @@
    - In local development without DATABASE_URL, PGlite: a real Postgres
      running inside the dev server, kept in .ncs-dev/pg. */
 
-import { mkdir, writeFile } from "node:fs/promises";
+import { mkdir } from "node:fs/promises";
 import path from "node:path";
 import { neon } from "@neondatabase/serverless";
 import postgres from "postgres";
 import { SCHEMA } from "./schema.mjs";
-import { hashCode, newCode } from "./codes.mjs";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type Row = Record<string, any>;
@@ -95,14 +94,6 @@ async function localSql(): Promise<Sql> {
       return out;
     });
 
-  // A first access code, so the panel can be signed in to straight away.
-  const [existing] = await sql`select 1 from settings where key = 'access_code'`;
-  if (!existing) {
-    const code = newCode();
-    await sql`insert into settings (key, value) values ('access_code', ${JSON.stringify(await hashCode(code))}::jsonb)`;
-    await writeFile(path.join(LOCAL_DIR, "ACCESS-CODE.txt"), `Local development admin access code:\n${code}\n`);
-    console.log(`\n  NCS admin (local): access code ${code}  (also in .ncs-dev/ACCESS-CODE.txt)\n`);
-  }
   return sql;
 }
 

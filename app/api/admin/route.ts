@@ -3,15 +3,13 @@
 
    GET    me, stats, page, speed, uptime, leads, posts, settings, log,
           counts, export, backup
-   POST   lead-save, lead-delete, post-save, post-delete, settings-save,
-          code-change
+   POST   lead-save, lead-delete, post-save, post-delete, settings-save
 
    The panel follows Aevion View: traffic and visitors, where they come
    from, enquiries and conversions, speed and uptime. Plus the blog, the
    site announcement and the document builders (which need no server). */
 
 import { slugify } from "@/lib/md.js";
-import { checkCode, hashCode, normaliseCode } from "@/lib/server/codes.mjs";
 import { getSql, type Row, type Sql } from "@/lib/server/db";
 import { audit, clip, guard, isAdmin, json, readBody } from "@/lib/server/http";
 
@@ -216,7 +214,7 @@ async function get(sql: Sql, action: string | null, p: URLSearchParams) {
     case "posts":
       return json({ posts: await sql`select * from posts order by coalesce(published_at, updated_at) desc limit 300` });
     case "settings": {
-      const rows = await sql`select key, value from settings where key not like 'access_code%'`;
+      const rows = await sql`select key, value from settings`;
       return json({ settings: Object.fromEntries(rows.map((r) => [r.key, r.value])) });
     }
     case "log":
@@ -242,7 +240,7 @@ async function get(sql: Sql, action: string | null, p: URLSearchParams) {
       const [posts, leads, settings] = await sql.transaction([
         sql`select * from posts order by id`,
         sql`select * from leads order by id`,
-        sql`select key, value from settings where key not like 'access_code%'`,
+        sql`select key, value from settings`,
       ]);
       return download(JSON.stringify({ made: new Date().toISOString(), posts, leads, settings }, null, 1), "application/json", `ncs-admin-backup-${today()}.json`);
     }
@@ -303,17 +301,6 @@ async function post(sql: Sql, action: string | null, d: Record<string, any>, req
         on conflict (key) do update set value = excluded.value, updated_at = now()`;
       await audit("announcement", true, request, value.on ? value.text : "off");
       return json({ value });
-    }
-    case "code-change": {
-      const [row] = await sql`select value from settings where key = 'access_code'`;
-      if (!(await checkCode(d.current, row?.value))) {
-        await audit("change code", false, request, "wrong current code");
-        return json({ error: "The current code isn’t right." }, 403);
-      }
-      if (normaliseCode(d.next).length < 10) return json({ error: "Use at least 10 letters and numbers." }, 400);
-      await sql`update settings set value = ${JSON.stringify(await hashCode(d.next))}::jsonb, updated_at = now() where key = 'access_code'`;
-      await audit("change code", true, request);
-      return json({ ok: true });
     }
     default:
       return json({ error: "Unknown action" }, 400);

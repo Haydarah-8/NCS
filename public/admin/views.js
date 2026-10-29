@@ -605,13 +605,12 @@ export async function settings(view) {
     head("Settings.") +
     `<div class="grid is-2">
       ${card(
-        "Access code",
-        `<form class="form" data-code>
-          <p class="muted small">The one code that opens this panel. Use at least 10 letters and numbers; dashes and spaces don't count.</p>
-          <label class="field"><span>Current code</span><input name="current" type="password" autocomplete="current-password" required></label>
-          <label class="field"><span>New code</span><input name="next" autocomplete="new-password" required minlength="10"></label>
-          <div class="row-between"><button class="btn is-quiet" type="button" data-make>${icon("refresh", 15)} Make one for me</button><button class="btn" type="submit">Change code</button></div>
-        </form>`,
+        "Admin access",
+        `<p class="muted small">Admins sign in with their email and a password, through Supabase. Only accounts given admin access can open this panel.</p>
+        <div class="stack">
+          <a class="btn is-quiet" href="/admin/login.html#forgot" data-reset>${icon("lock", 15)} Change my password</a>
+        </div>
+        <p class="muted small" style="margin-top:14px">To give someone access, run <code>npm run admin:add -- their@email.co.uk</code> on the office computer; they get an email to choose a password. <code>npm run admin:remove -- their@email.co.uk</code> takes it away.</p>`,
       )}
       ${card(
         "Your data",
@@ -632,22 +631,10 @@ export async function settings(view) {
             .join("")}</tbody></table>`
         : empty("Nothing yet"),
     )}`;
-  const form = $("[data-code]", view);
-  $("[data-make]", view).addEventListener("click", () => {
-    const ABC = "ABCDEFGHJKMNPQRSTUVWXYZ23456789";
-    const r = crypto.getRandomValues(new Uint32Array(12));
-    const c = [...r].map((n) => ABC[n % ABC.length]).join("");
-    form.next.value = `NCS-${c.slice(0, 4)}-${c.slice(4, 8)}-${c.slice(8)}`;
-  });
-  form.addEventListener("submit", async (e) => {
+  $("[data-reset]", view).addEventListener("click", async (e) => {
     e.preventDefault();
-    try {
-      await post("code-change", { current: form.current.value, next: form.next.value });
-      toast("Code changed. Use the new one next time you sign in.");
-      form.reset();
-    } catch (err) {
-      toast(err.message, { error: true });
-    }
+    await fetch("/api/logout", { method: "POST" });
+    location.href = "/admin/login.html#forgot";
   });
 }
 

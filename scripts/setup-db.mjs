@@ -1,15 +1,12 @@
-/* Creates the admin panel's tables, and the access code if there isn't one
-   yet. Safe to run again: it only adds what is missing. The code is printed
-   once, here, and only its scrypt hash is stored. Works with Supabase (or
-   any Postgres) and with Neon.
+/* Creates the admin panel's tables. Safe to run again: it only adds what
+   is missing. Works with Supabase (or any Postgres) and with Neon. Admins
+   sign in with Supabase email and password; see scripts/add-admin.mjs.
 
-     npm run db:setup        set up
-     npm run db:new-code     replace the code
+     npm run db:setup
 */
 
 import { neon } from "@neondatabase/serverless";
 import postgres from "postgres";
-import { hashCode, newCode } from "../lib/server/codes.mjs";
 import { SCHEMA } from "../lib/server/schema.mjs";
 
 const url = process.env.DATABASE_URL;
@@ -36,18 +33,8 @@ try {
   for (const statement of SCHEMA) await run(statement);
   console.log("tables ready, row level security on");
 
-  const [existing] = await run("select 1 from settings where key = 'access_code'");
-  if (!existing || process.argv.includes("--new-code")) {
-    const code = newCode();
-    await run(
-      `insert into settings (key, value) values ('access_code', $1::jsonb)
-       on conflict (key) do update set value = excluded.value, updated_at = now()`,
-      [JSON.stringify(await hashCode(code))],
-    );
-    console.log(`access code: ${code}`);
-  } else {
-    console.log("access code already set (use npm run db:new-code to replace it)");
-  }
+  // Access codes are gone; sign-in is by Supabase email and password.
+  await run("delete from settings where key like 'access_code%'");
 } finally {
   await end();
 }

@@ -1,9 +1,9 @@
-/* New Concept Security: the design kit. Letterhead, compliment slip,
+/* New Concept Security: the design kit. Letterhead,
    officer ID badge, training certificate, site sign and visitor pass, all
    in the brand and all from one small engine: the form on the left edits a
    state object, the item on the right is drawn from it at its printed size,
    and it downloads as a PDF or PNG or goes to the printer. Drafts stay in
-   this browser. The page picks the item from ?type= (letterhead, slip,
+   this browser. The page picks the item from ?type= (letterhead,
    badge, certificate, sign, pass). */
 
 const W_PATH = "M210 8L297.35 95.35V301.72L148.09 69.91ZM210 412L122.65 324.65V118.28L271.91 350.09Z";
@@ -57,20 +57,6 @@ const TYPES = {
       { k: "body", label: "Letter", type: "textarea", rows: 9, wide: true },
       { k: "signer", label: "Signed by" },
       { k: "title", label: "Their title" },
-    ],
-  },
-  slip: {
-    label: "Compliment slip",
-    w: 794,
-    h: 374,
-    pt: [595.28, 280.63],
-    print: "210mm 99mm",
-    designs: { classic: "Classic", band: "Band", minimal: "Minimal", stripe: "Stripe", corner: "Corner", monogram: "Monogram", bar: "Top bar" },
-    sample: { design: "classic", heading: "With compliments", note: "", lines: true },
-    fields: [
-      { k: "heading", label: "Heading", wide: true },
-      { k: "note", label: "Printed note (optional)", type: "textarea", wide: true },
-      { k: "lines", label: "Lines to write on", type: "check" },
     ],
   },
   badge: {
@@ -299,7 +285,7 @@ const contactLine = (sep = "  ·  ") => {
 let qrPending = null;
 function qr(text, size = 80, dark = "#1D1D1F") {
   if (!window.qrcode) {
-    if (!qrPending) qrPending = loadScript("https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js").then(render).catch(() => (qrPending = null));
+    if (!qrPending) qrPending = window.NCSExport.load("https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js").then(render).catch(() => (qrPending = null));
     return "";
   }
   const code = window.qrcode(0, "M");
@@ -378,27 +364,6 @@ const DRAW = {
     return [`<header class="kit-lh-classic">${brand()}${contact}</header><div class="kit-lh-rule"><span></span></div><div class="kit-lh-in">${letterBody(it)}</div>${footer}`];
   },
 
-  slip(it) {
-    const f = state.from;
-    const write = it.lines ? `<div class="kit-slip-lines">${"<span></span>".repeat(3)}</div>` : "";
-    const note = it.note ? `<p class="kit-slip-note">${lines(it.note)}</p>` : "";
-    const details = `<p class="kit-slip-contact">${[f.address.replace(/\n/g, ", "), f.phone, f.email, f.web].filter((v) => v && v.trim()).map(esc).join("<br>")}</p>`;
-    if (it.design === "band") {
-      return [`<aside class="kit-slip-band">${brand(true)}${details}</aside><div class="kit-slip-in"><h1>${esc(it.heading)}</h1>${note}${write}</div>`];
-    }
-    if (it.design === "monogram") return [`${watermark()}<div class="kit-slip-top">${brand()}${details}</div><div class="kit-slip-in"><h1>${esc(it.heading)}</h1>${note}${write}</div>`];
-    if (it.design === "bar") return [`<div class="kit-topbar"></div><div class="kit-slip-top">${brand()}${details}</div><div class="kit-slip-in"><h1>${esc(it.heading)}</h1>${note}${write}</div>`];
-    if (it.design === "stripe") {
-      return [`<div class="kit-slip-stripe"></div><div class="kit-slip-top is-stripe">${brand()}${details}</div><div class="kit-slip-in is-stripe"><h1>${esc(it.heading)}</h1>${note}${write}</div>`];
-    }
-    if (it.design === "corner") {
-      return [`${corner(170)}<div class="kit-slip-in is-corner"><h1>${esc(it.heading)}</h1>${note}${write}</div><p class="kit-slip-foot is-left">${contactLine()}</p>`];
-    }
-    if (it.design === "minimal") {
-      return [`<div class="kit-slip-in is-min">${mark()}<h1>${esc(it.heading)}</h1>${note}${write}<p class="kit-slip-foot">${contactLine()}</p></div>`];
-    }
-    return [`<div class="kit-slip-top">${brand()}${details}</div><div class="kit-slip-rule"></div><div class="kit-slip-in"><h1>${esc(it.heading)}</h1>${note}${write}</div>`];
-  },
 
   badge(it) {
     const f = state.from;
@@ -556,7 +521,7 @@ function render() {
     el.innerHTML = `<div style="transform:scale(${k});transform-origin:0 0;width:${t.w}px">${faces(state.type, item(), design)[0]}</div>`;
   });
   const it = item();
-  const paper = state.type === "sign" ? (it.paper === "a3" ? "A3" : "A4") : { letterhead: "A4", slip: "DL, 210 × 99 mm", badge: "Card, 54 × 85.6 mm, front and back", certificate: "A4 landscape", pass: "Card, 54 × 85.6 mm, front and back" }[state.type];
+  const paper = state.type === "sign" ? (it.paper === "a3" ? "A3" : "A4") : { letterhead: "A4", badge: "Card, 54 × 85.6 mm, front and back", certificate: "A4 landscape", pass: "Card, 54 × 85.6 mm, front and back" }[state.type];
   document.querySelector("[data-meta]").textContent = `${t.label} · ${paper}`;
   persist();
 }
@@ -577,82 +542,32 @@ function fit() {
 
 /* ---------- Export ---------- */
 
-function loadScript(src) {
-  return new Promise((resolve, reject) => {
-    if ([...document.scripts].some((s) => s.src === src)) return resolve();
-    const s = document.createElement("script");
-    s.src = src;
-    s.onload = resolve;
-    s.onerror = reject;
-    document.head.append(s);
-  });
-}
 
-async function capture() {
-  await loadScript("https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js");
-  const holder = document.createElement("div");
-  holder.style.cssText = "position:fixed;left:-30000px;top:0;";
-  holder.innerHTML = faces().join("");
-  document.body.append(holder);
-  await document.fonts?.ready;
-  const scale = state.type === "sign" && item().paper === "a3" ? 3.5 : T().faces ? 4 : 2.5;
-  try {
-    const out = [];
-    for (const el of holder.querySelectorAll(".kit")) out.push(await window.html2canvas(el, { scale, backgroundColor: "#ffffff", useCORS: true, logging: false }));
-    return out;
-  } finally {
-    holder.remove();
-  }
-}
-
-const fileName = (ext) => `ncs-${T().label.toLowerCase().replace(/[^a-z]+/g, "-")}${item().name ? `-${String(item().name).toLowerCase().replace(/[^a-z0-9]+/g, "-")}` : ""}.${ext}`;
-
-function save(url, name) {
-  const a = Object.assign(document.createElement("a"), { href: url, download: name });
-  document.body.append(a);
-  a.click();
-  a.remove();
-}
-
-async function exportPng() {
-  const canvases = await capture();
-  let canvas = canvases[0];
-  if (canvases.length > 1) {
-    const gap = 60;
-    canvas = document.createElement("canvas");
-    canvas.width = canvases.reduce((a, c) => a + c.width, 0) + gap * (canvases.length - 1);
-    canvas.height = Math.max(...canvases.map((c) => c.height));
-    const ctx = canvas.getContext("2d");
-    let x = 0;
-    canvases.forEach((c) => {
-      ctx.drawImage(c, x, 0);
-      x += c.width + gap;
-    });
-  }
-  canvas.toBlob((blob) => {
-    const url = URL.createObjectURL(blob);
-    save(url, fileName("png"));
-    setTimeout(() => URL.revokeObjectURL(url), 4000);
-  }, "image/png");
-}
+/* Exports go through the shared engine (exporter.js): sharp pictures, an
+   invisible text layer so the PDF can be searched and copied, live links. */
+const fileName = (ext) => window.NCSExport.fileName([T().label, item().name || item().headline || item().recipient, state.from.name], ext);
 
 function pagePt() {
   if (state.type === "sign" && item().paper === "a3") return [841.89, 1190.55];
   return T().pt;
 }
 
+const scaleFor = () => (state.type === "sign" && item().paper === "a3" ? 3.5 : T().faces ? 4 : 3);
+
+async function exportPng() {
+  const canvases = await window.NCSExport.pngOf({ html: faces().join(""), selector: ".kit", scale: scaleFor() });
+  await window.NCSExport.png(canvases, fileName("png"));
+}
+
 async function exportPdf() {
-  await loadScript("https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js");
-  const canvases = await capture();
-  const [w, h] = pagePt();
-  const orientation = w > h ? "landscape" : "portrait";
-  const pdf = new window.jspdf.jsPDF({ unit: "pt", format: [w, h], orientation });
-  canvases.forEach((c, i) => {
-    if (i) pdf.addPage([w, h], orientation);
-    pdf.addImage(c.toDataURL("image/jpeg", 0.94), "JPEG", 0, 0, w, h);
+  const { blob } = await window.NCSExport.pagesPdf({
+    html: faces().join(""),
+    selector: ".kit",
+    pt: pagePt(),
+    scale: scaleFor(),
+    meta: { title: `${T().label}${item().name ? `: ${item().name}` : ""}`, subject: `${T().label} by ${state.from.name}`, author: state.from.name, keywords: [T().label, state.from.name].join(", ") },
   });
-  pdf.setProperties({ title: `${T().label} · ${state.from.name}`, creator: state.from.name });
-  pdf.save(fileName("pdf"));
+  window.NCSExport.save(blob, fileName("pdf"));
 }
 
 /* Cards print nine to an A4 sheet, fronts then backs; everything else

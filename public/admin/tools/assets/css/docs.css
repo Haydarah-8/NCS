@@ -2269,3 +2269,360 @@ body.doc-app {
     box-shadow: none;
   }
 }
+
+/* ---------- Print: clean page breaks, headings on every page ---------- */
+
+@media print {
+  .dc-print .doc {
+    min-height: 0 !important;
+    box-shadow: none !important;
+  }
+
+  .dc-print .doc-table thead {
+    display: table-header-group;
+  }
+
+  .dc-print .doc-table tr,
+  .dc-print .doc-sum,
+  .dc-print .doc-sign,
+  .dc-print .doc-vat,
+  .dc-print .doc-notes > div,
+  .dc-print .doc-parties > *,
+  .dc-print .doc-pay {
+    break-inside: avoid;
+  }
+
+  .dc-print .doc-sum,
+  .dc-print .doc-sign {
+    break-before: avoid;
+  }
+
+  * {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}
+
+/* ---------- Export menu ---------- */
+
+.dc-export {
+  position: relative;
+}
+
+.dc-export > summary {
+  list-style: none;
+  cursor: pointer;
+}
+
+.dc-export > summary::-webkit-details-marker {
+  display: none;
+}
+
+.dc-export > summary::after {
+  content: "";
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  margin-left: 8px;
+  border-right: 1.5px solid currentColor;
+  border-bottom: 1.5px solid currentColor;
+  transform: translateY(-2px) rotate(45deg);
+}
+
+.dc-export-menu {
+  position: absolute;
+  z-index: 30;
+  top: calc(100% + 8px);
+  right: 0;
+  display: grid;
+  width: 300px;
+  padding: 6px;
+  border: 1px solid #e8e8ed;
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 24px 60px -24px rgba(0, 0, 0, 0.35);
+}
+
+.dc-export-menu button {
+  display: grid;
+  gap: 2px;
+  padding: 10px 12px;
+  border: 0;
+  border-radius: 10px;
+  background: none;
+  color: #1d1d1f;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.dc-export-menu button:hover {
+  background: #f5f5f7;
+}
+
+.dc-export-menu b {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.dc-export-menu span {
+  color: #6e6e73;
+  font-size: 12.5px;
+}
+
+/* ---------- Links on the page: they look like the text, and click in the PDF ---------- */
+
+.doc a {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* ---------- VAT summary ---------- */
+
+.doc-vat {
+  margin: 18px 0 0 auto;
+  width: min(100%, 360px);
+}
+
+.doc-vat .doc-label span {
+  margin-left: 6px;
+  color: #6e6e73;
+  font-weight: 500;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.doc-vat table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 11px;
+}
+
+.doc-vat th,
+.doc-vat td {
+  padding: 5px 0;
+  border-bottom: 1px solid #ececee;
+  text-align: left;
+}
+
+.doc-vat th {
+  color: #86868b;
+  font-weight: 600;
+}
+
+.doc-vat .is-num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- Concept: NEWCONCEPT large, the mark's wedges at the edges ---------- */
+
+.doc-cc-wedge {
+  position: absolute;
+  top: 58px;
+  width: 0;
+  height: 0;
+  border-top: 30px solid transparent;
+  border-bottom: 30px solid transparent;
+}
+
+.doc-cc-wedge.is-l {
+  left: 0;
+  border-left: 30px solid;
+}
+
+.doc-cc-wedge.is-r {
+  right: 0;
+  border-right: 30px solid;
+}
+
+.doc-cc-in {
+  padding-top: 48px;
+}
+
+.doc-cc-brand {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.doc-cc-brand svg {
+  width: auto;
+  height: calc(var(--logo-h, 40px) * 1.35);
+}
+
+.doc-cc-word {
+  margin: 0;
+  font-size: 30px;
+  line-height: 1;
+  letter-spacing: 0.01em;
+}
+
+.doc-cc-word b {
+  font-weight: 800;
+}
+
+.doc-cc-word span span {
+  color: var(--a2);
+  font-weight: 400;
+}
+
+.doc-cc-sub {
+  margin: 6px 0 0;
+  color: #6e6e73;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.42em;
+}
+
+.doc-cc-rule {
+  display: flex;
+  height: 3px;
+  margin: 26px 0 4px;
+}
+
+.doc-cc-rule span {
+  flex: 1;
+}
+
+.doc-cc-rule i {
+  width: 18%;
+}
+
+/* ---------- Sentinel: a dark band with the mark cropped behind ---------- */
+
+.doc-sn {
+  position: relative;
+  overflow: hidden;
+  padding: 44px 60px 40px;
+}
+
+.doc-sn-mark {
+  position: absolute;
+  top: -70px;
+  right: -40px;
+  width: 300px;
+  height: 300px;
+  opacity: 0.22;
+}
+
+.doc-sn-row {
+  position: relative;
+  align-items: center;
+}
+
+.doc-sn .doc-kind {
+  font-size: 34px;
+}
+
+.doc-sn-rule {
+  height: 5px;
+}
+
+/* ---------- Control room: a live light and readouts ---------- */
+
+.doc-ct {
+  padding: 34px 60px 26px;
+  color: #fff;
+}
+
+.doc-ct-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.doc-ct .doc-kind {
+  color: #fff;
+}
+
+.doc-ct-live {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.12);
+}
+
+.doc-ct-chips {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 22px;
+}
+
+.doc-ct-chips div {
+  padding: 9px 11px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.doc-ct-chips span {
+  display: block;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.doc-ct-chips b {
+  display: block;
+  margin-top: 3px;
+  overflow: hidden;
+  font: 600 13px ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.doc-ct-rule {
+  height: 3px;
+}
+
+/* ---------- Patrol: a route down the margin ---------- */
+
+.doc-pt-route {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 26px;
+  width: 0;
+  border-left: 2px dashed var(--route);
+  opacity: 0.85;
+}
+
+.doc-pt-route i {
+  position: absolute;
+  left: -7px;
+  width: 8px;
+  height: 8px;
+  border: 2px solid var(--route);
+  border-radius: 50%;
+  background: #fff;
+}
+
+.doc-pt-route i:nth-child(3n + 1) {
+  left: -9px;
+  width: 12px;
+  height: 12px;
+  border-color: var(--stop);
+  background: var(--stop);
+}
+
+.doc-pt-route i:nth-child(1) { top: 7%; }
+.doc-pt-route i:nth-child(2) { top: 20%; }
+.doc-pt-route i:nth-child(3) { top: 33%; }
+.doc-pt-route i:nth-child(4) { top: 47%; }
+.doc-pt-route i:nth-child(5) { top: 61%; }
+.doc-pt-route i:nth-child(6) { top: 75%; }
+.doc-pt-route i:nth-child(7) { top: 89%; }
+
+.doc-pt-in {
+  padding-left: 72px;
+}
+
+.doc-pt-rule {
+  width: 64px;
+  height: 4px;
+  margin: 18px 0 2px;
+}

@@ -43,6 +43,10 @@ const TEMPLATES = {
   minimal: "Minimal",
   sidebar: "Sidebar",
   compact: "Compact",
+  concept: "Concept",
+  sentinel: "Sentinel",
+  control: "Control room",
+  patrol: "Patrol",
   monogram: "Monogram",
   split: "Split",
   diagonal: "Diagonal",
@@ -300,6 +304,7 @@ function defaults() {
       phone: "01253 982211",
       email: "mattbaron@newconceptsecurity.co.uk",
       web: "newconceptsecurity.co.uk",
+      vatNo: "",
       taxId: "Company no. 10664067 · SIA ACS NECOSESC01",
     },
     to: {
@@ -459,10 +464,18 @@ function totals(s = state) {
   const discount = Math.min(subtotal, s.discountType === "percent" ? (subtotal * num(s.discount)) / 100 : num(s.discount));
   const ratio = subtotal ? (subtotal - discount) / subtotal : 0;
   const tax = lines.reduce((a, l) => a + (l.amount * ratio * num(l.tax)) / 100, 0);
+  // Net and tax at each rate, as a UK VAT invoice must show.
+  const byRate = {};
+  lines.forEach((l) => {
+    if (!l.amount) return;
+    const r = (byRate[num(l.tax)] ??= { net: 0, tax: 0 });
+    r.net += l.amount * ratio;
+    r.tax += (l.amount * ratio * num(l.tax)) / 100;
+  });
   const other = num(s.other);
   const total = subtotal - discount + tax + other;
   const paid = TYPE === "receipt" && s.paidInFull ? total : num(s.paid);
-  return { lines, subtotal, discount, tax, other, total, paid, due: total - paid };
+  return { lines, subtotal, discount, tax, other, total, paid, due: total - paid, byRate };
 }
 
 /* ---------- The page ---------- */
@@ -528,7 +541,7 @@ let qrPending = null;
 function qrSvg(text, size = 92) {
   if (!window.qrcode) {
     if (!qrPending) {
-      qrPending = loadScript("https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js").then(() => renderPreview()).catch(() => {
+      qrPending = window.NCSExport.load("https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js").then(() => renderPreview()).catch(() => {
         qrPending = null;
       });
     }
@@ -559,10 +572,21 @@ function qrBlock() {
   return `<div class="doc-qr">${art}<small>${state.qr === "pay" && state.pay.link.trim() ? "Scan to pay" : "Scan to visit us"}</small></div>`;
 }
 
+const link = (href, text) => `<a href="${esc(href)}">${esc(text)}</a>`;
+const webHref = (w) => (/^https?:/i.test(w) ? w : `https://${w}`);
+
 function fromBlock(label = "From") {
   const f = state.from;
-  const lines = [f.address, f.phone, f.email, f.web, f.taxId && (/[a-z]/i.test(f.taxId) ? f.taxId : `Company no. ${f.taxId}`)].filter((v) => v && String(v).trim());
-  return `<div><p class="doc-label">${label}</p><p class="doc-block"><strong>${esc(f.name)}</strong>${esc(lines.join("\n"))}</p></div>`;
+  const has = (v) => v && String(v).trim();
+  const lines = [
+    has(f.address) && esc(f.address),
+    has(f.phone) && link(`tel:${f.phone.replace(/[^\d+]/g, "")}`, f.phone),
+    has(f.email) && link(`mailto:${f.email.trim()}`, f.email.trim()),
+    has(f.web) && link(webHref(f.web.trim()), f.web.trim()),
+    has(f.vatNo) && esc(`VAT reg. no. ${f.vatNo.trim()}`),
+    has(f.taxId) && esc(/[a-z]/i.test(f.taxId) ? f.taxId : `Company no. ${f.taxId}`),
+  ].filter(Boolean);
+  return `<div><p class="doc-label">${label}</p><p class="doc-block"><strong>${esc(f.name)}</strong>${lines.join("\n")}</p></div>`;
 }
 
 function toBlock() {
@@ -757,7 +781,20 @@ function totalsBlock(t) {
     if (Math.abs(t.due) > 0.004) out += `<dt>Balance</dt><dd>${money(t.due)}</dd>`;
   }
   // The stamp sits beside the totals, where the eye lands last.
-  return `<div class="doc-sum">${stamp()}<dl class="doc-totals">${out}</dl></div>`;
+  return `<div class="doc-sum">${stamp()}<dl class="doc-totals">${out}</dl></div>${vatSummary(t)}`;
+}
+
+/* The tax at each rate, with the VAT number: what HMRC asks a VAT invoice
+   to show when its lines carry different rates. With one rate, the rate on
+   each line and the VAT total already say it all. */
+function vatSummary(t) {
+  const rates = Object.entries(t.byRate || {}).sort((a, b) => Number(b[0]) - Number(a[0]));
+  if (!t.tax || rates.length < 2) return "";
+  const vat = (state.from.vatNo || "").trim();
+  return `<div class="doc-vat"><p class="doc-label">${esc(state.taxLabel)} summary${vat ? ` <span>${esc(state.taxLabel)} reg. no. ${esc(vat)}</span>` : ""}</p>
+<table><thead><tr><th>Rate</th><th class="is-num">Net</th><th class="is-num">${esc(state.taxLabel)}</th><th class="is-num">Gross</th></tr></thead><tbody>${rates
+    .map(([r, v]) => `<tr><td>${qty(Number(r))}%</td><td class="is-num">${money(v.net)}</td><td class="is-num">${money(v.tax)}</td><td class="is-num">${money(v.net + v.tax)}</td></tr>`)
+    .join("")}</tbody></table></div>`;
 }
 
 function payBlock(compact = false) {
@@ -773,7 +810,7 @@ function payBlock(compact = false) {
     ["Pay online", p.link],
   ].filter(([, v]) => v && String(v).trim());
   if (!rows.length) return "";
-  return `<div><p class="doc-label">Payment details</p><dl class="doc-pay">${rows.map(([k, v]) => `<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`).join("")}</dl></div>`;
+  return `<div><p class="doc-label">Payment details</p><dl class="doc-pay">${rows.map(([k, v]) => `<dt>${esc(k)}</dt><dd>${k === "Pay online" ? link(webHref(String(v).trim()), v) : esc(v)}</dd>`).join("")}</dl></div>`;
 }
 
 function notesBlock(withPay = true) {
@@ -845,6 +882,42 @@ function headline(t) {
 }
 
 const LAYOUTS = {
+  /* NEWCONCEPT set large, with the mark's two side wedges at the page edges. */
+  concept(t) {
+    const c = colors();
+    const brand = ownLogo()
+      ? logo()
+      : `<div class="doc-cc-brand">${mark(false)}<div><p class="doc-cc-word"><span class="ncs-word"><b>NEW</b><span>CONCEPT</span></span></p><p class="doc-cc-sub">SECURITY</p>${tagline()}</div></div>`;
+    return `<span class="doc-cc-wedge is-l" style="border-left-color:${c.accent}"></span><span class="doc-cc-wedge is-r" style="border-right-color:${c.accent}"></span>
+<div class="doc-in doc-cc-in"><div class="doc-row" style="align-items:center">${brand}${kind()}</div><div class="doc-cc-rule"><span style="background:${c.main}"></span><i style="background:${c.accent}"></i></div>${body(t)}</div>`;
+  },
+  /* A dark band with the diamond N, large and cropped, behind the title. */
+  sentinel(t) {
+    const c = colors();
+    return `<div class="doc-sn" style="background:${c.main};color:${c.ink}"><svg class="doc-sn-mark" viewBox="0 0 420 420" aria-hidden="true"><path fill="${c.accent}" d="${W_PATH}"/><g fill="${c.accent}">${R_PATHS}</g></svg>
+<div class="doc-row doc-sn-row">${logo(true)}<div class="doc-title" style="text-align:right"><h1 class="doc-kind" style="color:${c.ink}">${KIND.title}</h1><p class="doc-number" style="color:${c.ink};opacity:0.72">${esc(state.number)}</p></div></div></div>
+<div class="doc-sn-rule" style="background:${c.accent}"></div><div class="doc-in">${body(t)}</div>`;
+  },
+  /* Like a control room screen: a live light and the key facts as readouts. */
+  control(t) {
+    const c = colors();
+    const [label, value] = headline(t);
+    const chips = [
+      ["Number", state.number],
+      [KIND.date, fmtDate(state.date)],
+      KIND.second ? [KIND.second.label, fmtDate(state[KIND.second.key])] : state.reference ? [REF_LABEL, state.reference] : null,
+      [label, value],
+    ].filter(Boolean);
+    return `<div class="doc-ct" style="background:${mixHex(c.main, "#000000", 0.35)}"><div class="doc-row" style="align-items:center">${logo(true)}<div class="doc-ct-title"><span class="doc-ct-live" style="background:${c.accent}"></span><h1 class="doc-kind">${KIND.title}</h1></div></div>
+<div class="doc-ct-chips">${chips.map(([k, v]) => `<div><span>${esc(k)}</span><b>${esc(v)}</b></div>`).join("")}</div></div>
+<div class="doc-ct-rule" style="background:${c.accent}"></div><div class="doc-in">${body(t)}</div>`;
+  },
+  /* A patrol route down the margin, checkpoints along it. */
+  patrol(t) {
+    const c = colors();
+    return `<div class="doc-pt-route" style="--route:${c.main};--stop:${c.accent}" aria-hidden="true">${"<i></i>".repeat(7)}</div>
+<div class="doc-in doc-pt-in"><div class="doc-row" style="align-items:flex-start">${logo()}${kind()}</div><div class="doc-pt-rule" style="background:${c.accent}"></div>${body(t)}</div>`;
+  },
   monogram(t) {
     const c = colors();
     const brand = ownLogo()
@@ -1065,6 +1138,10 @@ function thumb(id) {
   const g = state.accent2;
   const lines = (x, y, n, w = 50) => Array.from({ length: n }, (_, i) => `<rect x="${x}" y="${y + i * 7}" width="${w}" height="2.5" rx="1" fill="#d2d2d7"/>`).join("");
   const art = {
+    concept: `<polygon points="0,10 6,15 0,20" fill="${g}"/><polygon points="71,10 65,15 71,20" fill="${g}"/><rect x="10" y="10" width="7" height="8" fill="${a}"/><rect x="19" y="11" width="10" height="3" fill="#1d1d1f"/><rect x="29" y="11" width="11" height="3" fill="${g}"/><rect x="19" y="16" width="12" height="1.5" fill="#86868b"/><rect x="48" y="11" width="16" height="4" fill="${a}"/><rect x="10" y="24" width="45" height="1" fill="${a}"/><rect x="55" y="24" width="9" height="1" fill="${g}"/>${lines(10, 32, 3, 18)}${lines(33, 32, 3, 16)}${lines(10, 54, 5, 54)}<rect x="40" y="92" width="24" height="4" fill="#1d1d1f"/>`,
+    sentinel: `<rect width="71" height="24" fill="${a}"/><polygon points="58,-2 66,6 66,22 52,1" fill="${g}" opacity="0.35"/><polygon points="58,26 50,18 50,4 64,23" fill="${g}" opacity="0.35"/><rect y="24" width="71" height="2" fill="${g}"/><rect x="7" y="9" width="10" height="6" fill="#fff"/><rect x="40" y="9" width="14" height="5" fill="#fff"/>${lines(7, 33, 3, 18)}${lines(30, 33, 3, 16)}${lines(7, 56, 5, 57)}<rect x="40" y="92" width="24" height="4" fill="#1d1d1f"/>`,
+    control: `<rect width="71" height="30" fill="${mixHex(a, "#000000", 0.35)}"/><rect x="7" y="6" width="9" height="6" fill="#fff"/><circle cx="44" cy="9" r="1.6" fill="${g}"/><rect x="47" y="7" width="17" height="4" fill="#fff"/>${[7, 23, 39, 55].map((x) => `<rect x="${x}" y="17" width="13" height="8" rx="1.5" fill="#ffffff" opacity="0.14"/>`).join("")}<rect y="30" width="71" height="1.5" fill="${g}"/>${lines(7, 38, 3, 18)}${lines(30, 38, 3, 16)}${lines(7, 58, 5, 57)}<rect x="40" y="92" width="24" height="4" fill="#1d1d1f"/>`,
+    patrol: `<rect x="5.5" width="0.8" height="100" fill="${a}" opacity="0.6"/>${[10, 26, 42, 58, 74, 90].map((y, i) => `<circle cx="5.9" cy="${y}" r="${i % 3 ? 1.4 : 2.2}" fill="${i % 3 ? "#fff" : g}" stroke="${a}" stroke-width="0.6"/>`).join("")}<rect x="13" y="9" width="9" height="6" fill="${a}"/><rect x="46" y="9" width="18" height="5" fill="${a}"/><rect x="13" y="20" width="12" height="1.6" fill="${g}"/>${lines(13, 30, 3, 16)}${lines(36, 30, 3, 16)}${lines(13, 54, 5, 51)}<rect x="40" y="92" width="24" height="4" fill="#1d1d1f"/>`,
     classic: `<rect width="71" height="4" fill="${a}"/><rect x="50" y="4" width="21" height="4" fill="${g}"/><rect x="7" y="12" width="9" height="6" fill="${a}"/><rect x="44" y="12" width="20" height="5" fill="${a}"/>${lines(7, 28, 3, 18)}${lines(30, 28, 3, 16)}<rect x="7" y="52" width="57" height="1.5" fill="${a}"/>${lines(7, 58, 5, 57)}<rect x="40" y="94" width="24" height="4" fill="#1d1d1f"/>`,
     modern: `<rect width="71" height="22" fill="${a}"/><rect y="22" width="71" height="2.5" fill="${g}"/><rect x="7" y="8" width="9" height="6" fill="#fff"/><rect x="44" y="8" width="20" height="5" fill="#fff"/>${lines(7, 32, 3, 18)}${lines(36, 32, 3, 16)}<rect x="7" y="54" width="57" height="5" fill="${mixHex(a, "#FFFFFF", 0.85)}"/>${lines(7, 63, 4, 57)}<rect x="40" y="94" width="24" height="4" fill="#1d1d1f"/>`,
     minimal: `<rect x="7" y="9" width="26" height="7" fill="#1d1d1f" opacity="0.75"/><rect x="55" y="9" width="9" height="6" fill="${a}"/>${lines(7, 28, 3, 18)}${lines(30, 28, 3, 16)}${lines(7, 56, 5, 57)}<rect x="40" y="94" width="24" height="3" fill="#86868b"/>`,
@@ -1133,7 +1210,7 @@ const check = (label, key) => `<label class="dc-check"><input type="checkbox" da
 /* Five styles up front (this document's own first), the rest in a list. */
 function featured() {
   const own = defaults().template;
-  return [...new Set([own, "classic", "modern", "minimal", "column", "letterhead", "executive"])].slice(0, 5);
+  return [...new Set([own, "concept", "sentinel", "control", "classic", "modern", "patrol"])].slice(0, 6);
 }
 
 function designCard(papers, stamps) {
@@ -1311,7 +1388,8 @@ ${designCard(papers, status)}
     ${field("Phone", "from.phone")}
     ${field("Email", "from.email", "email")}
     ${field("Website", "from.web")}
-    ${field("Company, VAT or SIA numbers", "from.taxId")}
+    ${field("VAT registration number", "from.vatNo")}
+    ${field("Company and SIA numbers", "from.taxId")}
   </div>
   <div class="dc-logo-row">
     ${check("Show logo", "showLogo")}
@@ -1691,74 +1769,102 @@ function toInvoice() {
 
 /* ---------- Exports ---------- */
 
-function loadScript(src) {
-  return new Promise((resolve, reject) => {
-    if ([...document.scripts].some((s) => s.src === src)) return resolve();
-    const script = document.createElement("script");
-    script.src = src;
-    script.onload = resolve;
-    script.onerror = reject;
-    document.head.append(script);
+/* The PDF, through the shared engine (exporter.js): page breaks between rows,
+   searchable text, live links, page numbers on long documents. */
+function pdfFile() {
+  const t = totals();
+  const thermalPaper = state.paper === "thermal" && TYPE === "receipt";
+  const pt = thermalPaper ? [226.77, 0] : (PAGES[state.paper] || PAGES.a4).pt;
+  const amount = TYPE === "timesheet" ? `${hrs(t.hours)} hours` : headline(t)[1];
+  return window.NCSExport.documentPdf({
+    html: docHtml(),
+    selector: ".doc",
+    pt,
+    fit: thermalPaper,
+    footer: `${KIND.title} ${state.number}  ·  ${state.from.name}`,
+    meta: {
+      title: `${KIND.title} ${state.number}`,
+      subject: `${KIND.title} ${state.number} for ${state.to.name || "a client"}: ${amount}`,
+      author: state.from.name,
+      keywords: [KIND.title, state.number, state.to.name, state.reference, state.from.name].filter(Boolean).join(", "),
+    },
   });
 }
 
-async function capture() {
-  await loadScript("https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js");
-  const holder = document.createElement("div");
-  holder.style.cssText = "position:fixed;left:-20000px;top:0;";
-  holder.innerHTML = docHtml();
-  document.body.append(holder);
-  await document.fonts?.ready;
-  const doc = holder.querySelector(".doc");
-  try {
-    return await window.html2canvas(doc, { scale: 2.5, backgroundColor: "#ffffff", useCORS: true, logging: false });
-  } finally {
-    holder.remove();
-  }
-}
+const fileName = (ext) => window.NCSExport.fileName([state.number || KIND.title, state.to.name, state.from.name], ext);
 
-const fileName = (ext) => `${state.number || KIND.title}`.replace(/[^\w.-]+/g, "-") + `-new-concept-security.${ext}`;
-
-function download(url, name) {
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = name;
-  document.body.append(a);
-  a.click();
-  a.remove();
+async function exportPdf() {
+  const { blob, pages } = await pdfFile();
+  window.NCSExport.save(blob, fileName("pdf"));
+  toast(pages > 1 ? `PDF saved: ${pages} pages, text searchable.` : "PDF saved, text searchable.");
 }
 
 async function exportPng() {
-  const canvas = await capture();
-  canvas.toBlob((blob) => {
-    const url = URL.createObjectURL(blob);
-    download(url, fileName("png"));
-    setTimeout(() => URL.revokeObjectURL(url), 4000);
-  }, "image/png");
+  const canvases = await window.NCSExport.pngOf({ html: docHtml(), selector: ".doc" });
+  await window.NCSExport.png(canvases, fileName("png"));
 }
 
-async function exportPdf() {
-  await loadScript("https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js");
-  const canvas = await capture();
-  const { jsPDF } = window.jspdf;
-  const thermalPaper = state.paper === "thermal" && TYPE === "receipt";
-  const size = (PAGES[state.paper] && PAGES[state.paper].pt) || PAGES.letter.pt;
-  const pageW = thermalPaper ? 226.77 : size[0];
-  const pageH = thermalPaper ? (canvas.height / canvas.width) * pageW : size[1];
-  const orientation = pageW > pageH ? "landscape" : "portrait";
-  const pdf = new jsPDF({ unit: "pt", format: [pageW, pageH], orientation });
-  const slice = Math.round((canvas.width * pageH) / pageW);
-  for (let y = 0, i = 0; y < canvas.height - 4; y += slice, i += 1) {
-    const h = Math.min(slice, canvas.height - y);
-    const part = document.createElement("canvas");
-    part.width = canvas.width;
-    part.height = h;
-    part.getContext("2d").drawImage(canvas, 0, y, canvas.width, h, 0, 0, canvas.width, h);
-    if (i) pdf.addPage([pageW, pageH], orientation);
-    pdf.addImage(part.toDataURL("image/jpeg", 0.93), "JPEG", 0, 0, pageW, (h * pageW) / canvas.width);
+/* The line items as a spreadsheet, for accounts or a client's own system. */
+function exportCsv() {
+  const t = totals();
+  const cell = (v) => {
+    const x = String(v ?? "");
+    return /[",\n]/.test(x) ? `"${x.replace(/"/g, '""')}"` : x;
+  };
+  let rows;
+  if (TYPE === "timesheet") {
+    rows = [["Date", "Officer", "Post", "Start", "End", "Break (min)", "Type", "Hours"], ...state.entries.map((e) => [e.date, e.officer, e.post, e.start, e.end, e.brk, RATE_TYPES[e.type] || e.type, hrs(hoursOf(e))])];
+  } else {
+    rows = [["Description", "Detail", "Quantity", "Unit", "Unit price", `${state.taxLabel} %`, "Amount"], ...t.lines.filter((l) => l.desc || l.amount).map((l) => [l.desc, l.detail, num(l.qty), l.unit, num(l.rate).toFixed(2), num(l.tax), l.amount.toFixed(2)])];
+    rows.push([], ["Subtotal", "", "", "", "", "", t.subtotal.toFixed(2)]);
+    if (t.discount > 0) rows.push(["Discount", "", "", "", "", "", (-t.discount).toFixed(2)]);
+    if (t.tax > 0) rows.push([state.taxLabel, "", "", "", "", "", t.tax.toFixed(2)]);
+    rows.push(["Total", "", "", "", "", "", t.total.toFixed(2)]);
   }
-  pdf.setProperties({ title: `${KIND.title} ${state.number}`, creator: state.from.name });
-  pdf.save(fileName("pdf"));
+  const head = [[KIND.title, state.number], ["Date", state.date], ["Client", state.to.name], ["Currency", state.currency], []];
+  const csv = [...head, ...rows].map((r) => r.map(cell).join(",")).join("\r\n");
+  window.NCSExport.save(new Blob(["﻿" + csv], { type: "text/csv" }), fileName("csv"));
+}
+
+/* A ready-to-send covering message. */
+function emailText() {
+  const t = totals();
+  const who = (state.to.contact || "").trim();
+  const due = KIND.second?.key ? state[KIND.second.key] : "";
+  const lines = {
+    invoice: `Please find attached invoice ${state.number} for ${money(t.due)}${due ? `, due by ${fmtDate(due)}` : ""}.`,
+    quote: `Please find attached our quote ${state.number} for ${money(t.total)}${due ? `, valid until ${fmtDate(due)}` : ""}. Reply to accept and we'll arrange the site survey.`,
+    receipt: `Thank you for your payment. Your receipt ${state.number} for ${money(t.paid)} is attached.`,
+    credit: `Please find attached credit note ${state.number} for ${money(t.total)}.`,
+    statement: `Please find attached your statement of account. The balance due is ${money(t.due)}${due ? `, payable by ${fmtDate(due)}` : ""}.`,
+    timesheet: `Please find attached timesheet ${state.number} for ${state.site || "the site"}, covering ${hrs(t.hours)} hours. Please approve and return it.`,
+    jobsheet: `Please find attached job sheet ${state.number}${state.reference ? ` for ${state.reference}` : ""}.`,
+    payslip: `Your payslip for ${state.reference || "this period"} is attached.`,
+  }[TYPE] || `Please find attached ${KIND.title.toLowerCase()} ${state.number}.`;
+  const f = state.from;
+  return {
+    subject: `${KIND.title} ${state.number} from ${f.name}`,
+    body: `${who ? `Dear ${who},` : "Hello,"}\n\n${lines}\n\nAny questions, just reply to this email or call ${f.phone}.\n\nKind regards,\n${f.name}\n${f.phone}\n${f.web}`,
+  };
+}
+
+async function shareDoc() {
+  const { blob } = await pdfFile();
+  const m = emailText();
+  if (await window.NCSExport.share(blob, fileName("pdf"), { title: m.subject, text: m.body })) return;
+  window.NCSExport.save(blob, fileName("pdf"));
+  location.href = `mailto:${encodeURIComponent(state.to.email || "")}?subject=${encodeURIComponent(m.subject)}&body=${encodeURIComponent(m.body)}`;
+  toast("PDF saved. Attach it to the email that just opened.");
+}
+
+async function copyEmail() {
+  const m = emailText();
+  try {
+    await navigator.clipboard.writeText(`${m.subject}\n\n${m.body}`);
+    toast("Email text copied.");
+  } catch {
+    toast("Couldn't copy here. Use Share or email instead.");
+  }
 }
 
 function printDoc() {
@@ -1959,7 +2065,14 @@ function init() {
       busy(t, exportPng);
     } else if (t.dataset.export === "print") {
       printDoc();
+    } else if (t.dataset.export === "share") {
+      busy(t, shareDoc);
+    } else if (t.dataset.export === "csv") {
+      exportCsv();
+    } else if (t.dataset.export === "copy") {
+      copyEmail();
     }
+    if (t.closest(".dc-export") && t.dataset.export) t.closest("details").open = false;
   });
 
   window.addEventListener("resize", fit);

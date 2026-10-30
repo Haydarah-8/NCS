@@ -34,16 +34,11 @@
       <nav class="tl-tabs" aria-label="Brand tools">
         <a href="business-card.html">Business card</a>
         <a href="invoice.html">Invoice</a>
-        <a href="receipt.html" aria-current="page">Receipt</a>
         <a href="quote.html">Quote</a>
-        <a href="timesheet.html">Timesheet</a>
+        <a href="receipt.html" aria-current="page">Receipt</a>
         <a href="credit-note.html">Credit note</a>
-        <a href="purchase-order.html">Purchase order</a>
         <a href="statement.html">Statement</a>
-        <a href="proforma.html">Pro-forma</a>
-        <a href="debit-note.html">Debit note</a>
-        <a href="delivery-note.html">Delivery note</a>
-        <a href="remittance.html">Remittance</a>
+        <a href="timesheet.html">Timesheet</a>
         <a href="job-sheet.html">Job sheet</a>
         <a href="payslip.html">Payslip</a>
         <a href="kit.html">Design kit</a>
@@ -61,8 +56,16 @@
       <div class="dc-actions">
         <button class="ds-btn is-outline" type="button" data-new>New</button>
         <button class="ds-btn is-outline" type="button" data-save>Save</button>
-        <button class="ds-btn is-outline" type="button" data-export="print">Print</button>
-        <button class="ds-btn is-outline" type="button" data-export="png">PNG</button>
+        <details class="dc-export">
+          <summary class="ds-btn is-outline">Export</summary>
+          <div class="dc-export-menu" role="menu">
+            <button type="button" data-export="share"><b>Share or email</b><span>The PDF in your share sheet, or attached to an email</span></button>
+            <button type="button" data-export="copy"><b>Copy email text</b><span>A covering message, ready to paste</span></button>
+            <button type="button" data-export="print"><b>Print or save as PDF</b><span>Through the browser; vector, smallest file</span></button>
+            <button type="button" data-export="png"><b>PNG image</b><span>High resolution, for messages and social</span></button>
+            <button type="button" data-export="csv"><b>Spreadsheet (CSV)</b><span>The lines and totals, for Excel or accounts</span></button>
+          </div>
+        </details>
         <button class="ds-btn is-solid" type="button" data-export="pdf">Download PDF</button>
       </div>
     </div>
@@ -77,6 +80,7 @@
   </main>
 
   <div class="dc-print" aria-hidden="true"></div>
+  <script src="assets/js/exporter.js" defer></script>
   <script src="assets/js/docs.js" defer></script>
 </body>
 </html>

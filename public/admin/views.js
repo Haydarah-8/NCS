@@ -5,7 +5,7 @@
 
 import { render, slugify } from "./md.js";
 import {
-  $, $$, COLORS, ago, api, bars, card, clock, columns, confirmBox, day, delta, donut, dur, empty, esc, head, icon, kpi, lineChart, num,
+  $, $$, COLORS, ago, api, brandKit, studio, studioPost, bars, card, clock, columns, confirmBox, day, delta, donut, dur, empty, esc, head, icon, kpi, lineChart, num,
   pct, pointLabel, post, rangeLabel, rangePicker, secs, share, toast, wireCharts,
 } from "./core.js";
 
@@ -19,7 +19,7 @@ const TOPICS = [
   ["technology", "CCTV and technology"],
   ["news", "Company news"],
 ];
-const PHOTOS = ["hero", "hero-skyline", "construction-security", "balfour-site", "control-room", "fleet-night", "mobile-patrols", "northern-way", "reception", "standalone-cameras", "street", "tram", "venue"];
+const PHOTOS = ["hero", "hero-skyline", "balfour-site", "control-room", "fleet-night", "northern-way", "reception", "street", "tram", "venue"];
 
 /* Google's Core Web Vitals bands for the largest contentful paint. */
 const lcpBand = (ms) => (ms == null ? ["", "No data yet"] : ms <= 2500 ? ["is-good", "Good"] : ms <= 4000 ? ["is-fair", "Needs work"] : ["is-poor", "Poor"]);
@@ -28,11 +28,13 @@ const upBand = (p) => (p == null ? "" : p >= 99.5 ? "is-good" : p >= 97 ? "is-fa
 const LEAD_STATES = [
   ["new", "New"],
   ["contacted", "Contacted"],
-  ["quoted", "Quoted"],
+  ["quoted", "Quotation prepared"],
   ["won", "Won"],
-  ["lost", "Lost"],
+  ["closed", "Closed"],
 ];
-const stateName = (s) => LEAD_STATES.find((x) => x[0] === s)?.[1] || s;
+const stateName = (s) => (s === "lost" ? "Closed" : LEAD_STATES.find((x) => x[0] === s)?.[1] || s);
+const isOpen = (l) => !["won", "closed", "lost"].includes(l.status);
+const todayIso = () => new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 10);
 
 /* What Aevion View will do next. Planned, and not available yet. */
 export const COMING_NEXT = [
@@ -125,8 +127,26 @@ export async function overview(view, { days }) {
         ${card("Where visitors come from", donut(s.channels.map((c) => ({ name: c.name, value: c.visitors })), { label: "visitors" }), { action: `<a class="link" href="#/sources">Sources ${icon("arrow", 14)}</a>` })}
         ${card("Right now", `<p class="live"><i></i><b>${num(s.live.now)}</b> on the site in the last five minutes</p>${s.live.recent.length ? `<ul class="list is-tight">${s.live.recent.slice(0, 5).map((r) => `<li><span><b>${esc(r.title || r.path)}</b><small>${esc([r.city, r.country].filter(Boolean).join(", ") || r.device || "")}</small></span><small>${ago(r.ts)}</small></li>`).join("")}</ul>` : ""}`)}
       </div>
+      <div class="grid is-3" data-home><section class="card"><div class="card-body"><div class="loading"><span></span>Loading…</div></div></section></div>
       ${comingNextCard()}`;
     wireCharts(view);
+    studio("home")
+      .then((h) => {
+        const box = $("[data-home]", view);
+        if (!box) return;
+        box.innerHTML =
+          card("Recent documents", h.documents.length ? `<ul class="list">${h.documents.map((d) => `<li><a href="#/studio/${d.id}"><b>${d.favourite ? "★ " : ""}${esc(d.title)}</b><span>${esc(d.kind)} · ${esc(d.status)}</span><small>${ago(d.updated_at)}</small></a></li>`).join("")}</ul>` : empty("No documents yet", "Start one in Document Studio."), { action: `<a class="link" href="#/studio">Document Studio ${icon("arrow", 14)}</a>` }) +
+          card("Follow-ups due", h.followUps.length ? `<ul class="list">${h.followUps.map((l) => `<li><a href="#/enquiries/${l.id}"><b>${esc(l.name)}</b><span>${esc(l.company || l.site || "")}</span><small>${day(l.follow_up, { day: "numeric", month: "short" })}</small></a></li>`).join("")}</ul>` : empty("Nothing due", "Set follow-up dates on enquiries and they appear here."), { action: `<a class="link" href="#/enquiries?status=due">Enquiries ${icon("arrow", 14)}</a>` }) +
+          card("Shortcuts", `<div class="shortcuts">
+            <a href="#/studio/new/proposal">${icon("spark", 18)}<span>Proposal pack</span></a>
+            <a href="#/studio/new/quotation">${icon("file", 18)}<span>Quotation</span></a>
+            <a href="#/documents/business-card">${icon("card", 18)}<span>Business card</span></a>
+            <a href="#/documents/email">${icon("mail", 18)}<span>Email signature</span></a>
+            <a href="#/insights/campaigns">${icon("compass", 18)}<span>Campaign link</span></a>
+            <a href="#/documents/pdf">${icon("pen", 18)}<span>PDF editor</span></a>
+          </div>${h.library.overdue ? `<p class="note is-warn" style="margin-top:12px">${h.library.overdue} library item(s) are past their review date.</p>` : ""}`);
+      })
+      .catch(() => ($("[data-home]", view).innerHTML = ""));
   } catch (e) {
     failed(view, e, () => overview(view, { days }));
   }
@@ -226,13 +246,20 @@ export async function sources(view, { days }) {
 export async function enquiries(view, { days, id, query }) {
   loading(view);
   try {
-    const [s, { leads }] = await Promise.all([api("stats", { params: { days } }), api("leads")]);
+    const [s, { leads: all }, kit] = await Promise.all([api("stats", { params: { days } }), api("leads"), brandKit().catch(() => ({ staff: [] }))]);
     const t = s.totals, p = s.previous;
-    const filter = new URLSearchParams(query).get("status") || "open";
-    const counts = Object.fromEntries(LEAD_STATES.map(([k]) => [k, leads.filter((l) => l.status === k).length]));
-    const open = leads.filter((l) => !["won", "lost"].includes(l.status));
-    const shown = filter === "all" ? leads : filter === "open" ? open : leads.filter((l) => l.status === filter);
-    const current = leads.find((l) => String(l.id) === String(id)) || null;
+    const qs = new URLSearchParams(query);
+    const current0 = all.find((l) => String(l.id) === String(id)) || null;
+    // Sales enquiries and job applications are kept apart.
+    const kind = qs.get("kind") || current0?.kind || "sales";
+    const leads = all.filter((l) => (l.kind || "sales") === kind);
+    const filter = qs.get("status") || "open";
+    const counts = Object.fromEntries(LEAD_STATES.map(([k]) => [k, leads.filter((l) => (l.status === "lost" ? "closed" : l.status) === k).length]));
+    const open = leads.filter(isOpen);
+    const due = open.filter((l) => l.follow_up && l.follow_up.slice(0, 10) <= todayIso());
+    const shown = filter === "all" ? leads : filter === "open" ? open : filter === "due" ? due : leads.filter((l) => (l.status === "lost" ? "closed" : l.status) === filter);
+    const current = current0;
+    const q = (o) => `#/enquiries?${new URLSearchParams({ kind, ...o })}`;
     const ev = (k) => t.events?.[k] || 0, evb = (k) => p.events?.[k] || 0;
     const conv = share(t.leads, t.visitors);
     view.innerHTML =
@@ -248,23 +275,24 @@ export async function enquiries(view, { days, id, query }) {
       ${card("Enquiries against visitors", lineChart(s.series, [{ key: "leads", label: "Enquiries", color: COLORS.red, area: true }], pointLabel(days), { height: 160 }))}
       <section class="inbox${current ? " has-open" : ""}">
         <div class="inbox-list">
-          <div class="tabs" role="tablist">${[["open", "Open", open.length], ...LEAD_STATES.map(([k, l]) => [k, l, counts[k]]), ["all", "All", leads.length]]
-            .map(([k, l, n]) => `<a role="tab" href="#/enquiries?status=${k}" aria-selected="${k === filter}">${l}<small>${n}</small></a>`)
+          <div class="seg kind-seg">${[["sales", "Sales enquiries"], ["recruitment", "Job applications"]].map(([k, l]) => `<a href="#/enquiries?kind=${k}" aria-pressed="${k === kind}" class="${k === kind ? "is-on" : ""}">${l} <small>${all.filter((x) => (x.kind || "sales") === k && isOpen(x)).length}</small></a>`).join("")}</div>
+          <div class="tabs" role="tablist">${[["open", "Open", open.length], ["due", "Follow up", due.length], ...LEAD_STATES.map(([k, l]) => [k, l, counts[k]]), ["all", "All", leads.length]]
+            .map(([k, l, n]) => `<a role="tab" href="${q({ status: k })}" aria-selected="${k === filter}">${l}<small>${n}</small></a>`)
             .join("")}</div>
           <label class="search">${icon("compass", 15)}<input type="search" placeholder="Search names, emails, messages" data-find aria-label="Search enquiries"></label>
           <ul class="mail">${
             shown.length
               ? shown
-                  .map((l) => `<li data-text="${esc(`${l.name} ${l.email} ${l.phone} ${l.company} ${l.message}`.toLowerCase())}"><a href="#/enquiries/${l.id}${filter !== "open" ? `?status=${filter}` : ""}" aria-current="${String(l.id) === String(id)}">
+                  .map((l) => `<li data-text="${esc(`${l.name} ${l.email} ${l.phone} ${l.company} ${l.message}`.toLowerCase())}"><a href="#/enquiries/${l.id}?${new URLSearchParams({ kind, status: filter })}" aria-current="${String(l.id) === String(id)}">
                     <span class="mail-top"><b>${esc(l.name)}</b><small>${ago(l.ts)}</small></span>
                     <span class="mail-sub">${esc(l.site || l.company || "Enquiry")}</span>
                     <span class="mail-text">${esc(String(l.message || "").slice(0, 120))}</span>
-                    <span class="pill is-${l.status}">${stateName(l.status)}</span></a></li>`)
+                    <span class="mail-pills"><span class="pill is-${l.status}">${stateName(l.status)}</span>${l.follow_up && isOpen(l) ? `<span class="pill ${l.follow_up.slice(0, 10) <= todayIso() ? "is-new" : "is-draft"}">Follow up ${day(l.follow_up, { day: "numeric", month: "short" })}</span>` : ""}${l.assigned ? `<span class="pill is-draft">${esc(l.assigned)}</span>` : ""}${l.sample ? '<span class="chip is-sample">Sample</span>' : ""}</span></a></li>`)
                   .join("")
-              : `<li>${empty("Nothing here", filter === "open" ? "Every enquiry is won or lost." : "")}</li>`
+              : `<li>${empty("Nothing here", filter === "open" ? "No open " + (kind === "sales" ? "enquiries." : "applications.") : "")}</li>`
           }</ul>
         </div>
-        <div class="inbox-read">${current ? reader(current) : empty("Choose an enquiry", "Its message, contact details and notes open here.")}</div>
+        <div class="inbox-read">${current ? reader(current, kit) : empty("Choose an enquiry", "Its message, contact details and notes open here.")}</div>
       </section>`;
     wireCharts(view);
     $("[data-find]", view).addEventListener("input", (e) => {
@@ -277,7 +305,8 @@ export async function enquiries(view, { days, id, query }) {
   }
 }
 
-function reader(l) {
+function reader(l, kit) {
+  const sales = (l.kind || "sales") === "sales";
   const subject = encodeURIComponent(`Re: your enquiry to New Concept Security${l.site ? ` (${l.site})` : ""}`);
   return `<article class="reader">
     <a class="btn is-quiet is-small only-sm" href="#/enquiries">${icon("back", 14)} All enquiries</a>
@@ -286,6 +315,11 @@ function reader(l) {
       ${l.email ? `<a class="btn" href="mailto:${esc(l.email)}?subject=${subject}">${icon("mail", 15)} Reply by email</a>` : ""}
       ${l.phone ? `<a class="btn is-quiet" href="tel:${esc(String(l.phone).replace(/[^\d+]/g, ""))}">${icon("phone", 15)} ${esc(l.phone)}</a>` : ""}
     </div>
+    <div class="reader-next">${
+      sales
+        ? `<a class="btn is-quiet" href="#/studio/new/proposal?lead=${l.id}">${icon("spark", 15)} Prepare a proposal</a><a class="btn is-quiet" href="#/studio/new/quotation?lead=${l.id}">${icon("file", 15)} Prepare a quotation</a>`
+        : `<a class="btn is-quiet" href="#/studio/new/interview?lead=${l.id}">${icon("file", 15)} Interview invitation</a>`
+    }<span class="muted small">Their details fill in for you.</span></div>
     <dl class="facts">
       ${l.email ? `<div><dt>Email</dt><dd>${esc(l.email)}</dd></div>` : ""}
       ${l.company ? `<div><dt>Organisation</dt><dd>${esc(l.company)}</dd></div>` : ""}
@@ -294,7 +328,12 @@ function reader(l) {
     </dl>
     <blockquote class="message">${esc(l.message || "").replace(/\n/g, "<br>")}</blockquote>
     <form class="form" data-lead>
-      <label class="field"><span>Status</span><select name="status">${LEAD_STATES.map(([k, n]) => `<option value="${k}"${k === l.status ? " selected" : ""}>${n}</option>`).join("")}</select></label>
+      <div class="grid is-2 is-flat">
+        <label class="field"><span>Status</span><select name="status">${LEAD_STATES.map(([k, n]) => `<option value="${k}"${k === (l.status === "lost" ? "closed" : l.status) ? " selected" : ""}>${n}</option>`).join("")}</select></label>
+        <label class="field"><span>Assigned to</span><select name="assigned"><option value="">Nobody yet</option>${(kit?.staff || []).map((s) => `<option${s.name === l.assigned ? " selected" : ""}>${esc(s.name)}</option>`).join("")}${l.assigned && !(kit?.staff || []).some((s) => s.name === l.assigned) ? `<option selected>${esc(l.assigned)}</option>` : ""}</select></label>
+        <label class="field"><span>Follow up on</span><input type="date" name="follow_up" value="${esc((l.follow_up || "").slice(0, 10))}"></label>
+        <label class="field"><span>Kind</span><select name="kind"><option value="sales"${sales ? " selected" : ""}>Sales enquiry</option><option value="recruitment"${sales ? "" : " selected"}>Job application</option></select></label>
+      </div>
       <label class="field"><span>Notes, for you only</span><textarea name="notes" rows="4" placeholder="Called back, quote sent…">${esc(l.notes || "")}</textarea></label>
       <div class="row-between"><button class="btn is-danger-quiet" type="button" data-delete>${icon("trash", 15)} Delete</button><button class="btn" type="submit">Save</button></div>
     </form></article>`;
@@ -305,14 +344,14 @@ function wireReader(view, l, reload) {
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
     try {
-      await post("lead-save", { id: l.id, status: form.status.value, notes: form.notes.value });
+      await studioPost("lead-update", { id: l.id, status: form.status.value, notes: form.notes.value, assigned: form.assigned.value, follow_up: form.follow_up.value, kind: form.kind.value });
       toast("Saved.");
       reload();
     } catch (err) {
       toast(err.message, { error: true });
     }
   });
-  form.status.addEventListener("change", () => form.requestSubmit());
+  ["status", "assigned", "follow_up", "kind"].forEach((k) => form[k].addEventListener("change", () => form.requestSubmit()));
   $("[data-delete]", view).addEventListener("click", async () => {
     if (!(await confirmBox(`Delete the enquiry from ${l.name}? This can't be undone.`))) return;
     await post("lead-delete", { id: l.id });
@@ -563,6 +602,7 @@ export const DOCS = [
   ]],
   ["Tools", [
     ["pdf", "PDF editor", "pen", "pdf.html", "Sign, fill in, mark up, merge, reorder and split any PDF"],
+    ["files", "File tools", "download", "files.html", "Images to PDF, compress, page numbers, watermarks, QR codes, renaming"],
   ]],
 ];
 const ALL_DOCS = DOCS.flatMap(([, items]) => items);
@@ -573,13 +613,13 @@ export function documents(view) {
     DOCS.map(([group, items]) => `<h2 class="group-title">${group}</h2><div class="docs">${items.map(([id, name, ic, , text]) => `<a href="#/documents/${id}"><span class="doc-ico">${icon(ic, 22)}</span><b>${name}</b><span>${text}</span></a>`).join("")}</div>`).join("");
 }
 
-export function documentView(view, { id }) {
+export function documentView(view, { id, query }) {
   const d = ALL_DOCS.find((x) => x[0] === id);
   if (!d) return (location.hash = "#/documents");
   view.innerHTML = `<div class="docbar"><a class="btn is-quiet is-small" href="#/documents">${icon("back", 14)} Documents</a>
       <select data-pick aria-label="Switch document">${DOCS.map(([g, items]) => `<optgroup label="${g}">${items.map(([did, name]) => `<option value="${did}"${did === id ? " selected" : ""}>${esc(name)}</option>`).join("")}</optgroup>`).join("")}</select>
       <a class="btn is-quiet is-small" href="/admin/tools/${d[3]}" target="_blank" rel="noopener">${icon("external", 14)} Open on its own</a></div>
-    <iframe class="frame" src="/admin/tools/${d[3]}" title="${esc(d[1])}"></iframe>`;
+    <iframe class="frame" src="/admin/tools/${d[3]}${query ? `?${esc(query)}` : ""}" title="${esc(d[1])}"></iframe>`;
   $("[data-pick]", view).addEventListener("change", (e) => (location.hash = `#/documents/${e.target.value}`));
 }
 

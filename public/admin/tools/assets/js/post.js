@@ -12,9 +12,14 @@
     story: { label: "Story", use: "Stories, Reels cover", w: 1080, h: 1920 },
     link: { label: "Landscape", use: "LinkedIn, Facebook", w: 1200, h: 627 },
     wide: { label: "Wide", use: "X (Twitter)", w: 1600, h: 900 },
+    banner: { label: "LinkedIn banner", use: "LinkedIn profile or company page; words sit clear of the profile photo", w: 1584, h: 396 },
+    cover: { label: "Facebook cover", use: "Facebook page cover", w: 1640, h: 624 },
+    flyer: { label: "A5 flyer", use: "Print at 300 dpi; download the print PDF", w: 1748, h: 2480, mm: [148, 210] },
+    poster: { label: "A4 poster or sign", use: "Print at 300 dpi, event and site signage", w: 2480, h: 3508, mm: [210, 297] },
   };
+  const SOCIAL = Object.keys(FORMATS).filter((k) => !FORMATS[k].mm);
 
-  const PHOTOS = ["hero", "hero-skyline", "construction-security", "balfour-site", "control-room", "fleet-night", "mobile-patrols", "northern-way", "reception", "standalone-cameras", "street", "tram", "venue"];
+  const PHOTOS = ["hero", "hero-skyline", "balfour-site", "control-room", "fleet-night", "northern-way", "reception", "street", "tram", "venue"];
 
   const LAYOUTS = {
     hiring: {
@@ -33,7 +38,7 @@
       headline: "Construction site security, day and night",
       body: "Licensed officers on site\nStandalone CCTV towers\nMorning reports, every day",
       cta: "Free site survey: 01253 982211",
-      photo: "construction-security",
+      photo: "balfour-site",
       caption: "Keeping construction sites safe across the North West: licensed officers, mobile patrols and standalone CCTV, with a written report every morning. Book a free site survey on 01253 982211.",
       tags: "#ConstructionSecurity #SiteSecurity #CCTV #Blackpool #Preston #NorthWest",
     },
@@ -82,6 +87,16 @@
       caption: "Security tip: with darker evenings on the way, walk your perimeter, test your lighting and check every gate locks properly. Want a second pair of eyes? We offer free site surveys.",
       tags: "#SecurityTips #BusinessSecurity #CrimePrevention #Blackpool",
     },
+    event: {
+      label: "Event sign",
+      kicker: "Event security",
+      headline: "Bag searches in operation",
+      body: "Please have your ticket ready\nNo glass beyond this point\nAsk any steward for help",
+      cta: "",
+      photo: "venue",
+      caption: "Licensed security on duty at today's event. Please arrive early and have your ticket ready.",
+      tags: "#EventSecurity #SIA #Blackpool",
+    },
     photo: {
       label: "Photo and words",
       kicker: "",
@@ -129,7 +144,7 @@
   function postHtml(s = state, format = s.format) {
     const f = FORMATS[format];
     const u = Math.min(f.w, f.h) / 100;
-    const shape = f.h / f.w > 1.5 ? "tall" : f.w / f.h > 1.5 ? "wide" : "even";
+    const shape = f.w / f.h >= 3 ? "banner" : f.h / f.w > 1.5 ? "tall" : f.w / f.h > 1.5 ? "wide" : "even";
     const photo = s.upload || `/images/${s.photo}.jpg`;
     const light = s.theme === "light";
     const red = s.theme === "red";
@@ -153,13 +168,14 @@
         break;
       case "hiring":
       case "spotlight":
+      case "event":
         main = `<p class="pm-kicker">${esc(s.kicker)}</p><h1 class="pm-head">${esc(s.headline)}</h1>${lines.length ? `<ul class="pm-list">${lines.map((l) => `<li>${esc(l)}</li>`).join("")}</ul>` : ""}`;
         break;
       default:
         main = `${s.kicker ? `<p class="pm-kicker">${esc(s.kicker)}</p>` : ""}<h1 class="pm-head">${esc(s.headline)}</h1>${s.body ? `<p class="pm-body">${esc(s.body)}</p>` : ""}`;
     }
     return `<div class="pm l-${s.layout} s-${shape} t-${s.theme}" style="width:${f.w}px;height:${f.h}px;--u:${u}px;--ink:${ink};background-image:url('${photo}')">
-      <div class="pm-shade" style="background:linear-gradient(${shape === "wide" ? "90deg" : "180deg"}, ${shade}, ${shade.replace(/[\d.]+\)$/, `${Math.min(1, s.overlay / 100 + 0.25)})`)})"></div>
+      <div class="pm-shade" style="background:linear-gradient(${shape === "wide" ? "90deg" : shape === "banner" ? "270deg" : "180deg"}, ${shade}, ${shade.replace(/[\d.]+\)$/, `${Math.min(1, s.overlay / 100 + 0.25)})`)})"></div>
       <div class="pm-in">
         <header class="pm-top">${logo}</header>
         <div class="pm-main">${main}</div>
@@ -198,6 +214,7 @@
       tip: field("kicker", "Small heading") + field("tipNo", "Tip number") + field("headline", "Headline") + field("body", "Tip", true, 3),
       hiring: field("kicker", "Small heading") + field("headline", "Headline") + field("body", "Points <em>one per line</em>", true, 3),
       spotlight: field("kicker", "Small heading") + field("headline", "Headline") + field("body", "Points <em>one per line</em>", true, 3),
+      event: field("kicker", "Small heading") + field("headline", "Headline") + field("body", "Lines <em>one per line</em>", true, 3),
     }[s.layout] || field("kicker", "Small heading") + field("headline", "Headline") + field("body", "Words", true, 3);
     return `
     <section class="st-sec"><h2>Size <small>${esc(FORMATS[s.format].use)}</small></h2>
@@ -317,8 +334,27 @@
   }
 
   async function exportAll() {
-    for (const f of Object.keys(FORMATS)) await exportOne(f);
-    toast(`${Object.keys(FORMATS).length} sizes saved.`);
+    for (const f of SOCIAL) await exportOne(f);
+    toast(`${SOCIAL.length} social sizes saved.`);
+  }
+
+  /* A PDF at the real print size (A5, A4), or at the picture's size for the rest. */
+  async function exportPdf(format = state.format) {
+    const f = FORMATS[format];
+    const holder = document.createElement("div");
+    holder.style.cssText = "position:fixed;left:-30000px;top:0";
+    holder.innerHTML = postHtml(state, format);
+    document.body.append(holder);
+    fit(holder);
+    const html = holder.innerHTML;
+    holder.remove();
+    const [canvas] = await window.NCSExport.pngOf({ html, selector: ".pm", scale: 1 });
+    await window.NCSExport.load("https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js");
+    const [w, h] = f.mm || [f.w * 0.75, f.h * 0.75];
+    const pdf = new window.jspdf.jsPDF({ unit: f.mm ? "mm" : "pt", format: [w, h], orientation: w > h ? "landscape" : "portrait" });
+    pdf.addImage(canvas.toDataURL("image/jpeg", 0.95), "JPEG", 0, 0, w, h);
+    pdf.setProperties({ title: `${LAYOUTS[state.layout].label}: ${state.headline || state.kicker || ""}`, author: "New Concept Security", creator: "New Concept Security admin" });
+    window.NCSExport.save(pdf.output("blob"), name(format).replace(/\.png$/, ".pdf"));
   }
 
   function toast(text) {
@@ -347,6 +383,7 @@
     if (!b) return;
     if (b.dataset.export === "png") busy(b, () => exportOne());
     if (b.dataset.export === "all") busy(b, exportAll);
+    if (b.dataset.export === "pdf") busy(b, () => exportPdf());
     if (b.dataset.export === "reset") {
       state = defaults();
       redraw();

@@ -50,6 +50,13 @@
     .s-tall .pm-head { font-size: calc(var(--u) * 10 * var(--fit, 1)); }
     .s-tall .pm-foot { flex-direction: column; align-items: flex-start; }
     .s-tall .pm-contact { justify-items: start; }
+    .s-banner .pm-in { grid-template-rows: 1fr; padding: calc(var(--u) * 9) calc(var(--u) * 12) calc(var(--u) * 9) 36%; }
+    .s-banner .pm-top { position: absolute; top: calc(var(--u) * 9); left: calc(var(--u) * 12); }
+    .s-banner .pm-main { justify-content: center; }
+    .s-banner .pm-head { font-size: calc(var(--u) * 12 * var(--fit, 1)); }
+    .s-banner .pm-kicker { font-size: calc(var(--u) * 4.4 * var(--fit, 1)); }
+    .s-banner .pm-list li, .s-banner .pm-body { font-size: calc(var(--u) * 5 * var(--fit, 1)); }
+    .s-banner .pm-foot { display: none; }
     .l-photo .pm-main { justify-content: flex-end; }
     .l-stat .pm-main, .l-quote .pm-main { justify-content: center; }
     .pm-photos { display: grid; grid-template-columns: repeat(auto-fill, minmax(56px, 1fr)); gap: 6px; }
@@ -69,7 +76,8 @@
       <details class="st-menu">
         <summary class="st-btn">More</summary>
         <div class="st-menu-list">
-          <button type="button" data-export="all"><b>Every size</b><span>Square, portrait, story, landscape and wide</span></button>
+          <button type="button" data-export="pdf"><b>Print PDF</b><span>A5 flyers and A4 posters at their real size</span></button>
+          <button type="button" data-export="all"><b>Every social size</b><span>Square, portrait, story, landscape, wide, banner and cover</span></button>
           <button type="button" data-export="reset"><b>Start again</b><span>Back to the hiring post</span></button>
         </div>
       </details>

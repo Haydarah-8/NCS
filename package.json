@@ -12,6 +12,7 @@
     "admin:remove": "node --env-file=.env scripts/add-admin.mjs --remove"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^1.3.0",
     "@base-ui/react": "^1.9.0",
     "@electric-sql/pglite": "^0.5.13",
     "@neondatabase/serverless": "^1.2.0",

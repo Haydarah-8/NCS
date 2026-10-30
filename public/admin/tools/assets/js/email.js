@@ -156,6 +156,7 @@
     sender: "Matt Baron",
     senderTitle: "Operations Manager",
     senderPhone: "07496 320245",
+    senderEmail: "",
     header: "dark",
     accent: "#A01010",
     footer: true,
@@ -243,14 +244,14 @@ ${footer}
 </table></td></tr></table></body></html>`;
   }
 
-  function signatureHtml() {
-    const s = state;
+  function signatureHtml(p) {
+    const s = p ? { ...state, sender: p.name, senderTitle: p.role, senderPhone: p.phone, senderEmail: p.email } : state;
     return `<table role="presentation" cellpadding="0" cellspacing="0" style="font-family:${FONT};color:#1d1d1f"><tr>
 <td style="padding-right:16px;border-right:3px solid ${s.accent};vertical-align:middle"><img src="${LOGO_LIGHT}" width="150" alt="New Concept Security" style="display:block;width:150px;height:auto;border:0"></td>
 <td style="padding-left:16px;vertical-align:middle;font-size:13px;line-height:1.55">
 <strong style="font-size:15px">${esc(s.sender)}</strong><br><span style="color:#6e6e73">${esc(s.senderTitle)}</span><br>
 ${s.senderPhone ? `<a href="tel:${esc(s.senderPhone.replace(/\s/g, ""))}" style="color:#1d1d1f;text-decoration:none">${esc(s.senderPhone)}</a> · ` : ""}<a href="tel:${COMPANY.phone.replace(/\s/g, "")}" style="color:#1d1d1f;text-decoration:none">${COMPANY.phone}</a><br>
-<a href="https://${COMPANY.web}" style="color:${s.accent};text-decoration:none;font-weight:600">${COMPANY.web}</a><br>
+${s.senderEmail ? `<a href="mailto:${esc(s.senderEmail)}" style="color:#1d1d1f;text-decoration:none">${esc(s.senderEmail)}</a><br>` : ""}<a href="https://${COMPANY.web}" style="color:${s.accent};text-decoration:none;font-weight:600">${COMPANY.web}</a><br>
 <span style="color:#86868b;font-size:11.5px">SIA Approved Contractor · Control room 24/7</span></td></tr></table>`;
   }
 
@@ -310,7 +311,8 @@ ${s.senderPhone ? `<a href="tel:${esc(s.senderPhone.replace(/\s/g, ""))}" style=
     <section class="st-sec"><h2>Make</h2><div class="st-seg"><button type="button" data-mode="email" aria-pressed="${s.mode === "email"}">Email</button><button type="button" data-mode="signature" aria-pressed="${s.mode === "signature"}">Email signature</button></div></section>
     ${
       s.mode === "signature"
-        ? `<section class="st-sec"><h2>You</h2><div class="st-grid">${field("sender", "Name", { wide: true })}${field("senderTitle", "Job title", { wide: true })}${field("senderPhone", "Mobile", { wide: true })}<label class="st-field is-wide">Accent<input type="color" data-k="accent" value="${esc(s.accent)}"></label></div></section>`
+        ? `${staffPicker()}<section class="st-sec"><h2>You</h2><div class="st-grid">${field("sender", "Name", { wide: true })}${field("senderTitle", "Job title", { wide: true })}${field("senderPhone", "Mobile")}${field("senderEmail", "Email")}<label class="st-field is-wide">Accent<input type="color" data-k="accent" value="${esc(s.accent)}"></label></div></section>
+    ${officeSection()}${installGuide()}`
         : `<section class="st-sec"><h2>Template <small>${Object.keys(TEMPLATES).length} emails</small></h2>${Object.entries(groups)
             .map(([g, list]) => `<p class="em-group">${g}</p><div class="st-seg">${list.map(([id, t]) => `<button type="button" data-template="${id}" aria-pressed="${id === s.template}">${esc(t.label)}</button>`).join("")}</div>`)
             .join("")}</section>
@@ -337,6 +339,74 @@ ${s.senderPhone ? `<a href="tel:${esc(s.senderPhone.replace(/\s/g, ""))}" style=
     }`;
   }
 
+  /* ---------- Staff profiles and the whole office ---------- */
+
+  let staff = [];
+  const staffPicker = () =>
+    staff.length
+      ? `<section class="st-sec"><h2>Staff profile</h2><label class="st-field">Fill from a profile<select data-staff><option value="">Type the details yourself</option>${staff.map((p) => `<option value="${esc(p.id)}">${esc(p.name)}${p.role ? ` · ${esc(p.role)}` : ""}${p.sample ? " (sample)" : ""}</option>`).join("")}</select></label></section>`
+      : "";
+  const officeSection = () =>
+    staff.length
+      ? `<section class="st-sec"><h2>Whole office <small>${staff.length} profile${staff.length === 1 ? "" : "s"}</small></h2>
+        <p class="em-hint">Matching signatures for everyone in Settings, Staff, in this design.${staff.some((p) => p.sample) ? " Profiles marked sample are demonstration details: replace them before anyone uses them." : ""}</p>
+        <div class="st-seg" style="margin-top:10px"><button type="button" data-office="page">One page with every signature</button><button type="button" data-office="outlook">Outlook signature files (zip)</button></div></section>`
+      : "";
+  const installGuide = () => `<section class="st-sec"><h2>Putting it in</h2>
+    <details class="em-guide"><summary>Gmail</summary><p>Copy the signature. In Gmail open Settings, See all settings, General, Signature, Create new. Paste, then pick it under Signature defaults and save at the bottom.</p></details>
+    <details class="em-guide"><summary>Outlook (new Outlook and outlook.com)</summary><p>Copy the signature. Open Settings, Accounts, Signatures, New signature. Paste, name it, and choose it for new messages and replies.</p></details>
+    <details class="em-guide"><summary>Outlook for Windows (classic)</summary><p>Copy and paste in File, Options, Mail, Signatures. Or unzip the Outlook files into <code>%APPDATA%\\Microsoft\\Signatures</code> and restart Outlook.</p></details>
+    <details class="em-guide"><summary>Apple Mail and iPhone</summary><p>Mac: Mail, Settings, Signatures, add one, untick "Always match my default message font", then paste. iPhone: Settings, Mail, Signature, then paste.</p></details>
+    <p class="em-hint">The logo loads from the website, so it shows once the site is live at its own address.</p></section>`;
+
+  function officePage() {
+    const rows = staff
+      .map((p) => `<section style="margin:0 0 28px;padding:24px;border:1px solid #e5e5ea;border-radius:14px"><p style="margin:0 0 14px;font:600 13px ${FONT};color:#86868b">${esc(p.name)}${p.sample ? " · sample" : ""}</p>${signatureHtml(p)}</section>`)
+      .join("");
+    return `<!doctype html><html lang="en-GB"><head><meta charset="utf-8"><title>Email signatures · ${esc(COMPANY.name)}</title></head><body style="max-width:760px;margin:40px auto;padding:0 20px;font-family:${FONT};color:#1d1d1f"><h1 style="font-size:24px">Email signatures</h1><p style="color:#6e6e73">Find your name, select your signature from the logo to the last line, copy, and paste it into your email signature settings.</p>${rows}</body></html>`;
+  }
+
+  async function officeOutlook() {
+    await window.NCSExport.load("https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js");
+    const zip = new window.JSZip();
+    for (const p of staff) {
+      zip.file(window.NCSExport.fileName([`${COMPANY.name} ${p.name}`], "htm"), `<!doctype html><html><head><meta charset="utf-8"></head><body>${signatureHtml(p)}</body></html>`);
+    }
+    window.NCSExport.save(await zip.generateAsync({ type: "blob" }), window.NCSExport.fileName(["Outlook email signatures"], "zip"));
+  }
+
+  function fillFromStaff(id) {
+    const p = staff.find((x) => x.id === id);
+    if (!p) return;
+    Object.assign(state, { sender: p.name, senderTitle: p.role, senderPhone: p.phone, senderEmail: p.email });
+    redraw();
+    const pick = $("[data-staff]");
+    if (pick) pick.value = id;
+  }
+
+  // Company details and staff come from the brand kit inside the admin; on
+  // its own (no admin sign-in) the maker keeps its built-in details.
+  async function loadBrand() {
+    try {
+      const res = await fetch("/api/studio?action=brand", { credentials: "same-origin" });
+      if (!res.ok) return;
+      const { brand } = await res.json();
+      const c = brand?.company || {};
+      const web = c.web ? c.web.replace(/^https?:\/\//, "").replace(/\/$/, "") : "";
+      Object.entries({ name: c.name, legal: c.legal, address: c.address, phone: c.phone, email: c.email, web, number: c.number, facebook: brand.socials?.facebook }).forEach(([k, v]) => v && (COMPANY[k] = v));
+      const acs = (brand.credentials || []).find((x) => /approved contractor/i.test(x.name) && x.reference);
+      if (acs) COMPANY.acs = acs.reference;
+      staff = (brand.staff || []).filter((p) => p.name);
+      const want = new URLSearchParams(location.search).get("staff");
+      if (want && staff.some((p) => p.id === want)) {
+        state.mode = "signature";
+        fillFromStaff(want);
+      } else redraw();
+    } catch {
+      /* Built-in details only. */
+    }
+  }
+
   function preview() {
     const html = state.mode === "signature" ? `<!doctype html><html><body style="margin:0;padding:32px;background:#fff">${signatureHtml()}</body></html>` : emailHtml();
     frame.style.width = `${width}px`;
@@ -354,6 +424,9 @@ ${s.senderPhone ? `<a href="tel:${esc(s.senderPhone.replace(/\s/g, ""))}" style=
     preview();
   }
 
+  controls.addEventListener("change", (e) => {
+    if (e.target.matches("[data-staff]")) fillFromStaff(e.target.value);
+  });
   controls.addEventListener("input", (e) => {
     const t = e.target;
     if (t.dataset.var) state.vars[t.dataset.var] = t.value;
@@ -369,6 +442,8 @@ ${s.senderPhone ? `<a href="tel:${esc(s.senderPhone.replace(/\s/g, ""))}" style=
       state = { ...state, template: t.dataset.template, unsubscribe: false, ...tpl };
     } else if (t.dataset.header) state.header = t.dataset.header;
     else if (t.dataset.mode) state.mode = t.dataset.mode;
+    else if (t.dataset.office === "page") return window.NCSExport.save(new Blob([officePage()], { type: "text/html" }), window.NCSExport.fileName(["Email signatures", COMPANY.name], "html"));
+    else if (t.dataset.office === "outlook") return officeOutlook();
     else return;
     redraw();
   });
@@ -432,4 +507,5 @@ ${s.senderPhone ? `<a href="tel:${esc(s.senderPhone.replace(/\s/g, ""))}" style=
 
   window.NCSEmail = { html: emailHtml, text: plainText, eml, signature: signatureHtml, state: () => state };
   redraw();
+  loadBrand();
 })();

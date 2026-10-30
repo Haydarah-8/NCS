@@ -521,6 +521,16 @@
       }
     }
 
+    .bc-staff {
+      margin-bottom: 1rem;
+    }
+
+    .bc-staff p {
+      margin: 0.4rem 0 0;
+      color: var(--ds-ink-3);
+      font-size: 0.8rem;
+    }
+
     .bc-field {
       display: block;
       padding: 0.9rem 0 0.7rem;
@@ -853,6 +863,10 @@
       <div class="bc-panel">
         <form id="card-form" autocomplete="off">
           <h2>Your details.</h2>
+          <div class="bc-staff" data-staff-box hidden>
+            <label class="bc-field"><span>Fill from a staff profile</span><select data-staff><option value="">Type the details yourself</option></select></label>
+            <p data-staff-note></p>
+          </div>
           <div class="bc-fields">
             <label class="bc-field"><span>Name</span><input name="name" maxlength="40"></label>
             <label class="bc-field"><span>Job title</span><input name="title" maxlength="44"></label>
@@ -931,6 +945,7 @@
             <button class="ds-btn is-outline" type="button" data-export="svg-back">SVG back</button>
           </div>
           <button class="ds-btn is-outline bc-print-btn" type="button" data-export="print">Print from the browser</button>
+          <button class="ds-btn is-outline bc-print-btn" type="button" data-export="batch" data-staff-only hidden>Cards for every staff profile (one PDF)</button>
           <p>The PDF and PNGs are drawn at 600 dpi. SVGs are vector with the font embedded, for edits in Illustrator, Figma or Inkscape. Turn on bleed when a print shop asks for it.</p>
         </div>
       </div>

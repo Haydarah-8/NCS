@@ -27,6 +27,36 @@ export async function api(action, { method = "GET", body, params = {} } = {}) {
 }
 export const post = (action, body) => api(action, { method: "POST", body });
 
+/* The Business Studio's own data (documents, library, locations, brand kit). */
+export async function studio(action, { method = "GET", body, params = {} } = {}) {
+  let res;
+  try {
+    res = await fetch(`/api/studio?${new URLSearchParams({ action, ...params })}`, {
+      method,
+      headers: body ? { "content-type": "application/json" } : {},
+      body: body ? JSON.stringify(body) : undefined,
+      signal: AbortSignal.timeout(25_000),
+    });
+  } catch (e) {
+    throw new Error(e?.name === "TimeoutError" ? "The server took too long to answer. Try again." : "Couldn't reach the server. Check your connection.");
+  }
+  if (res.status === 401) {
+    location.href = `/admin/login.html?next=${encodeURIComponent(location.pathname + location.hash)}`;
+    throw new Error("Signed out");
+  }
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || `Something went wrong (${res.status}).`);
+  return data;
+}
+export const studioPost = (action, body) => studio(action, { method: "POST", body });
+
+/* The brand kit, fetched once per page load. */
+let brandPromise = null;
+export const brandKit = (fresh = false) => {
+  if (fresh || !brandPromise) brandPromise = studio("brand").then((d) => d.brand).catch((e) => ((brandPromise = null), Promise.reject(e)));
+  return brandPromise;
+};
+
 /* ---------- Formatting ---------- */
 
 const nf = new Intl.NumberFormat("en-GB");

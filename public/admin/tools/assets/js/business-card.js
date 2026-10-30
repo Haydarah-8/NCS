@@ -1202,6 +1202,35 @@ async function exportPdf() {
   pdf.save(`ncs-business-card-${opt.design}-${opt.palette}-${S.name}${opt.bleed ? "-bleed" : ""}.pdf`);
 }
 
+/* One PDF with a front and back for every staff profile in the brand kit,
+   in the current design. Sent to the printer as one job. */
+async function exportBatch() {
+  if (!staff.length) return;
+  await ensureFont();
+  if (!window.jspdf) {
+    await loadScript("https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js");
+  }
+  const base = readForm();
+  const opt = options();
+  const S = SIZES[opt.size];
+  const pw = S.pw + (opt.bleed ? 2 * S.pb : 0);
+  const ph = S.ph + (opt.bleed ? 2 * S.pb : 0);
+  const pdf = new window.jspdf.jsPDF({ orientation: "landscape", unit: S.unit, format: [pw, ph] });
+  let first = true;
+  for (const person of staff) {
+    const d = { ...base, name: person.name, title: person.role, phone: person.phone || base.phone, email: person.email || base.email };
+    for (const side of ["front", "back"]) {
+      if (!first) pdf.addPage([pw, ph], "landscape");
+      first = false;
+      const canvas = await svgToCanvas(drawSide(side, d, opt), 2);
+      if (opt.rounded && !opt.bleed) pdf.addImage(canvas.toDataURL("image/png"), "PNG", 0, 0, pw, ph);
+      else pdf.addImage(canvas.toDataURL("image/jpeg", 0.95), "JPEG", 0, 0, pw, ph);
+    }
+  }
+  pdf.setProperties({ title: "New Concept Security business cards", creator: "New Concept Security" });
+  pdf.save(`ncs-business-cards-${staff.length}-staff-${opt.design}-${S.name}${opt.bleed ? "-bleed" : ""}.pdf`);
+}
+
 /* Print straight from the browser: one side per page at its real size. */
 function printCards() {
   const d = readForm();
@@ -1268,6 +1297,7 @@ document.addEventListener("click", (event) => {
     "svg-back": () => exportSvg("back"),
     pdf: exportPdf,
     "logo-png": exportLogoPng,
+    batch: exportBatch,
   }[kind];
   if (kind === "print") printCards();
   else if (run) busy(button, run);
@@ -1310,6 +1340,48 @@ form.addEventListener("focusin", (event) => {
   if (event.target.name === "tagline") showSide("front");
 });
 
+/* ---------- Staff profiles from the brand kit ---------- */
+
+let staff = [];
+const staffPick = document.querySelector("[data-staff]");
+
+function fillFromStaff(id) {
+  const person = staff.find((p) => p.id === id);
+  if (!person) return;
+  form.elements.name.value = person.name;
+  form.elements.title.value = person.role;
+  if (person.phone) form.elements.phone.value = person.phone;
+  if (person.email) form.elements.email.value = person.email;
+  showSide("back");
+  render();
+}
+
+// Only works inside the admin (it needs the admin sign-in); on its own the
+// maker simply keeps the typed details.
+async function loadStaff() {
+  try {
+    const res = await fetch("/api/studio?action=brand", { credentials: "same-origin" });
+    if (!res.ok) return;
+    const { brand } = await res.json();
+    staff = (brand?.staff || []).filter((p) => p.name);
+    if (!staff.length || !staffPick) return;
+    staffPick.insertAdjacentHTML("beforeend", staff.map((p) => `<option value="${p.id}">${p.name.replace(/</g, "&lt;")}${p.role ? ` · ${p.role.replace(/</g, "&lt;")}` : ""}${p.sample ? " (sample)" : ""}</option>`).join(""));
+    document.querySelector("[data-staff-box]").hidden = false;
+    document.querySelectorAll("[data-staff-only]").forEach((el) => (el.hidden = false));
+    document.querySelector("[data-staff-note]").textContent = staff.some((p) => p.sample)
+      ? "Profiles marked sample are demonstration details. Replace them in Settings, Staff, before printing."
+      : "Profiles come from Settings, Staff.";
+    const want = new URLSearchParams(location.search).get("staff");
+    if (want && staff.some((p) => p.id === want)) {
+      staffPick.value = want;
+      fillFromStaff(want);
+    }
+  } catch {
+    /* No admin session: typed details only. */
+  }
+}
+staffPick?.addEventListener("change", () => fillFromStaff(staffPick.value));
+
 buildGallery();
 restore();
 render();
@@ -1317,3 +1389,4 @@ initTilt();
 // Redraw once the fonts have loaded so the fitted sizes use the real metrics.
 document.fonts?.ready.then(render);
 ensureFont();
+loadStaff();

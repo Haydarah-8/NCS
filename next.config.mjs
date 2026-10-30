@@ -6,7 +6,8 @@ const root = path.dirname(fileURLToPath(import.meta.url));
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   outputFileTracingRoot: root,
-  distDir: '.next-ncs',
+  // Vercel expects .next; locally the build lives in .next-ncs.
+  distDir: process.env.VERCEL ? '.next' : '.next-ncs',
   // The local development database (PGlite) ships WebAssembly; load it from node_modules as is.
   serverExternalPackages: ['@electric-sql/pglite'],
   async rewrites() { return [{ source: '/admin', destination: '/admin/index.html' }]; },

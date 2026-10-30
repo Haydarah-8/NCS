@@ -1,10 +1,10 @@
-/* New Concept Security: the design kit. Letterhead,
-   officer ID badge, training certificate and visitor pass, all
-   in the brand and all from one small engine: the form on the left edits a
-   state object, the item on the right is drawn from it at its printed size,
-   and it downloads as a PDF or PNG or goes to the printer. Drafts stay in
-   this browser. The page picks the item from ?type= (letterhead,
-   badge, certificate, pass). Site signs have their own studio (sign.js). */
+/* New Concept Security: letterhead, officer ID badge and visitor pass, each
+   on its own page (letterhead.html, id-badge.html, visitor-pass.html) and
+   all from one small engine: the form on the left edits a state object, the
+   item on the right is drawn from it at its printed size, and it downloads
+   as a PDF or PNG or goes to the printer. The page says which item it is
+   with <body data-kit-type>. Inside the admin, company details and staff
+   come from the brand kit. Drafts stay in this browser. */
 
 const W_PATH = "M210 8L297.35 95.35V301.72L148.09 69.91ZM210 412L122.65 324.65V118.28L271.91 350.09Z";
 const R_PATHS =
@@ -21,6 +21,17 @@ const PALETTES = {
 const FONTS = ["Geist", "Inter", "Manrope", "DM Sans", "Montserrat", "Space Grotesk", "Playfair Display", "Fraunces"];
 const ROLES = ["Security officer", "Static guard", "Gatehouse officer", "Mobile patrol officer", "CCTV operator", "Key holder", "Supervisor", "Operations manager"];
 const STORE = "ncs-kit";
+/* A common weekly rota for visitor pass colours. */
+const DAY_COLOURS = [
+  ["Mon", "#C41616", "Red"],
+  ["Tue", "#0A62D0", "Blue"],
+  ["Wed", "#1E8E3E", "Green"],
+  ["Thu", "#F2C200", "Yellow"],
+  ["Fri", "#EA7600", "Orange"],
+  ["Sat", "#7B3FBF", "Purple"],
+  ["Sun", "#6E6E73", "Grey"],
+];
+let staff = [];
 
 /* Each item: its size on screen (CSS px) and on paper (PDF points, print
    size), its designs, its sample content, and the form that edits it. */
@@ -90,41 +101,6 @@ const TYPES = {
       { k: "back", label: "Back of the card", type: "textarea", wide: true },
     ],
   },
-  certificate: {
-    label: "Certificate",
-    w: 1123,
-    h: 794,
-    pt: [841.89, 595.28],
-    print: "A4 landscape",
-    designs: { classic: "Classic", modern: "Modern", seal: "Seal", elegant: "Elegant", dark: "Dark", bars: "Bars", monogram: "Monogram" },
-    sample: {
-      design: "classic",
-      heading: "Certificate of completion",
-      name: "Jordan Carter",
-      line: "has successfully completed",
-      course: "Conflict management and de-escalation",
-      details: "Six hours of classroom and practical training, assessed on site",
-      date: "",
-      number: "CERT-2026-0417",
-      signer1: "NCS Operations",
-      role1: "Director",
-      signer2: "Priya Shah",
-      role2: "Training lead",
-    },
-    fields: [
-      { k: "heading", label: "Heading", wide: true },
-      { k: "name", label: "Awarded to", wide: true },
-      { k: "line", label: "Line under the name", wide: true },
-      { k: "course", label: "Course or achievement", wide: true },
-      { k: "details", label: "Details", wide: true },
-      { k: "date", label: "Date (blank = today)", type: "date" },
-      { k: "number", label: "Certificate number" },
-      { k: "signer1", label: "First signature" },
-      { k: "role1", label: "Their role" },
-      { k: "signer2", label: "Second signature (optional)" },
-      { k: "role2", label: "Their role" },
-    ],
-  },
   pass: {
     label: "Visitor pass",
     ...CARD,
@@ -141,11 +117,14 @@ const TYPES = {
       until: "17:00",
       vehicle: "",
       colour: "#C41616",
+      sheet: "9",
+      blanks: true,
       rules: "Wear this pass where it can be seen.\nStay with your host at all times.\nFollow the officer's instructions in an emergency.\nHand this pass back at the gate when you leave.",
     },
     fields: [
       { k: "number", label: "Pass number" },
       { k: "colour", label: "Colour of the day", type: "color" },
+      { k: "colour", label: "Or pick the day's colour", type: "days", wide: true },
       { k: "name", label: "Visitor" },
       { k: "company", label: "Company" },
       { k: "host", label: "Visiting" },
@@ -154,6 +133,8 @@ const TYPES = {
       { k: "until", label: "Valid until", type: "time" },
       { k: "vehicle", label: "Vehicle registration" },
       { k: "rules", label: "Rules on the back", type: "textarea", rows: 5, wide: true },
+      { k: "sheet", label: "Numbered sheet: how many passes", type: "select", options: [["9", "9 (one A4 sheet)"], ["18", "18 (two sheets)"], ["27", "27 (three sheets)"], ["45", "45 (five sheets)"]] },
+      { k: "blanks", label: "Leave name and company blank to write in", type: "check" },
     ],
   },
 };
@@ -196,8 +177,8 @@ function load() {
       base.type = saved.type;
     }
   } catch {}
-  const asked = new URLSearchParams(location.search).get("type");
-  base.type = TYPES[asked] ? asked : TYPES[base.type] ? base.type : "letterhead";
+  const fixed = document.body.dataset.kitType;
+  base.type = TYPES[fixed] ? fixed : "letterhead";
   return base;
 }
 
@@ -221,11 +202,6 @@ const todayIso = () => {
 const fmt = (iso, opts = { day: "numeric", month: "long", year: "numeric" }) => {
   const d = new Date(`${iso || todayIso()}T12:00:00`);
   return Number.isNaN(+d) ? "" : d.toLocaleDateString("en-GB", opts);
-};
-const addYears = (iso, n) => {
-  const d = new Date(`${iso || todayIso()}T12:00:00`);
-  d.setFullYear(d.getFullYear() + n);
-  return d.toISOString().slice(0, 10);
 };
 
 /* Real colours, not CSS variables: the PNG and PDF renderer draws each SVG
@@ -329,7 +305,8 @@ const DRAW = {
   badge(it) {
     const f = state.from;
     const photo = it.photo ? `<img src="${it.photo}" alt="">` : `<svg viewBox="0 0 100 100" aria-hidden="true" style="color:#b0b0b8"><circle cx="50" cy="38" r="18" fill="currentColor"/><path d="M14 96c2-22 16-32 36-32s34 10 36 32z" fill="currentColor"/></svg>`;
-    const expiry = it.expiry ? fmt(it.expiry, { month: "short", year: "numeric" }) : fmt(addYears(it.issued, 3), { month: "short", year: "numeric" });
+    // Only the real expiry date from the SIA register; never a guess.
+    const expiry = it.expiry ? fmt(it.expiry, { month: "short", year: "numeric" }) : "See SIA register";
     const facts = `<dl class="kit-badge-facts"><dt>Staff no.</dt><dd>${esc(it.number)}</dd><dt>Licence</dt><dd>${esc(it.licence)}</dd><dt>Type</dt><dd>${esc(it.licenceType)}</dd><dt>Expires</dt><dd>${esc(expiry)}</dd></dl>`;
     const front = it.design === "minimal"
       ? `<div class="kit-badge-mtop">${mark()}<span>${esc(it.number)}</span></div><div class="kit-badge-photo is-square">${photo}</div><h1 class="kit-badge-name is-left">${esc(it.name)}</h1><p class="kit-badge-role is-left">${esc(it.role)}</p>${facts}<div class="kit-badge-mbar"></div>`
@@ -345,28 +322,12 @@ const DRAW = {
     return [front, back];
   },
 
-  certificate(it) {
-    const sig = (n, r) => (n ? `<div class="kit-cert-sig"><span class="kit-cert-hand">${esc(n)}</span><i></i><b>${esc(n)}</b><small>${esc(r)}</small></div>` : "");
-    const seal = `<svg class="kit-cert-seal" viewBox="0 0 200 200" aria-hidden="true"><circle cx="100" cy="100" r="92" fill="${state.accent}"/><circle cx="100" cy="100" r="80" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-dasharray="3 5"/><circle cx="100" cy="100" r="64" fill="${state.main}"/><g transform="translate(58 76) scale(0.135)"><path fill="#FFFFFF" d="${W_PATH}"/><g fill="${state.accent}">${R_PATHS}</g></g><text x="100" y="146" text-anchor="middle" fill="#FFFFFF" font-size="10" letter-spacing="2" font-family="Arial, sans-serif">CERTIFIED</text></svg>`;
-    const inner = `${it.design === "modern" ? "" : `<div class="kit-cert-brand">${brand(it.design === "dark")}</div>`}
-      <p class="kit-cert-heading">${esc(it.heading)}</p><p class="kit-cert-pre">This is to certify that</p><h1 class="kit-cert-name">${esc(it.name)}</h1>
-      <p class="kit-cert-line">${esc(it.line)}</p><h2 class="kit-cert-course">${esc(it.course)}</h2><p class="kit-cert-details">${esc(it.details)}</p>
-      <div class="kit-cert-bottom">${sig(it.signer1, it.role1)}<div class="kit-cert-meta"><span>${esc(fmt(it.date))}</span><small>${esc(it.number)}</small></div>${sig(it.signer2, it.role2)}</div>`;
-    if (it.design === "modern") return [`<aside class="kit-cert-band">${brand(true)}<p>${esc(state.from.web)}</p></aside><div class="kit-cert-in is-left">${inner}</div>`];
-    if (it.design === "seal") return [`<div class="kit-cert-in is-left is-seal">${inner}</div>${seal}<div class="kit-cert-edge"></div>`];
-    if (it.design === "bars") return [`<div class="kit-cert-bars"><i></i><i></i></div><div class="kit-cert-in">${inner}</div>`];
-    if (it.design === "monogram") return [`${watermark()}<div class="kit-cert-frame is-thin"><div class="kit-cert-in">${inner}</div></div>`];
-    if (it.design === "elegant") return [`<div class="kit-cert-frame is-elegant"><i></i><i></i><i></i><i></i><div class="kit-cert-in">${inner}</div></div>`];
-    if (it.design === "dark") return [`<div class="kit-cert-frame is-dark"><div class="kit-cert-in">${inner}</div></div>`];
-    return [`<div class="kit-cert-frame"><div class="kit-cert-in">${inner}</div></div>`];
-  },
-
   pass(it) {
     const escort = it.design === "escort";
     const word = escort ? "ESCORT" : it.design === "contractor" ? "CONTRACTOR" : "VISITOR";
     const front = `<div class="kit-pass-top">${brand(it.design !== "minimal", true)}<span>${esc(it.number)}</span></div>
       ${it.design === "stripe" ? `<div class="kit-pass-word is-stripes">${stripes(it.colour, "#FFFFFF", 14)}<b>${word}</b></div>` : it.design === "vertical" ? `<div class="kit-pass-side" style="background:${esc(it.colour)}"><svg viewBox="0 0 64 440" aria-hidden="true"><text x="-220" y="47" transform="rotate(-90)" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="40" font-weight="800" letter-spacing="6" fill="#1D1D1F">${word}</text></svg></div>` : `<div class="kit-pass-word" style="--day:${esc(it.colour)}"><b>${word}</b>${escort ? "<small>MUST BE ACCOMPANIED</small>" : it.design === "contractor" ? "<small>WORKING ON SITE</small>" : ""}</div>`}
-      <h1 class="kit-pass-name">${esc(it.name)}</h1><p class="kit-pass-co">${esc(it.company)}</p>
+      <h1 class="kit-pass-name">${it.name ? esc(it.name) : '<span class="kit-blank"></span>'}</h1><p class="kit-pass-co">${it.company ? esc(it.company) : '<span class="kit-blank is-thin"></span>'}</p>
       <dl class="kit-pass-facts"><dt>Visiting</dt><dd>${esc(it.host)}</dd><dt>Site</dt><dd>${esc(it.site)}</dd><dt>Date</dt><dd>${esc(fmt(it.date, { weekday: "short", day: "numeric", month: "short" }))}</dd><dt>Valid until</dt><dd>${esc(it.until)}</dd>${it.vehicle ? `<dt>Vehicle</dt><dd>${esc(it.vehicle)}</dd>` : ""}</dl>
       <p class="kit-pass-wear">${escort ? "Stay with your escort" : "Wear this pass at all times"}</p><div class="kit-pass-day" style="background:${esc(it.colour)}"></div>`;
     const back = `<div class="kit-pass-back">${mark()}<p class="kit-label">While you are on site</p><ol>${String(it.rules || "").split("\n").filter((l) => l.trim()).map((l) => `<li>${esc(l)}</li>`).join("")}</ol>
@@ -396,6 +357,7 @@ function control(f, base) {
   if (f.type === "check") return `<label class="dc-check${f.wide ? " is-wide" : ""}"><input type="checkbox" data-k="${key}"> ${f.label}</label>`;
   if (f.type === "textarea") return `<label class="${cls}">${f.label}<textarea data-k="${key}" rows="${f.rows || 3}"></textarea></label>`;
   if (f.type === "select") return `<label class="${cls}">${f.label}<select data-k="${key}">${f.options.map((o) => (Array.isArray(o) ? o : [o, o])).map(([v, l]) => `<option value="${esc(v)}">${esc(l)}</option>`).join("")}</select></label>`;
+  if (f.type === "days") return `<div class="${cls}"><span>${f.label}</span><div class="kit-days">${DAY_COLOURS.map(([d, c, n]) => `<button type="button" data-day-colour="${c}" title="${n}" style="--c:${c}"><i></i>${d}</button>`).join("")}</div></div>`;
   if (f.type === "photo") return `<div class="${cls} kit-photo-row"><span>${f.label}</span><div><button class="ds-btn is-outline" type="button" data-photo>Upload a photo</button> <button class="dc-link" type="button" data-photo-clear>Remove</button><input type="file" accept="image/*" data-photo-file hidden></div></div>`;
   return `<label class="${cls}">${f.label}<input type="${f.type || "text"}" data-k="${key}"></label>`;
 }
@@ -406,7 +368,10 @@ function editorHtml() {
   const swatches = Object.entries(PALETTES)
     .map(([id, p]) => `<label class="dc-swatch" title="${p.label}"><input type="radio" name="kit-palette" value="${id}" data-palette aria-label="${p.label}"><span style="background:linear-gradient(160deg, ${p.main}, ${p.main} 60%, ${p.accent} 60%)"></span></label>`)
     .join("");
-  return `<section class="dc-card"><h2>Design</h2>
+  const people = staff.length && (state.type === "letterhead" || state.type === "badge")
+    ? `<label class="dc-field is-wide">Fill from a staff profile<select data-staff><option value="">Type the details yourself</option>${staff.map((p) => `<option value="${esc(p.id)}">${esc(p.name)}${p.role ? ` · ${esc(p.role)}` : ""}${p.sample ? " (sample)" : ""}</option>`).join("")}</select></label>`
+    : "";
+  return `<div class="kit-warn" data-warn hidden></div><section class="dc-card"><h2>Design</h2>
     <div class="kit-designs">${Object.entries(t.designs).slice(0, 5).map(([id, name]) => `<button class="kit-design" type="button" data-design="${id}" aria-pressed="false"><span class="kit-thumb" data-thumb="${id}"></span>${name}</button>`).join("")}</div>
     ${Object.keys(t.designs).length > 5 ? `<p class="dc-sub">More designs</p><div class="kit-more">${Object.entries(t.designs).slice(5).map(([id, name]) => `<button class="kit-design is-mini" type="button" data-design="${id}" aria-pressed="false"><span class="kit-thumb" data-thumb="${id}" data-mini></span><span>${name}</span></button>`).join("")}</div>` : ""}
     <p class="dc-sub">Colour</p><div class="dc-swatches">${swatches}</div>
@@ -415,8 +380,8 @@ function editorHtml() {
       <label class="dc-field">Accent<input type="color" data-k="accent"></label>
       <label class="dc-field is-wide">Font<select data-k="font">${FONTS.map((f) => `<option>${f}</option>`).join("")}</select></label>
     </div></section>
-  <section class="dc-card"><h2>${t.label}</h2><div class="dc-grid">${t.fields.map((f) => control(f, base)).join("")}</div></section>
-  <section class="dc-card"><h2>Your business <small>shared by every item</small></h2><div class="dc-grid">
+  <section class="dc-card"><h2>${t.label}</h2><div class="dc-grid">${people}${t.fields.map((f) => control(f, base)).join("")}</div></section>
+  <section class="dc-card"><h2>Your business <small>${brandLoaded ? "from the brand kit" : "shared by every item"}</small></h2><div class="dc-grid">
     ${control({ k: "name", label: "Business name", wide: true }, "from")}
     ${control({ k: "address", label: "Address", type: "textarea", wide: true }, "from")}
     ${control({ k: "phone", label: "Phone" }, "from")}
@@ -430,7 +395,11 @@ function fill() {
   document.querySelectorAll("[data-k]").forEach((el) => {
     const v = get(el.dataset.k);
     if (el.type === "checkbox") el.checked = Boolean(v);
-    else el.value = v ?? "";
+    else {
+      // A role from a staff profile that isn't in the list joins it.
+      if (el.tagName === "SELECT" && v && ![...el.options].some((o) => o.value === v)) el.add(new Option(v, v));
+      el.value = v ?? "";
+    }
   });
   document.querySelectorAll("[data-palette]").forEach((r) => (r.checked = r.value === state.palette));
   document.querySelectorAll("[data-design]").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.design === item().design)));
@@ -451,10 +420,42 @@ function render() {
     el.style.height = `${Math.round(t.h * k)}px`;
     el.innerHTML = `<div style="transform:scale(${k});transform-origin:0 0;width:${t.w}px">${faces(state.type, item(), design)[0]}</div>`;
   });
-  const it = item();
-  const paper = state.type === "sign" ? (it.paper === "a3" ? "A3" : "A4") : { letterhead: "A4", badge: "Card, 54 × 85.6 mm, front and back", certificate: "A4 landscape", pass: "Card, 54 × 85.6 mm, front and back" }[state.type];
+  const paper = { letterhead: "A4", badge: "Card, 54 × 85.6 mm, front and back", pass: "Card, 54 × 85.6 mm, front and back" }[state.type];
   document.querySelector("[data-meta]").textContent = `${t.label} · ${paper}`;
+  warnings();
   persist();
+}
+
+/* Things to fix before printing, worked out from what's on the page. */
+function warnings() {
+  const it = item();
+  const out = [];
+  if (state.type === "badge") {
+    const digits = String(it.licence || "").replace(/\D/g, "");
+    if (!digits) out.push("Add the officer's SIA licence number.");
+    else if (digits.length !== 16) out.push(`An SIA licence number has 16 digits; this one has ${digits.length}.`);
+    if (!it.expiry) out.push("Add the licence expiry date from the SIA register. The card shows \"See SIA register\" until you do.");
+    else {
+      const days = Math.round((new Date(`${it.expiry}T12:00:00`) - new Date()) / 86400000);
+      if (days < 0) out.push("This licence has expired. Don't issue the card.");
+      else if (days <= 60) out.push(`This licence expires in ${days} day${days === 1 ? "" : "s"}. Check the renewal before issuing the card.`);
+    }
+    out.push('Check every licence on the <a href="https://services.sia.homeoffice.gov.uk/rolh" target="_blank" rel="noopener">SIA register of licence holders</a> before issuing a card.');
+  }
+  if (state.type === "letterhead" && it.letter) {
+    const page = stage().querySelector(".kit");
+    const letter = page?.querySelector(".kit-letter");
+    const foot = page?.querySelector(".kit-lh-foot, .kit-lh-bottom");
+    if (letter) {
+      const last = letter.lastElementChild?.getBoundingClientRect().bottom || 0;
+      const limit = foot ? foot.getBoundingClientRect().top : page.getBoundingClientRect().bottom - 30;
+      if (last > limit) out.push("The letter runs past the bottom of the page. Shorten it, or write longer letters in Document Studio.");
+    }
+  }
+  const box = document.querySelector("[data-warn]");
+  if (!box) return;
+  box.hidden = !out.length;
+  box.innerHTML = out.map((m) => `<p>${m}</p>`).join("");
 }
 
 function fit() {
@@ -476,14 +477,11 @@ function fit() {
 
 /* Exports go through the shared engine (exporter.js): sharp pictures, an
    invisible text layer so the PDF can be searched and copied, live links. */
-const fileName = (ext) => window.NCSExport.fileName([T().label, item().name || item().headline || item().recipient, state.from.name], ext);
+const fileName = (ext) => window.NCSExport.fileName([T().label, item().name || (state.type === "letterhead" && item().letter ? item().subject : ""), state.from.name], ext);
 
-function pagePt() {
-  if (state.type === "sign" && item().paper === "a3") return [841.89, 1190.55];
-  return T().pt;
-}
+const pagePt = () => T().pt;
 
-const scaleFor = () => (state.type === "sign" && item().paper === "a3" ? 3.5 : T().faces ? 4 : 3);
+const scaleFor = () => (T().faces ? 4 : 3);
 
 async function exportPng() {
   const canvases = await window.NCSExport.pngOf({ html: faces().join(""), selector: ".kit", scale: scaleFor() });
@@ -501,6 +499,99 @@ async function exportPdf() {
   window.NCSExport.save(blob, fileName("pdf"));
 }
 
+/* Visitor passes, numbered in order, nine to an A4 sheet at real card
+   size, with a sheet of backs at the end for double-sided printing. */
+function nextNumbers(start, n) {
+  const m = String(start || "V-0001").match(/^(.*?)(\d+)(\D*)$/);
+  if (!m) return Array.from({ length: n }, (_, i) => `${start}-${i + 1}`);
+  return Array.from({ length: n }, (_, i) => `${m[1]}${String(Number(m[2]) + i).padStart(m[2].length, "0")}${m[3]}`);
+}
+
+function a4Sheets(cards) {
+  const k = 204 / CARD.w;
+  const pages = [];
+  for (let i = 0; i < cards.length; i += 9) {
+    pages.push(`<div class="kit-a4">${cards.slice(i, i + 9).map((c) => `<div class="kit-a4-card"><div style="transform:scale(${k});transform-origin:0 0">${c}</div></div>`).join("")}</div>`);
+  }
+  return pages.join("");
+}
+
+async function exportSheet() {
+  const it = item();
+  const n = Number(it.sheet) || 9;
+  const nums = nextNumbers(it.number, n);
+  const fronts = nums.map((num) => faces("pass", { ...it, number: num, ...(it.blanks ? { name: "", company: "", vehicle: "" } : {}) })[0]);
+  const back = faces("pass", it)[1];
+  const html = a4Sheets(fronts) + a4Sheets(Array.from({ length: Math.min(9, n) }, () => back));
+  const { blob } = await window.NCSExport.pagesPdf({
+    html,
+    selector: ".kit-a4",
+    pt: [595.28, 841.89],
+    scale: 3,
+    meta: { title: `Visitor passes ${nums[0]} to ${nums.at(-1)}`, subject: `Visitor passes by ${state.from.name}`, author: state.from.name, keywords: "Visitor pass" },
+  });
+  window.NCSExport.save(blob, window.NCSExport.fileName(["Visitor passes", `${nums[0]} to ${nums.at(-1)}`, state.from.name], "pdf"));
+  toast(`${n} passes, ${nums[0]} to ${nums.at(-1)}. Print at 100% (actual size).`);
+}
+
+/* A Word template of the letterhead: logo in the header, company details
+   in the footer, and the letter (if any) in the body, ready to type over. */
+async function exportDocx() {
+  const src = "https://unpkg.com/docx@8.5.0/build/index.umd.js";
+  if (!window.docx) await window.NCSExport.load(src);
+  const { Document, Packer, Paragraph, TextRun, ImageRun, Header, Footer, AlignmentType, BorderStyle, TabStopType } = window.docx;
+  const it = item();
+  const f = state.from;
+  const accent = state.accent.replace("#", "");
+  let logo = null;
+  let size = { width: 170, height: 57 };
+  try {
+    const url = brandLogo || "/images/logo.png";
+    const blob = await fetch(url).then((r) => (r.ok ? r.blob() : Promise.reject()));
+    const bmp = await createImageBitmap(blob);
+    size = { width: 170, height: Math.round((170 * bmp.height) / bmp.width) };
+    logo = await blob.arrayBuffer();
+  } catch {}
+  const p = (text, o = {}) => new Paragraph({ children: [new TextRun({ text, ...o })], spacing: { after: 160 } });
+  const lines = (text) => String(text || "").split("\n").map((l) => new Paragraph({ children: [new TextRun(l)] }));
+  const body = it.letter
+    ? [
+        ...lines(it.recipient),
+        new Paragraph({ spacing: { before: 240, after: 240 }, children: [new TextRun(fmt(it.date))], alignment: AlignmentType.RIGHT }),
+        ...(it.ref ? [new Paragraph({ alignment: AlignmentType.RIGHT, children: [new TextRun({ text: it.ref, color: "6E6E73" })], spacing: { after: 240 } })] : []),
+        ...(it.subject ? [p(it.subject, { bold: true })] : []),
+        p(it.salutation),
+        ...String(it.body || "").split(/\n{2,}/).map((t) => p(t.replace(/\n/g, " "))),
+        p(it.signoff),
+        new Paragraph({ spacing: { before: 600 }, children: [new TextRun({ text: it.signer, bold: true })] }),
+        p(it.title, { color: "6E6E73" }),
+      ]
+    : [p("")];
+  const d = new Document({
+    creator: f.name,
+    title: `${f.name} letterhead`,
+    styles: { default: { document: { run: { font: "Calibri", size: 22, color: "1D1D1F" } } } },
+    sections: [{
+      properties: { page: { margin: { top: 1700, bottom: 1400, left: 1134, right: 1134, header: 600, footer: 500 } } },
+      headers: {
+        default: new Header({
+          children: [new Paragraph({
+            tabStops: [{ type: TabStopType.RIGHT, position: 9600 }],
+            border: { bottom: { color: accent, size: 12, style: BorderStyle.SINGLE, space: 8 } },
+            children: [
+              logo ? new ImageRun({ data: logo, transformation: size }) : new TextRun({ text: f.name, bold: true, size: 28 }),
+              new TextRun({ text: `\t${[f.phone, f.email, f.web].filter(Boolean).join("  ·  ")}`, size: 16, color: "6E6E73" }),
+            ],
+          })],
+        }),
+      },
+      footers: { default: new Footer({ children: [new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: [f.name, f.address.replace(/\n/g, ", "), f.reg].filter(Boolean).join("  ·  "), size: 15, color: "86868B" })] })] }) },
+      children: body,
+    }],
+  });
+  window.NCSExport.save(await Packer.toBlob(d), window.NCSExport.fileName(["Letterhead", it.letter ? it.subject : "template", f.name], "docx"));
+}
+
 /* Cards print nine to an A4 sheet, fronts then backs; everything else
    prints at its own size. */
 function printItem() {
@@ -515,8 +606,7 @@ function printItem() {
     css = "@page { size: A4; margin: 10mm; }";
   } else {
     box.innerHTML = faces().join("");
-    const a3 = state.type === "sign" && item().paper === "a3";
-    css = `@page { size: ${a3 ? "A3" : t.print}; margin: 0; }${a3 ? " .dc-print .kit { zoom: 1.4142; }" : ""}`;
+    css = `@page { size: ${t.print}; margin: 0; }`;
   }
   let style = document.getElementById("kit-page");
   if (!style) {
@@ -572,10 +662,42 @@ function readPhoto(file) {
   reader.readAsDataURL(file);
 }
 
+/* ---------- Brand kit (inside the admin) ---------- */
+
+let brandLoaded = false;
+let brandLogo = "";
+
+async function loadBrand() {
+  try {
+    const res = await fetch("/api/studio?action=brand", { credentials: "same-origin" });
+    if (!res.ok) return;
+    const { brand } = await res.json();
+    const c = brand?.company || {};
+    const web = (c.web || "").replace(/^https?:\/\//, "").replace(/\/$/, "");
+    const address = String(c.address || "").replace(/,\s*(?=[^,]*$)/, "\n");
+    Object.entries({ name: c.name, address, phone: c.phone, email: c.email, web, reg: c.number ? `${c.legal || c.name}, registered in England and Wales no. ${c.number}` : "" }).forEach(([k, v]) => v && (state.from[k] = v));
+    brandLogo = brand?.logos?.light || "";
+    staff = (brand?.staff || []).filter((p) => p.name);
+    brandLoaded = true;
+    build();
+  } catch {
+    /* On its own, without the admin sign-in: the typed details stay. */
+  }
+}
+
+function fillFromStaff(id) {
+  const p = staff.find((x) => x.id === id);
+  if (!p) return;
+  const it = item();
+  if (state.type === "letterhead") Object.assign(it, { signer: p.name, title: `${p.role}, ${state.from.name}` });
+  if (state.type === "badge") Object.assign(it, { name: p.name, role: p.role || it.role });
+  fill();
+  render();
+}
+
 /* ---------- Wiring ---------- */
 
 function build() {
-  document.querySelectorAll("[data-type]").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.type === state.type)));
   document.querySelector("[data-editor]").innerHTML = editorHtml();
   document.querySelector(".dc-title").textContent = `${T().label}.`;
   document.title = `${T().label} · New Concept Security`;
@@ -584,13 +706,12 @@ function build() {
 }
 
 function init() {
-  document.querySelector("[data-types]").innerHTML = Object.entries(TYPES).map(([id, t]) => `<button type="button" data-type="${id}" aria-pressed="false">${t.label}</button>`).join("");
   document.addEventListener("click", (e) => {
-    const type = e.target.closest("[data-type]");
-    if (type) {
-      state.type = type.dataset.type;
-      history.replaceState(null, "", `?type=${state.type}`);
-      return build();
+    const day = e.target.closest("[data-day-colour]");
+    if (day) {
+      item().colour = day.dataset.dayColour;
+      fill();
+      return render();
     }
     const design = e.target.closest("[data-design]");
     if (design) {
@@ -606,7 +727,8 @@ function init() {
     const exp = e.target.closest("[data-export]");
     if (exp) {
       if (exp.dataset.export === "print") return printItem();
-      return busy(exp, exp.dataset.export === "pdf" ? exportPdf : exportPng);
+      const run = { pdf: exportPdf, png: exportPng, sheet: exportSheet, docx: exportDocx }[exp.dataset.export];
+      return run && busy(exp, run);
     }
     if (e.target.closest("[data-reset]") && window.confirm(`Put the ${T().label.toLowerCase()} back to the sample? Your business details are kept.`)) {
       state.items[state.type] = { ...T().sample };
@@ -628,11 +750,13 @@ function init() {
     render();
   });
   document.addEventListener("change", (e) => {
+    if (e.target.matches("[data-staff]")) return fillFromStaff(e.target.value);
     if (e.target.matches("[data-photo-file]") && e.target.files[0]) readPhoto(e.target.files[0]);
   });
   window.addEventListener("resize", fit);
   document.fonts?.ready.then(render);
   build();
+  loadBrand();
 }
 
 init();

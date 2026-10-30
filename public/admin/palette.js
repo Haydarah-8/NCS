@@ -1,13 +1,13 @@
 /* The quick-command search (Ctrl K): every page, every tool and template,
-   and, as you type, documents, enquiries, library items and locations. */
+   and, as you type, documents, enquiries and locations. */
 
 import { $, esc, icon, studio } from "./core.js";
-import { DOCS } from "./views.js";
+import { TOOLS as TOOL_PAGES } from "./views.js";
 import { TEMPLATES } from "./docstudio.js";
 
 const TOOLS = [
   ...Object.entries(TEMPLATES).map(([kind, t]) => ({ href: `#/studio/new/${kind}`, icon: "plus", label: `New ${t.label.toLowerCase()}`, hint: "Document Studio" })),
-  ...DOCS.flatMap(([group, items]) => items.map(([id, name, ic]) => ({ href: `#/documents/${id}`, icon: ic, label: name, hint: group }))),
+  ...TOOL_PAGES.map(([id, name, ic, , text]) => ({ href: `#/tools/${id}`, icon: ic, label: name, hint: text })),
   { href: "#/insights/campaigns", icon: "compass", label: "Campaign links and QR codes", hint: "Website Insights" },
   { href: "#/settings?tab=brand", icon: "gear", label: "Brand kit", hint: "Settings" },
   { href: "#/settings?tab=sample", icon: "gear", label: "Sample data", hint: "Settings" },
@@ -51,9 +51,7 @@ export function openPalette(pages) {
             ? { href: `#/studio/${r.id}`, icon: "file", label: r.title, hint: "Document" }
             : r.type === "enquiry"
               ? { href: `#/enquiries/${r.id}`, icon: "inbox", label: [r.name, r.company].filter(Boolean).join(", "), hint: "Enquiry" }
-              : r.type === "library"
-                ? { href: `#/library?id=${r.id}`, icon: "badge", label: r.title, hint: `Library · ${r.type}` }
-                : { href: `#/locations?id=${r.id}`, icon: "compass", label: r.name, hint: `Location · ${r.category}` },
+              : { href: `#/locations?id=${r.id}`, icon: "compass", label: r.name, hint: `Location · ${r.category}` },
         );
         if (input.value.trim().toLowerCase() === q) {
           items = [...items, ...more];

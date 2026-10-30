@@ -27,7 +27,7 @@ export async function api(action, { method = "GET", body, params = {} } = {}) {
 }
 export const post = (action, body) => api(action, { method: "POST", body });
 
-/* The Business Studio's own data (documents, library, locations, brand kit). */
+/* The Business Studio's own data (documents, locations, brand kit). */
 export async function studio(action, { method = "GET", body, params = {} } = {}) {
   let res;
   try {

@@ -18,6 +18,8 @@
     poster: { label: "A4 poster or sign", use: "Print at 300 dpi, event and site signage", w: 2480, h: 3508, mm: [210, 297] },
   };
   const SOCIAL = Object.keys(FORMATS).filter((k) => !FORMATS[k].mm);
+  // Phone and website on every post; inside the admin they come from the brand kit.
+  const CONTACT = { phone: "01253 982211", web: "newconceptsecurity.co.uk" };
 
   const PHOTOS = ["hero", "hero-skyline", "balfour-site", "control-room", "fleet-night", "northern-way", "reception", "street", "tram", "venue"];
 
@@ -154,7 +156,7 @@
     const logo = s.showLogo
       ? `<div class="pm-logo"><svg viewBox="0 0 420 420"><g fill="${red ? "#ffffff" : "#c41616"}">${MARK}</g></svg><div><b style="color:${red ? "#fff" : "#c41616"}"><i style="color:${ink}">NEW</i>CONCEPT</b><small>SECURITY</small></div></div>`
       : "";
-    const contact = s.showContact ? `<div class="pm-contact"><span>01253 982211</span><span>newconceptsecurity.co.uk</span>${s.handle ? `<span>${esc(s.handle)}</span>` : ""}</div>` : "";
+    const contact = s.showContact ? `<div class="pm-contact"><span>${esc(CONTACT.phone)}</span><span>${esc(CONTACT.web)}</span>${s.handle ? `<span>${esc(s.handle)}</span>` : ""}</div>` : "";
     let main = "";
     switch (s.layout) {
       case "stat":
@@ -398,4 +400,15 @@
   });
   window.NCSPost = { html: postHtml, state: () => state, exportOne };
   redraw();
+  fetch("/api/studio?action=brand", { credentials: "same-origin" })
+    .then((r) => (r.ok ? r.json() : null))
+    .then((j) => {
+      const c = j?.brand?.company;
+      if (!c) return;
+      if (c.phone) CONTACT.phone = c.phone;
+      if (c.web) CONTACT.web = c.web.replace(/^https?:\/\//, "").replace(/\/$/, "");
+      draw();
+      thumbs();
+    })
+    .catch(() => {});
 })();

@@ -60,7 +60,7 @@ export default async function PostPage({ params }: Props) {
           <div className="hidden lg:block" />
         )}
         <div
-          className="max-w-[44rem] text-[19px] leading-[1.6] [&_a]:text-[#a01010] [&_a]:underline [&_blockquote]:my-8 [&_blockquote]:border-l-[3px] [&_blockquote]:border-[#a01010] [&_blockquote]:pl-5 [&_blockquote]:text-[22px] [&_code]:rounded [&_code]:bg-[#f5f5f7] [&_code]:px-1.5 [&_h2]:mt-12 [&_h2]:scroll-mt-[calc(var(--header-h)+24px)] [&_h2]:text-[30px] [&_h2]:font-semibold [&_h2]:leading-[1.15] [&_h2]:tracking-[-0.02em] [&_h3]:mt-8 [&_h3]:text-[22px] [&_h3]:font-semibold [&_li]:mt-2 [&_ol]:mt-5 [&_ol]:list-decimal [&_ol]:pl-6 [&_p]:mt-5 [&_ul]:mt-5 [&_ul]:list-disc [&_ul]:pl-6"
+          className="post-body max-w-[44rem] text-[19px] leading-[1.6] [&_a]:text-[#a01010] [&_a]:underline [&_blockquote]:my-8 [&_blockquote]:border-l-[3px] [&_blockquote]:border-[#a01010] [&_blockquote]:pl-5 [&_blockquote]:text-[22px] [&_code]:rounded [&_code]:bg-[#f5f5f7] [&_code]:px-1.5 [&_h2]:mt-12 [&_h2]:scroll-mt-[calc(var(--header-h)+24px)] [&_h2]:text-[30px] [&_h2]:font-semibold [&_h2]:leading-[1.15] [&_h2]:tracking-[-0.02em] [&_h3]:mt-8 [&_h3]:text-[22px] [&_h3]:font-semibold [&_li]:mt-2 [&_ol]:mt-5 [&_ol]:list-decimal [&_ol]:pl-6 [&_p]:mt-5 [&_ul]:mt-5 [&_ul]:list-disc [&_ul]:pl-6"
           dangerouslySetInnerHTML={{ __html: post.html }}
         />
       </div>

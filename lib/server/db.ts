@@ -64,17 +64,32 @@ const JSON_TEXT = {
   parse: (x: string) => JSON.parse(x),
 };
 
+/* A query that times out usually means a dead connection (the network
+   dropped, or the pooler closed it). The whole pool is thrown away so the
+   next request connects afresh instead of queueing behind it. */
+function resetPool(db: postgres.Sql) {
+  g.__ncsSql = undefined;
+  db.end({ timeout: 0 }).catch(() => {});
+}
+const healing = <T>(db: postgres.Sql, work: Promise<T>) =>
+  withTimeout(work).catch((error) => {
+    if (error instanceof DatabaseTimeout) resetPool(db);
+    throw error;
+  });
+
 function postgresSql(url: string): Sql {
   // prepare: false, because Supabase's transaction pooler can't keep prepared statements.
-  const db = postgres(url, { prepare: false, ssl: /localhost|127\.0\.0\.1/.test(url) ? false : "require", max: 3, idle_timeout: 20, connect_timeout: 10, types: { json: JSON_TEXT } });
+  // max_lifetime: connections are renewed every few minutes, before the pooler drops them.
+  const db = postgres(url, { prepare: false, ssl: /localhost|127\.0\.0\.1/.test(url) ? false : "require", max: 3, idle_timeout: 20, max_lifetime: 300, connect_timeout: 10, types: { json: JSON_TEXT } });
   const on = (client: postgres.Sql | postgres.TransactionSql) => async (text: string, params: unknown[]) =>
     [...(await client.unsafe(text, params.map(param) as postgres.ParameterOrJSON<never>[]))] as Row[];
-  const run = on(db);
+  const run = (text: string, params: unknown[]) => healing(db, on(db)(text, params));
   const sql = ((strings: TemplateStringsArray, ...values: unknown[]) =>
     new LocalQuery(strings.reduce((t, s, i) => `${t}$${i}${s}`), values, run)) as unknown as Sql;
   sql.query = (text, params = []) => new LocalQuery(text, params, run);
   sql.transaction = (queries) =>
-    withTimeout(
+    healing(
+      db,
       db.begin(async (tx) => {
         const out: Row[][] = [];
         for (const q of queries as LocalQuery[]) out.push(await on(tx)(q.text, q.params));

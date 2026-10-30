@@ -228,7 +228,7 @@
   });
 
   tool("split", "PDF", "Split or extract pages", I.split, (main) => {
-    main.innerHTML = `${head("Split or extract pages", "Save every page as its own file, split into ranges, or pull chosen pages into a new PDF. For reordering or deleting pages by eye, use the <a class=\"st-link\" href=\"pdf.html\">PDF editor</a>.")}<div data-pick></div>
+    main.innerHTML = `${head("Split or extract pages", "Save every page as its own file, split into ranges, or pull chosen pages into a new PDF. For reordering or deleting pages by eye, use the <a class=\"st-link\" href=\"../pdfjs/web/viewer.html\">PDF viewer</a>.")}<div data-pick></div>
       <div class="ft-opts">
         ${field("How", select("mode", [["each", "Every page as its own file"], ["ranges", "One file per range"], ["extract", "Chosen pages into one file"]], "each"))}
         ${field("Pages", `<input name="pages" placeholder="e.g. 1-3, 5, 8-">`)}

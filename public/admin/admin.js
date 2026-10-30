@@ -15,17 +15,12 @@ const NAV = [
     ["#/insights", "chart", "Website Insights"],
     ["#/enquiries", "inbox", "Enquiries", "leads"],
     ["#/locations", "compass", "Locations"],
-    ["#/library", "badge", "Library"],
   ]],
   ["Website", [
     ["#/blog", "pen", "Blog", "drafts"],
     ["#/announcement", "megaphone", "Announcement"],
   ]],
-  ["Tools", [
-    ["#/documents", "receipt", "Paperwork"],
-    ["#/documents/pdf", "pen", "PDF editor"],
-    ["#/documents/files", "download", "File tools"],
-  ]],
+  ["Tools", V.TOOLS.map(([id, name, ic]) => [`#/tools/${id}`, ic, name])],
 ];
 const FOOT = [
   ["#/next", "spark", "Coming next"],
@@ -45,12 +40,14 @@ const ROUTES = [
   [/^#\/speed$/, (v, a) => V.speed(v, a), "Speed and uptime"],
   [/^#\/enquiries(?:\/(\w+))?$/, (v, a, m) => V.enquiries(v, { ...a, id: m[1] }), "Enquiries"],
   [/^#\/locations$/, (v, a) => H.locations(v, a), "Locations"],
-  [/^#\/library$/, (v, a) => H.library(v, a), "Library"],
   [/^#\/blog$/, (v) => V.blog(v), "Blog"],
   [/^#\/blog\/(new|\w+)$/, (v, a, m) => V.editPost(v, { id: m[1] }), "Blog"],
   [/^#\/announcement$/, (v) => V.announcement(v), "Announcement"],
-  [/^#\/documents$/, (v) => V.documents(v), "Paperwork"],
-  [/^#\/documents\/([\w-]+)$/, (v, a, m) => V.documentView(v, { id: m[1], query: a.query }), "Paperwork"],
+  [/^#\/tools\/([\w-]+)$/, (v, a, m) => V.toolView(v, { id: m[1], query: a.query }), "Tools"],
+  // Old addresses.
+  [/^#\/documents$/, () => (location.hash = "#/brand"), "Tools"],
+  [/^#\/documents\/([\w-]+)$/, (v, a, m) => (location.hash = `#/tools/${{ badge: "id-badge", pass: "visitor-pass" }[m[1]] || m[1]}${a.query ? `?${a.query}` : ""}`), "Tools"],
+  [/^#\/library$/, () => (location.hash = "#/"), "Overview"],
   [/^#\/next$/, (v) => V.next(v), "Coming next"],
   [/^#\/settings$/, (v, a) => H.settings(v, a), "Settings"],
 ];

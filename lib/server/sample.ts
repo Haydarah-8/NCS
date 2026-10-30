@@ -13,13 +13,6 @@ const LEADS = [
   { name: "Jordan Carter (sample)", email: "jordan@example.com", phone: "07700 900456", company: "", site: "Security Officer", location: "Blackpool", page: "/careers", message: "I hold a current SIA door supervisor licence and would like to apply for weekend shifts.", status: "new", kind: "recruitment", days: 2, follow: 3 },
 ];
 
-const LIBRARY = [
-  { type: "text", title: "Company introduction (sample wording)", tags: "proposal, introduction", body: "New Concept Security is an SIA Approved Contractor based in Blackpool. We protect construction sites, venues, healthcare settings and commercial premises across the North West, with every officer SIA licensed and our control room staffed around the clock." },
-  { type: "text", title: "Why choose us (sample wording)", tags: "proposal", body: "One account manager from survey to start date.\nLicensed, vetted and uniformed officers.\nA written report every morning.\nA control room that answers 24 hours a day, 365 days a year." },
-  { type: "text", title: "Standard terms: placeholder", tags: "terms, proposal", status: "draft", body: "PLACEHOLDER. Replace with the company's approved terms and conditions. The studio never writes contractual terms itself." },
-  { type: "credential", title: "SIA Approved Contractor Scheme", tags: "accreditation", body: "Approved Contractor reference NECOSESC01. Check at services.sia.homeoffice.gov.uk." },
-];
-
 const LOCATIONS = [
   { name: "Concept House (head office)", category: "office", address: "283 Church Street, Blackpool", postcode: "FY1 3PG", lat: 53.8193, lng: -3.0479, radius: 40, pub: true },
   { name: "Blackpool and the Fylde", category: "coverage", address: "", postcode: "", lat: 53.8175, lng: -3.0357, radius: 18, pub: true },
@@ -43,9 +36,6 @@ export const SAMPLE = {
         values (now() - make_interval(days => ${l.days}), ${l.name}, ${l.email}, ${l.phone}, ${l.company}, ${l.site}, ${l.location}, ${l.message}, 'contact', ${l.status}, ${l.kind}, ${l.page},
                 (now() at time zone 'Europe/London')::date + ${l.follow}::int, 'sample', true)`;
     }
-    for (const x of LIBRARY) {
-      await sql`insert into library (type, title, body, tags, owner, review_date, status, sample) values (${x.type}, ${x.title}, ${x.body}, ${x.tags}, 'Operations Manager', (now() + interval '6 months')::date, ${x.status || "approved"}, true)`;
-    }
     for (const x of LOCATIONS) {
       await sql`insert into locations (name, category, address, postcode, lat, lng, radius_km, contact, phone, public, sample) values (${x.name}, ${x.category}, ${x.address}, ${x.postcode}, ${x.lat}, ${x.lng}, ${x.radius}, ${x.contact || ""}, ${x.phone || ""}, ${x.pub}, true)`;
     }
@@ -60,7 +50,7 @@ export const SAMPLE = {
     await sql.transaction([
       sql`delete from leads where sample`,
       sql`delete from documents where sample`,
-      sql`delete from library where sample`,
+      sql`delete from library where sample`, // from before the Library was removed
       sql`delete from locations where sample`,
       sql`delete from campaigns where sample`,
     ]);

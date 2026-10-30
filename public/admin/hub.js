@@ -1,7 +1,8 @@
 /* NCS Business Studio: the hubs. Brand Studio, Website Insights with its
-   practical questions and campaign links, Locations and coverage, the
-   content Library, and Settings with the brand kit everything inherits. */
+   practical questions and campaign links, Locations and coverage, and
+   Settings with the brand kit everything inherits. */
 
+import { TOOLS } from "./views.js";
 import {
   $, $$, COLORS, api, bars, brandKit, card, clock, confirmBox, day, delta, download, empty, esc, head, icon, kpi, lineChart, num,
   pointLabel, rangeLabel, rangePicker, secs, share, studio, studioPost, toast, wireCharts,
@@ -19,16 +20,6 @@ const loadCss = (href) => document.querySelector(`link[href="${href}"]`) || docu
 
 /* ---------- Brand Studio ---------- */
 
-const BRAND_TOOLS = [
-  ["business-card", "Business cards", "card", "Staff cards from saved profiles, 3D preview, batch print"],
-  ["email", "Email signatures and templates", "mail", "Matching signatures for the whole office, and business emails"],
-  ["letterhead", "Letterhead and stationery", "file", "Letterheads, with or without a letter"],
-  ["post", "Marketing and social", "megaphone", "Recruitment graphics, flyers, LinkedIn banners and posts"],
-  ["sign", "Site signs", "sign", "Safety and security signage to UK standards"],
-  ["badge", "Officer ID badges", "badge", "Photo, licence, QR to check, front and back"],
-  ["certificate", "Certificates", "spark", "Training and long-service certificates"],
-  ["pass", "Visitor passes", "badge", "Colour of the day, escort and contractor"],
-];
 
 export async function brandStudio(view) {
   loading(view);
@@ -45,8 +36,8 @@ export async function brandStudio(view) {
       <div class="brand-colours">${Object.entries(kit.colours).map(([k, c]) => `<span><i style="background:${esc(c)}"></i><b>${esc(k)}</b><small>${esc(c)}</small></span>`).join("")}</div>
       <div class="brand-type"><b style="font-family:${esc(kit.fonts.heading)}">${esc(kit.fonts.heading)}</b><small>headings</small><b>${esc(kit.fonts.body)}</b><small>text</small></div>
     </section>
-    <div class="docs">${BRAND_TOOLS.map(([id, name, ic, text]) => `<a href="#/documents/${id}"><span class="doc-ico">${icon(ic, 22)}</span><b>${name}</b><span>${text}</span></a>`).join("")}</div>
-    ${card("Staff profiles", kit.staff.length ? `<ul class="list">${kit.staff.map((s) => `<li><span><b>${esc(s.name)}</b> ${s.sample ? '<span class="chip is-sample">Sample</span>' : ""}<small>${esc(s.role)} · ${esc(s.phone)} · ${esc(s.email)}</small></span><span class="row-links"><a class="link" href="#/documents/business-card?staff=${encodeURIComponent(s.id)}">Card ${icon("arrow", 13)}</a><a class="link" href="#/documents/email?staff=${encodeURIComponent(s.id)}">Signature ${icon("arrow", 13)}</a></span></li>`).join("")}</ul>` : empty("No staff yet", "Add staff in the brand kit to fill cards and signatures."), { action: `<a class="link" href="#/settings?tab=staff">Manage staff ${icon("arrow", 14)}</a>` })}`;
+    <div class="docs">${TOOLS.map(([id, name, ic, , text]) => `<a href="#/tools/${id}"><span class="doc-ico">${icon(ic, 22)}</span><b>${name}</b><span>${text}</span></a>`).join("")}</div>
+    ${card("Staff profiles", kit.staff.length ? `<ul class="list">${kit.staff.map((s) => `<li><span><b>${esc(s.name)}</b> ${s.sample ? '<span class="chip is-sample">Sample</span>' : ""}<small>${esc(s.role)} · ${esc(s.phone)} · ${esc(s.email)}</small></span><span class="row-links"><a class="link" href="#/tools/business-card?staff=${encodeURIComponent(s.id)}">Card ${icon("arrow", 13)}</a><a class="link" href="#/tools/email?staff=${encodeURIComponent(s.id)}">Signature ${icon("arrow", 13)}</a></span></li>`).join("")}</ul>` : empty("No staff yet", "Add staff in the brand kit to fill cards and signatures."), { action: `<a class="link" href="#/settings?tab=staff">Manage staff ${icon("arrow", 14)}</a>` })}`;
 }
 
 /* ---------- Website Insights ---------- */
@@ -350,117 +341,6 @@ function locationForm(view, l, query) {
   d.showModal();
 }
 
-/* ---------- Library ---------- */
-
-const LIB_TYPES = { text: "Words", logo: "Logos", photo: "Photographs", graphic: "Graphics", template: "Templates", credential: "Credentials", headshot: "Staff headshots", document: "Documents" };
-
-export async function library(view, { query }) {
-  loading(view);
-  let items;
-  try {
-    items = (await studio("library")).items;
-  } catch (e) {
-    return failed(view, e, () => library(view, { query }));
-  }
-  let type = "all", term = "";
-  const today = new Date().toISOString().slice(0, 10);
-  const overdue = (x) => x.review_date && x.review_date.slice(0, 10) < today;
-  view.innerHTML =
-    head("Library.", "Approved words, logos, photographs, templates and credentials, each with an owner and a review date, so out-of-date claims don't slip into new work.", `<button class="btn" type="button" data-new>${icon("plus", 15)} Add to the library</button>`) +
-    `<div class="lib-bar"><label class="search">${icon("compass", 15)}<input type="search" placeholder="Search the library" data-find></label>
-      <div class="seg">${[["all", "All"], ...Object.entries(LIB_TYPES)].map(([k, l]) => `<button type="button" data-type="${k}" aria-pressed="${k === "all"}">${l}</button>`).join("")}</div></div>
-    ${items.some(overdue) ? `<p class="note is-warn">${items.filter(overdue).length} item(s) are past their review date. Check they're still true before using them.</p>` : ""}
-    <div class="lib-grid" data-grid></div>`;
-  const draw = () => {
-    const rows = items.filter((x) => (type === "all" || x.type === type) && `${x.title} ${x.body || ""} ${x.tags || ""}`.toLowerCase().includes(term));
-    $("[data-grid]", view).innerHTML = rows.length
-      ? rows
-          .map(
-            (x) => `<article class="lib-item" data-id="${x.id}">
-          <div class="lib-thumb">${x.file && /^data:image/.test(x.file) ? `<img src="${x.file}" alt="">` : x.has_file ? icon("file", 26) : `<p>${esc((x.body || "").slice(0, 150))}</p>`}</div>
-          <div class="lib-meta"><b>${esc(x.title)}</b>${sampleChip(x)}<small>${LIB_TYPES[x.type] || x.type} · <span class="pill is-${x.status === "approved" ? "won" : x.status === "draft" ? "draft" : "lost"}">${x.status}</span>${overdue(x) ? ' · <span class="pill is-new">Review due</span>' : ""}</small>
-          <small>${x.owner ? `Owner: ${esc(x.owner)}` : "No owner"}${x.review_date ? ` · review ${day(x.review_date)}` : ""}</small></div>
-          <div class="row-start"><button class="btn is-quiet is-small" type="button" data-open>Open</button>${x.body ? '<button class="btn is-quiet is-small" type="button" data-copy>Copy words</button>' : ""}</div></article>`,
-          )
-          .join("")
-      : empty("Nothing here yet", "Add approved wording, logos, photographs and credentials. Load the sample data in Settings to see how it works.");
-  };
-  draw();
-  $("[data-find]", view).addEventListener("input", (e) => {
-    term = e.target.value.trim().toLowerCase();
-    draw();
-  });
-  view.onclick = async (e) => {
-    const t = e.target.closest("button");
-    if (!t) return;
-    if (t.dataset.type) {
-      type = t.dataset.type;
-      $$("[data-type]", view).forEach((b) => b.setAttribute("aria-pressed", String(b === t)));
-      return draw();
-    }
-    if (t.matches("[data-new]")) return libraryForm(view, null, query);
-    const x = items.find((i) => String(i.id) === t.closest("[data-id]")?.dataset.id);
-    if (t.matches("[data-copy]")) {
-      await navigator.clipboard.writeText(x.body).catch(() => {});
-      return toast("Copied.");
-    }
-    if (t.matches("[data-open]")) libraryForm(view, x, query);
-  };
-  const want = new URLSearchParams(query).get("id");
-  const hit = want && items.find((i) => String(i.id) === want);
-  if (hit) libraryForm(view, hit, query);
-}
-
-async function libraryForm(view, x, query) {
-  x ||= { type: "text", title: "", body: "", tags: "", owner: "", review_date: "", status: "approved" };
-  let file = null;
-  if (x.has_file && !x.file && x.id) file = (await studio("library-file", { params: { id: x.id } })).file;
-  else file = x.file || null;
-  const d = document.createElement("dialog");
-  d.className = "dialog is-wide";
-  d.innerHTML = `<form class="form" method="dialog"><div class="dialog-head"><h2>${x.id ? esc(x.title) : "Add to the library"}</h2></div>
-    <div class="grid is-2 is-flat"><label class="field"><span>Title</span><input name="title" value="${esc(x.title)}" required></label>
-    <label class="field"><span>Kind</span><select name="type">${Object.entries(LIB_TYPES).map(([k, v]) => `<option value="${k}"${k === x.type ? " selected" : ""}>${v}</option>`).join("")}</select></label></div>
-    <label class="field"><span>Words <em>for reusable wording, descriptions and biographies</em></span><textarea name="body" rows="6">${esc(x.body || "")}</textarea></label>
-    <div class="field"><span>File <em>picture or PDF, up to about 3 MB</em></span><div class="row-start"><button class="btn is-quiet is-small" type="button" data-pick>${file ? "Replace file" : "Choose a file"}</button>${file ? `<a class="link" href="${file}" download="${esc(x.title || "file")}">Download</a>` : ""}<input type="file" hidden data-file accept="image/*,application/pdf"></div>${file && /^data:image/.test(file) ? `<img class="lib-preview" src="${file}" alt="">` : ""}</div>
-    <div class="grid is-2 is-flat"><label class="field"><span>Tags</span><input name="tags" value="${esc(x.tags || "")}" placeholder="proposal, recruitment"></label><label class="field"><span>Owner</span><input name="owner" value="${esc(x.owner || "")}" placeholder="Who keeps it up to date"></label></div>
-    <div class="grid is-2 is-flat"><label class="field"><span>Review by</span><input type="date" name="review_date" value="${esc((x.review_date || "").slice(0, 10))}"></label>
-    <label class="field"><span>Status</span><select name="status">${["approved", "draft", "retired"].map((s) => `<option${s === x.status ? " selected" : ""}>${s}</option>`).join("")}</select></label></div>
-    <div class="row-between">${x.id ? '<button class="btn is-danger-quiet" value="delete" formnovalidate>Delete</button>' : "<span></span>"}<span class="row-end"><button class="btn is-quiet" value="cancel" formnovalidate>Cancel</button><button class="btn" value="save">Save</button></span></div></form>`;
-  document.body.append(d);
-  const f = $("form", d);
-  let newFile = null, mime = x.mime || null;
-  $("[data-pick]", d).onclick = () => $("[data-file]", d).click();
-  $("[data-file]", d).onchange = (e) => {
-    const file0 = e.target.files[0];
-    if (!file0) return;
-    if (file0.size > 3_000_000) return toast("That file is over 3 MB.", { error: true });
-    const r = new FileReader();
-    r.onload = () => {
-      newFile = r.result;
-      mime = file0.type;
-      if (!f.title.value) f.title.value = file0.name.replace(/\.[^.]+$/, "");
-      toast("File ready. Save to keep it.");
-    };
-    r.readAsDataURL(file0);
-  };
-  d.addEventListener("close", async () => {
-    try {
-      if (d.returnValue === "save") {
-        await studioPost("library-save", { id: x.id, type: f.type.value, title: f.title.value, body: f.body.value, tags: f.tags.value, owner: f.owner.value, review_date: f.review_date.value, status: f.status.value, file: newFile, mime });
-        library(view, { query: "" });
-      } else if (d.returnValue === "delete" && (await confirmBox(`Delete "${x.title}" from the library?`))) {
-        await studioPost("library-delete", { id: x.id });
-        library(view, { query: "" });
-      }
-    } catch (e) {
-      toast(e.message, { error: true });
-    }
-    d.remove();
-  });
-  d.showModal();
-}
-
 /* ---------- Settings ---------- */
 
 const TABS = [
@@ -513,7 +393,7 @@ export async function settings(view, { query }) {
   } else if (tab === "access") {
     body = card("Who can sign in", `<p>Admins sign in with their email and password through Supabase. Only accounts given admin access can open the studio.</p>
       <p class="muted small" style="margin-top:10px">To add someone, run on the office computer:<br><code>npm run admin:add -- their@email.co.uk</code><br>They'll get an email to choose a password. To remove access: <code>npm run admin:remove -- their@email.co.uk</code></p>
-      <p class="muted small" style="margin-top:10px">Everyone with access can see enquiries, documents and the library. Recruitment applications are kept on their own tab in Enquiries.</p>
+      <p class="muted small" style="margin-top:10px">Everyone with access can see enquiries and documents. Recruitment applications are kept on their own tab in Enquiries.</p>
       <div class="row-start" style="margin-top:14px"><a class="btn is-quiet" href="/admin/login.html#forgot">${icon("lock", 15)} Change my password</a></div>`);
   } else if (tab === "integrations") {
     const row = (name, ok, text) => `<li><span><b>${name}</b><small>${text}</small></span><span class="pill ${ok ? "is-won" : "is-draft"}">${ok ? "Connected" : "Not set up"}</span></li>`;
@@ -526,7 +406,7 @@ export async function settings(view, { query }) {
       ${row("Google Search Console", false, "Coming next: the searches that bring people in")}
     </ul>`);
   } else if (tab === "sample") {
-    body = card("Sample data", `<p>Load clearly labelled demonstration enquiries, a proposal, library items, locations and campaigns, to show the studio before real company information is authorised. Every sample row says "(sample)".</p>
+    body = card("Sample data", `<p>Load clearly labelled demonstration enquiries, a proposal, locations and campaigns, to show the studio before real company information is authorised. Every sample row says "(sample)".</p>
       <p class="muted small" style="margin-top:8px">Website analytics are never faked. Removing sample data deletes only rows marked as samples.</p>
       <div class="row-start" style="margin-top:14px"><button class="btn" type="button" data-sample="load">Load sample data</button><button class="btn is-quiet" type="button" data-sample="remove">Remove sample data</button></div>`);
   } else {
@@ -602,7 +482,7 @@ function wireSettings(view, kit, defaults, tab, query) {
       b.disabled = true;
       try {
         await studioPost(load ? "sample-load" : "sample-remove", {});
-        toast(load ? "Sample data loaded. Look in Enquiries, Document Studio, Library and Locations." : "Sample data removed.");
+        toast(load ? "Sample data loaded. Look in Enquiries, Document Studio and Locations." : "Sample data removed.");
       } catch (e) {
         toast(e.message, { error: true });
       }

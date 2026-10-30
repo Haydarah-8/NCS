@@ -308,3 +308,107 @@
   gap: 8px;
   justify-content: flex-end;
 }
+
+/* ---------- Tool pages ---------- */
+
+.toolbar-head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  align-items: center;
+  justify-content: space-between;
+  margin: -8px 0 6px;
+}
+
+.toolbar-head h1 {
+  margin: 0;
+  font-size: 22px;
+  letter-spacing: -0.02em;
+}
+
+.toolbar-head p {
+  margin: 2px 0 0;
+  font-size: 13px;
+}
+
+.frame.is-tall {
+  height: calc(100vh - 96px);
+  min-height: 560px;
+  border-radius: 12px;
+  background: #e8e8ed;
+}
+
+/* ---------- Blog: rich text editor ---------- */
+
+.rich {
+  min-height: 200px;
+}
+
+.rich .toastui-editor-defaultUI {
+  border-color: var(--line, rgba(0, 0, 0, 0.1));
+  border-radius: 12px;
+  font-family: inherit;
+}
+
+.rich .toastui-editor-defaultUI-toolbar {
+  border-radius: 12px 12px 0 0;
+  background: #fafafa;
+}
+
+.rich .toastui-editor-contents {
+  font-family: inherit;
+  font-size: 15px;
+}
+
+.rich .toastui-editor-contents h1,
+.rich .toastui-editor-contents h2 {
+  border-bottom: 0;
+}
+
+.rich-tools {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 8px;
+}
+
+.rich-tools label {
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+  font-size: 13px;
+}
+
+.rich-tools select {
+  width: auto;
+  min-height: 32px;
+  padding: 2px 10px;
+}
+
+/* The preview shows what the blog shows. */
+.preview em { font-style: italic; }
+.preview del { color: #86868b; }
+.preview hr { margin: 28px 0; border: 0; border-top: 1px solid rgba(0, 0, 0, 0.12); }
+.preview figure { margin: 20px 0; }
+.preview .table-wrap { overflow-x: auto; margin-top: 16px; }
+.preview table { width: 100%; border-collapse: collapse; font-size: 14px; }
+.preview th, .preview td { padding: 8px 10px; border-bottom: 1px solid rgba(0, 0, 0, 0.1); text-align: left; }
+.preview th { background: #f5f5f7; }
+.preview pre { padding: 12px 14px; overflow-x: auto; border-radius: 10px; background: #f5f5f7; font-size: 13px; }
+.preview ul.tasks { padding-left: 0; list-style: none; }
+.preview img { max-width: 100%; height: auto; border-radius: 10px; }
+
+/* Keep the editor inside its column; its toolbar wraps instead. */
+.editor > *,
+.editor-main,
+.editor-main .form,
+.rich {
+  min-width: 0;
+}
+
+.rich .toastui-editor-defaultUI-toolbar {
+  flex-wrap: wrap;
+  height: auto;
+}

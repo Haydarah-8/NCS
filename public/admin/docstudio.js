@@ -5,8 +5,9 @@
    so the PDF is exactly what's on screen. Every document keeps the brand
    kit it was made with; autosave, versions, statuses, PDF, Word and print.
 
-   Contract terms are never written here: a terms block takes approved
-   wording from the Library, or stays a visible placeholder. */
+   Contract terms are never written here: a terms block holds the
+   company's own approved wording, pasted in, or stays a visible
+   placeholder. */
 
 import { render } from "./md.js";
 import { $, $$, api, brandKit, confirmBox, day, empty, esc, head, icon, studio, studioPost, toast } from "./core.js";
@@ -66,7 +67,7 @@ function starter(kind, kit, c = {}) {
         B("facts", { rows: [["Prepared for", client], ["Site", c.location || ""], ["Valid until", plusDays(30)]] }),
         B("services", { ids: c.services || [], intro: "Our quotation covers the following services." }),
         B("pricing", { rows: (c.services || []).map((id) => ({ item: kit.services.find((s) => s.id === id)?.name || id, qty: "", unit: "hours", rate: "" })), vat: 20, notes: "Prices exclude VAT unless stated." }),
-        B("terms", { libraryId: "" }),
+        B("terms", { text: "" }),
         sig,
       ];
     case "letter":
@@ -132,7 +133,7 @@ function starter(kind, kit, c = {}) {
 }
 
 /* The proposal pack, assembled from the wizard's choices. */
-function proposalPack(kit, c, opts, terms) {
+function proposalPack(kit, c, opts) {
   const chosen = kit.services.filter((s) => c.services.includes(s.id));
   const blocks = [B("cover", { title: "Security proposal", subtitle: c.site ? `${c.site}${c.location ? `, ${c.location}` : ""}` : "Prepared for you", client: c.client, photo: opts.photo || "balfour-site" })];
   if (opts.intro) blocks.push(B("heading", { text: "Introduction" }), B("text", { text: `${c.contact ? `Dear ${c.contact.split(" ")[0]},\n\n` : ""}Thank you for the opportunity to propose security for ${c.client || "your site"}.${c.message ? `\n\nYou told us: “${c.message.slice(0, 400)}”` : ""}\n\n${kit.description}` }));
@@ -140,7 +141,7 @@ function proposalPack(kit, c, opts, terms) {
   if (opts.quote) blocks.push(B("pagebreak"), B("heading", { text: "Quotation" }), B("pricing", { rows: chosen.map((s) => ({ item: s.name, qty: "", unit: "hours", rate: "" })), vat: 20, notes: "Prices exclude VAT unless stated. Rates are confirmed after the site survey." }));
   if (opts.credentials) blocks.push(B("credentials", {}));
   if (opts.coverage) blocks.push(B("coverage", { text: kit.company.region }));
-  if (opts.terms) blocks.push(B("terms", { libraryId: terms || "" }));
+  if (opts.terms) blocks.push(B("terms", { text: "" }));
   blocks.push(B("contact", { staffIds: kit.staff.slice(0, 2).map((s) => s.id) }));
   return blocks;
 }
@@ -154,7 +155,7 @@ const n = (v) => Number(String(v ?? "").replace(/[^\d.-]/g, "")) || 0;
 
 /* Each block becomes one or more flowing pieces; a piece never splits. */
 function pieces(block, ctx) {
-  const { kit, data, library, locations } = ctx;
+  const { kit, data, locations } = ctx;
   const out = [];
   const add = (html, opts = {}) => out.push({ html, ...opts });
   switch (block.type) {
@@ -223,9 +224,8 @@ function pieces(block, ctx) {
       add(`<blockquote class="ds-quote"><p>“${esc(block.text)}”</p>${block.who ? `<cite>${esc(block.who)}</cite>` : ""}</blockquote>`);
       break;
     case "terms": {
-      const item = (library || []).find((x) => String(x.id) === String(block.libraryId));
-      if (item) String(item.body || "").split(/\n\s*\n/).forEach((p, i) => add(`${i ? "" : `<h3 class="ds-h3">${esc(item.title)}</h3>`}<div class="ds-text ds-small">${md(p)}</div>`));
-      else add(`<div class="ds-placeholder">Terms: choose the company's approved terms from the Library. The studio never writes contractual terms.</div>`);
+      if (String(block.text || "").trim()) String(block.text).split(/\n\s*\n/).forEach((p, i) => add(`${i ? "" : `<h3 class="ds-h3">${esc(block.title || "Terms and conditions")}</h3>`}<div class="ds-text ds-small">${md(p)}</div>`));
+      else add(`<div class="ds-placeholder">Terms: paste the company's approved terms here. The studio never writes contractual terms.</div>`);
       break;
     }
     case "signature":
@@ -356,7 +356,6 @@ export async function create(view, { kind, query }) {
 }
 
 async function wizard(view, kit, c, lead) {
-  const lib = (await studio("library")).items.filter((x) => x.status === "approved" && x.type === "text");
   view.innerHTML =
     head("Proposal pack.", "Choose the client and services; the studio assembles a branded cover, introduction, services, quotation, credentials and contact page into one PDF.", `<a class="btn is-quiet" href="#/studio">${icon("back", 15)} Document Studio</a>`) +
     `<form class="wizard" data-wizard>
@@ -371,7 +370,6 @@ async function wizard(view, kit, c, lead) {
       <section class="card"><header class="card-head"><h2>2. Services</h2></header><div class="card-body"><div class="checks">${kit.services.map((s) => `<label class="check-card"><input type="checkbox" name="svc" value="${s.id}"${(c.services || []).includes(s.id) ? " checked" : ""}><b>${esc(s.name)}</b><small>${esc(s.summary)}</small></label>`).join("")}</div></div></section>
       <section class="card"><header class="card-head"><h2>3. Sections</h2></header><div class="card-body checks is-sections">
         ${[["intro", "Introduction"], ["services", "Service overview"], ["quote", "Quotation"], ["credentials", "Credentials"], ["coverage", "Coverage"], ["terms", "Approved terms"]].map(([k, l]) => `<label class="st-check"><input type="checkbox" name="opt" value="${k}" checked> ${l}</label>`).join("")}
-        <label class="field" style="grid-column:1/-1"><span>Terms from the Library <em>approved wording only</em></span><select name="terms"><option value="">Leave a placeholder</option>${lib.map((x) => `<option value="${x.id}">${esc(x.title)}</option>`).join("")}</select></label>
       </div></section>
       <div class="row-end"><button class="btn" type="submit">${icon("spark", 15)} Build the proposal</button></div>
     </form>`;
@@ -381,7 +379,7 @@ async function wizard(view, kit, c, lead) {
     const client = { client: f.client.value, contact: f.contact.value, email: f.email.value, site: f.site.value, location: f.location.value, message: c.message || "", services: $$('[name="svc"]:checked', f).map((x) => x.value) };
     const opts = Object.fromEntries($$('[name="opt"]', f).map((x) => [x.value, x.checked]));
     opts.photo = f.photo.value;
-    const blocks = proposalPack(kit, client, opts, f.terms.value);
+    const blocks = proposalPack(kit, client, opts);
     const { document: d } = await studioPost("document-save", { kind: "proposal", title: `Proposal: ${client.client || "new client"}`, data: { ...client, blocks }, lead_id: lead?.id });
     toast("Proposal assembled. Fill in the prices and check the wording.");
     location.hash = `#/studio/${d.id}`;
@@ -392,16 +390,16 @@ async function wizard(view, kit, c, lead) {
 
 export async function edit(view, { id }) {
   view.innerHTML = `<div class="loading"><span></span>Loading…</div>`;
-  let doc, versions, library, locations, current;
+  let doc, versions, locations, current;
   try {
-    [{ document: doc, versions }, { items: library }, { locations }, current] = await Promise.all([studio("document", { params: { id } }), studio("library"), studio("locations"), brandKit()]);
+    [{ document: doc, versions }, { locations }, current] = await Promise.all([studio("document", { params: { id } }), studio("locations"), brandKit()]);
   } catch (e) {
     view.innerHTML = head("Something went wrong.") + `<p class="muted">${esc(e.message)}</p>`;
     return;
   }
   const kit = Object.keys(doc.brand || {}).length ? { ...current, ...doc.brand } : current;
   doc.data.blocks ||= [];
-  const ctx = { kit, data: doc.data, library: library.filter((x) => x.status === "approved"), locations };
+  const ctx = { kit, data: doc.data, locations };
   const slides = TEMPLATES[doc.kind]?.slides;
   const brandChanged = (doc.brand?.version || 0) < current.version;
   view.innerHTML = `
@@ -428,8 +426,7 @@ export async function edit(view, { id }) {
       <aside class="ds-blocks">
         <div class="ds-client">${["client", "contact", "email"].map((k) => `<label class="field"><span>${k === "client" ? "Client" : k === "contact" ? "Contact" : "Email"}</span><input data-client="${k}" value="${esc(doc.data[k] || "")}"></label>`).join("")}</div>
         <ol class="ds-list" data-list></ol>
-        <div class="ds-add"><select data-add-type><option value="">+ Add a section…</option>${Object.entries(BLOCKS).filter(([k]) => (slides ? k === "slide" : k !== "slide")).map(([k, l]) => `<option value="${k}">${l}</option>`).join("")}</select>
-        <select data-add-lib><option value="">+ Insert approved wording…</option>${ctx.library.filter((x) => x.type === "text").map((x) => `<option value="${x.id}">${esc(x.title)}</option>`).join("")}</select></div>
+        <div class="ds-add"><select data-add-type><option value="">+ Add a section…</option>${Object.entries(BLOCKS).filter(([k]) => (slides ? k === "slide" : k !== "slide")).map(([k, l]) => `<option value="${k}">${l}</option>`).join("")}</select></div>
       </aside>
       <div class="ds-preview" data-preview></div>
     </div>`;
@@ -560,17 +557,6 @@ export async function edit(view, { id }) {
     const type = e.target.value;
     if (!type) return;
     const b = B(type, type === "pricing" ? { rows: [{ item: "", qty: "", unit: "hours", rate: "" }], vat: 20 } : type === "table" ? { head: ["Column", "Column"], rows: [["", ""]] } : type === "facts" ? { rows: [["", ""]] } : type === "actions" ? { rows: [{ action: "", owner: "", due: "" }] } : type === "services" ? { ids: [] } : type === "contact" ? { staffIds: kit.staff.slice(0, 1).map((s) => s.id) } : type === "slide" ? { title: "New slide", points: "", photo: "hero" } : {});
-    doc.data.blocks.push(b);
-    open = b.id;
-    e.target.value = "";
-    drawList();
-    drawPreview();
-    later();
-  });
-  $("[data-add-lib]", view).addEventListener("change", (e) => {
-    const item = ctx.library.find((x) => String(x.id) === e.target.value);
-    if (!item) return;
-    const b = B("text", { text: item.body || "" });
     doc.data.blocks.push(b);
     open = b.id;
     e.target.value = "";
@@ -725,7 +711,7 @@ async function assistReview(btn) {
 }
 
 function blockForm(b, ctx) {
-  const { kit, library } = ctx;
+  const { kit } = ctx;
   const inp = (k, label, v = b[k] ?? "", opts = {}) =>
     opts.area ? `<label class="field"><span>${label}</span><textarea data-k="${k}" rows="${opts.rows || 4}">${esc(v)}</textarea></label>` : `<label class="field"><span>${label}</span><input data-k="${k}" value="${esc(v)}"${opts.type ? ` type="${opts.type}"` : ""}></label>`;
   const photo = (k = "photo") => `<label class="field"><span>Photograph</span><select data-k="${k}">${PHOTOS.map((p) => `<option${p === b[k] ? " selected" : ""}>${p}</option>`).join("")}</select></label>`;
@@ -753,7 +739,7 @@ function blockForm(b, ctx) {
     case "quote":
       return inp("text", "Quote", b.text, { area: true }) + inp("who", "Who said it");
     case "terms":
-      return `<label class="field"><span>Approved terms from the Library</span><select data-k="libraryId"><option value="">None: leave a placeholder</option>${library.filter((x) => x.type === "text").map((x) => `<option value="${x.id}"${String(x.id) === String(b.libraryId) ? " selected" : ""}>${esc(x.title)}</option>`).join("")}</select></label><p class="muted small">Only approved wording is offered. Edit terms in the Library, not here.</p>`;
+      return inp("title", "Heading", b.title || "Terms and conditions") + inp("text", "The company's approved terms <em>paste them in exactly as supplied</em>", b.text || "", { area: true, rows: 10 }) + `<p class="muted small">Use only terms the company has approved. The studio never writes contractual terms, and writing help is not offered here.</p>`;
     case "signature":
       return inp("name", "Name") + inp("role", "Role");
     case "contact":
@@ -794,7 +780,7 @@ async function toDocx(doc, ctx) {
   const src = "https://unpkg.com/docx@8.5.0/build/index.umd.js";
   if (!window.docx) await new Promise((ok, no) => document.head.append(Object.assign(document.createElement("script"), { src, onload: ok, onerror: no })));
   const { Document, Packer, Paragraph, TextRun, HeadingLevel, Table, TableRow, TableCell, WidthType, ImageRun, Header, Footer, AlignmentType, PageNumber, PageBreak, BorderStyle } = window.docx;
-  const { kit, data, library } = ctx;
+  const { kit, data } = ctx;
   const accent = kit.colours.accent.replace("#", "");
   const runs = (text) =>
     String(text)
@@ -865,8 +851,7 @@ async function toDocx(doc, ctx) {
         children.push(new Paragraph({ children: [new TextRun({ text: `“${b.text}”`, italics: true })] }), ...(b.who ? [new Paragraph(b.who)] : []));
         break;
       case "terms": {
-        const item = library.find((x) => String(x.id) === String(b.libraryId));
-        children.push(...(item ? [new Paragraph({ text: item.title, heading: HeadingLevel.HEADING_3 }), ...textBlock(item.body || "")] : [para("Terms: add the company's approved terms from the Library.")]));
+        children.push(...(String(b.text || "").trim() ? [new Paragraph({ text: b.title || "Terms and conditions", heading: HeadingLevel.HEADING_3 }), ...textBlock(b.text)] : [para("Terms: paste the company's approved terms here.")]));
         break;
       }
       case "signature":

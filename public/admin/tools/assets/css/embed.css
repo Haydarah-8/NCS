@@ -352,3 +352,19 @@ textarea:focus {
 .bc-hero {
   padding-bottom: 1rem !important;
 }
+
+/* Inside the admin the frame is narrower than a full window: put the form
+   and the preview side by side from 900 px, with the preview kept in view. */
+@media (min-width: 900px) and (max-width: 1099px) {
+  .dc-layout {
+    grid-template-columns: minmax(0, 360px) minmax(0, 1fr);
+    align-items: start;
+  }
+}
+
+@media (min-width: 900px) {
+  .dc-preview {
+    position: sticky;
+    top: 12px;
+  }
+}

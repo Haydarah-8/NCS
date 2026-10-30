@@ -140,11 +140,11 @@ export async function overview(view, { days }) {
           card("Shortcuts", `<div class="shortcuts">
             <a href="#/studio/new/proposal">${icon("spark", 18)}<span>Proposal pack</span></a>
             <a href="#/studio/new/quotation">${icon("file", 18)}<span>Quotation</span></a>
-            <a href="#/documents/business-card">${icon("card", 18)}<span>Business card</span></a>
-            <a href="#/documents/email">${icon("mail", 18)}<span>Email signature</span></a>
+            <a href="#/tools/business-card">${icon("card", 18)}<span>Business card</span></a>
+            <a href="#/tools/email">${icon("mail", 18)}<span>Email signature</span></a>
             <a href="#/insights/campaigns">${icon("compass", 18)}<span>Campaign link</span></a>
-            <a href="#/documents/pdf">${icon("pen", 18)}<span>PDF editor</span></a>
-          </div>${h.library.overdue ? `<p class="note is-warn" style="margin-top:12px">${h.library.overdue} library item(s) are past their review date.</p>` : ""}`);
+            <a href="#/tools/pdf">${icon("pen", 18)}<span>PDF viewer</span></a>
+          </div>`);
       })
       .catch(() => ($("[data-home]", view).innerHTML = ""));
   } catch (e) {
@@ -428,6 +428,16 @@ export async function speed(view, { days }) {
 
 /* ---------- Blog ---------- */
 
+let richPending = null;
+function loadRichEditor() {
+  if (window.toastui?.Editor) return Promise.resolve();
+  if (!document.querySelector('link[href="/admin/vendor/toastui/toastui-editor.min.css"]')) {
+    document.head.append(Object.assign(document.createElement("link"), { rel: "stylesheet", href: "/admin/vendor/toastui/toastui-editor.min.css" }));
+  }
+  richPending ||= new Promise((ok, no) => document.head.append(Object.assign(document.createElement("script"), { src: "/admin/vendor/toastui/toastui-editor-all.min.js", onload: ok, onerror: () => ((richPending = null), no()) })));
+  return richPending;
+}
+
 const live = (p) => p.status === "published" && new Date(p.published_at) <= new Date();
 const postState = (p) => (p.status !== "published" ? ["is-draft", "Draft"] : live(p) ? ["is-won", "Live"] : ["is-quoted", `Scheduled ${day(p.published_at, { day: "numeric", month: "short" })}`]);
 
@@ -472,7 +482,15 @@ export async function editPost(view, { id }) {
       <div class="editor-main card"><div class="card-body form">
         <label class="field"><span>Title</span><input name="title" value="${esc(p.title)}" required maxlength="200" placeholder="What happened, or what you want readers to know"></label>
         <label class="field"><span>Summary <em>shown under the title and in search results</em></span><textarea name="dek" rows="2" maxlength="400">${esc(p.dek || "")}</textarea></label>
-        <label class="field"><span>Text <em>## heading, - list, **bold**, [link](https://…)</em></span><textarea name="body" rows="18" class="mono" placeholder="## A heading\n\nA paragraph…">${esc(p.body || "")}</textarea></label>
+        <div class="field"><span>Text <em data-count></em></span>
+          <div class="rich" data-rich><div class="loading"><span></span>Loading the editor…</div></div>
+          <textarea name="body" rows="18" class="mono" hidden placeholder="## A heading\n\nA paragraph…">${esc(p.body || "")}</textarea>
+          <div class="rich-tools">
+            <label>Insert a site photo <select data-photo-insert><option value="">Choose…</option>${PHOTOS.map((ph) => `<option value="${ph}">${ph}</option>`).join("")}</select></label>
+            <span class="muted small">Ctrl S saves. Unsaved changes are kept in this browser.</span>
+          </div>
+          <p class="note" data-draft hidden></p>
+        </div>
       </div></div>
       <aside class="editor-side">
         ${card("Publish", `<div class="form">
@@ -492,6 +510,100 @@ export async function editPost(view, { id }) {
     $("[data-preview]", view).innerHTML = `${cover ? `<img src="/images/${cover}.jpg" alt="">` : ""}<p class="preview-meta">${esc(TOPICS.find((t) => t[0] === form.topic.value)?.[1] || "")} · ${minutes} min read</p><h1>${esc(form.title.value || "Your title")}</h1>${form.dek.value ? `<p class="preview-dek">${esc(form.dek.value)}</p>` : ""}${html}`;
   };
   form.addEventListener("input", draw);
+
+  // The rich text editor (Toast UI Editor, served from /admin/vendor). It
+  // writes Markdown, which the blog renders. If it can't load, the plain
+  // Markdown box takes its place.
+  const draftKey = `ncs-post-draft:${p.id || "new"}`;
+  const stash = () => {
+    try {
+      localStorage.setItem(draftKey, JSON.stringify({ body: form.body.value, title: form.title.value, dek: form.dek.value, at: Date.now() }));
+    } catch {}
+  };
+  const counts = () => {
+    const { words, minutes } = render(form.body.value);
+    $("[data-count]", view).textContent = `${words} words · about ${minutes} min read`;
+  };
+  let editor = null;
+  loadRichEditor()
+    .then(() => {
+      const box = $("[data-rich]", view);
+      if (!box) return;
+      box.innerHTML = "";
+      editor = new window.toastui.Editor({
+        el: box,
+        height: "620px",
+        initialEditType: "wysiwyg",
+        previewStyle: "tab",
+        initialValue: form.body.value,
+        placeholder: "Write the post. Use the toolbar for headings, lists, tables, quotes and links.",
+        usageStatistics: false, // no reports to the editor's makers
+        hideModeSwitch: false,
+        toolbarItems: [["heading", "bold", "italic", "strike"], ["hr", "quote"], ["ul", "ol", "task", "indent", "outdent"], ["table", "image", "link"], ["code", "codeblock"]],
+        hooks: {
+          addImageBlobHook: () => toast("Pictures can't be uploaded into posts. Use a site photo, or the picture button with a web address.", { error: true }),
+        },
+      });
+      editor.on("change", () => {
+        form.body.value = editor.getMarkdown();
+        draw();
+        counts();
+        stash();
+      });
+    })
+    .catch(() => {
+      $("[data-rich]", view)?.remove();
+      form.body.hidden = false;
+      toast("The rich text editor couldn't load, so the plain text box is showing instead.", { error: true });
+    });
+  form.body.addEventListener("input", () => (counts(), stash()));
+  form.title.addEventListener("input", stash);
+  form.dek.addEventListener("input", stash);
+  counts();
+
+  $("[data-photo-insert]", view).addEventListener("change", (e) => {
+    const ph = e.target.value;
+    e.target.value = "";
+    if (!ph) return;
+    if (editor) editor.exec("addImage", { imageUrl: `/images/${ph}.jpg`, altText: ph.replace(/-/g, " ") });
+    else form.body.value += `\n\n![${ph.replace(/-/g, " ")}](/images/${ph}.jpg)\n`;
+    form.body.value = editor ? editor.getMarkdown() : form.body.value;
+    draw();
+  });
+
+  // An unsaved draft from earlier in this browser.
+  try {
+    const saved = JSON.parse(localStorage.getItem(draftKey) || "null");
+    const newer = saved && saved.at > new Date(p.updated_at || 0).getTime() && (saved.body !== (p.body || "") || saved.title !== (p.title || ""));
+    if (newer) {
+      const note = $("[data-draft]", view);
+      note.hidden = false;
+      note.innerHTML = `There are unsaved changes from ${new Date(saved.at).toLocaleString("en-GB", { dateStyle: "medium", timeStyle: "short" })}. <button class="link" type="button" data-restore>Bring them back</button> · <button class="link" type="button" data-discard>Discard</button>`;
+      note.addEventListener("click", (e) => {
+        if (e.target.matches("[data-restore]")) {
+          form.title.value = saved.title;
+          form.dek.value = saved.dek;
+          form.body.value = saved.body;
+          editor?.setMarkdown(saved.body, false);
+          draw();
+          counts();
+        }
+        if (e.target.matches("[data-restore], [data-discard]")) {
+          if (e.target.matches("[data-discard]")) localStorage.removeItem(draftKey);
+          note.hidden = true;
+        }
+      });
+    }
+  } catch {}
+
+  const saveKeys = (e) => {
+    if (!document.contains(form)) return removeEventListener("keydown", saveKeys);
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "s") {
+      e.preventDefault();
+      form.requestSubmit();
+    }
+  };
+  addEventListener("keydown", saveKeys);
   form.title.addEventListener("input", () => {
     if (!p.id || !form.slug.dataset.touched) form.slug.placeholder = slugify(form.title.value) || "made from the title";
   });
@@ -509,6 +621,9 @@ export async function editPost(view, { id }) {
     const when = form.published_at.value ? new Date(form.published_at.value).toISOString() : "";
     try {
       const { post: saved } = await post("post-save", { id: p.id, title: form.title.value, slug: form.slug.value, dek: form.dek.value, topic: form.topic.value, cover, body: form.body.value, status: form.status.value, published_at: when });
+      try {
+        localStorage.removeItem(draftKey);
+      } catch {}
       toast(saved.status === "published" ? (live(saved) ? "Published." : "Scheduled.") : "Draft saved.");
       location.hash = `#/blog/${saved.id}`;
       if (String(saved.id) === String(id)) editPost(view, { id: saved.id });
@@ -573,54 +688,29 @@ export async function announcement(view) {
   });
 }
 
-/* ---------- Documents ---------- */
+/* ---------- Tools ---------- */
 
-export const DOCS = [
-  ["Money", [
-    ["invoice", "Invoice", "receipt", "invoice.html", "Line items, VAT, deposits and payment details"],
-    ["quote", "Quote", "file", "quote.html", "Priced cover for a site, valid for a set time"],
-    ["receipt", "Receipt", "receipt", "receipt.html", "Proof of payment, A4 or till roll"],
-    ["credit-note", "Credit note", "file", "credit-note.html", "Money back against an invoice"],
-    ["statement", "Statement of account", "file", "statement.html", "Everything a client owes, at a glance"],
-  ]],
-  ["Operations", [
-    ["timesheet", "Timesheet", "clock", "timesheet.html", "Shifts and hours, ready to turn into an invoice"],
-    ["job-sheet", "Job sheet", "file", "job-sheet.html", "A call-out, alarm response or job, signed off on site"],
-    ["payslip", "Payslip", "receipt", "payslip.html", "Gross pay, deductions and net pay"],
-  ]],
-  ["Brand and print", [
-    ["business-card", "Business cards and brand kit", "card", "business-card.html", "Twenty-four designs, logos, colours and type"],
-    ["letterhead", "Letterhead", "mail", "kit.html?type=letterhead", "With or without a letter"],
-    ["badge", "Officer ID badge", "badge", "kit.html?type=badge", "Photo, SIA licence, front and back"],
-    ["certificate", "Certificate", "spark", "kit.html?type=certificate", "Training and long service"],
-    ["sign", "Site signs", "sign", "sign.html", "Safety and security signs to UK standards, A5 to hoarding banner"],
-    ["pass", "Visitor pass", "badge", "kit.html?type=pass", "Colour of the day, escort and contractor"],
-  ]],
-  ["Marketing", [
-    ["email", "Email templates", "mail", "email.html", "Quotes, reminders, incidents, news and your email signature"],
-    ["post", "Social posts", "megaphone", "post.html", "Instagram, LinkedIn, Facebook and X, at every size"],
-  ]],
-  ["Tools", [
-    ["pdf", "PDF editor", "pen", "pdf.html", "Sign, fill in, mark up, merge, reorder and split any PDF"],
-    ["files", "File tools", "download", "files.html", "Images to PDF, compress, page numbers, watermarks, QR codes, renaming"],
-  ]],
+/* Each tool is its own page in the admin, drawn in a frame. */
+export const TOOLS = [
+  ["business-card", "Business cards", "card", "tools/business-card.html", "Staff cards from saved profiles, 3D preview, batch print"],
+  ["letterhead", "Letterhead", "file", "tools/letterhead.html", "Headed paper and letters, PDF and a Word template"],
+  ["id-badge", "ID badges", "badge", "tools/id-badge.html", "Officer cards with photo, licence and expiry check"],
+  ["visitor-pass", "Visitor passes", "badge", "tools/visitor-pass.html", "Colour of the day, escort and contractor, numbered sheets"],
+  ["email", "Email templates", "mail", "tools/email.html", "Business emails and signatures for the whole office"],
+  ["post", "Social posts", "megaphone", "tools/post.html", "Posts, banners, flyers and posters at every size"],
+  ["files", "File tools", "download", "tools/files.html", "Merge, split, compress, page numbers, watermarks, QR codes"],
+  ["pdf", "PDF viewer", "pen", "pdfjs/web/viewer.html", "Read, fill in, add text, draw, highlight, sign and reorder pages"],
 ];
-const ALL_DOCS = DOCS.flatMap(([, items]) => items);
+// Old addresses from before the tools had their own pages.
+const OLD_TOOL = { badge: "id-badge", pass: "visitor-pass" };
 
-export function documents(view) {
-  view.innerHTML =
-    head("Documents.", "Paperwork, print, marketing and the PDF editor, all in the NCS brand. Drafts stay in this browser.") +
-    DOCS.map(([group, items]) => `<h2 class="group-title">${group}</h2><div class="docs">${items.map(([id, name, ic, , text]) => `<a href="#/documents/${id}"><span class="doc-ico">${icon(ic, 22)}</span><b>${name}</b><span>${text}</span></a>`).join("")}</div>`).join("");
-}
-
-export function documentView(view, { id, query }) {
-  const d = ALL_DOCS.find((x) => x[0] === id);
-  if (!d) return (location.hash = "#/documents");
-  view.innerHTML = `<div class="docbar"><a class="btn is-quiet is-small" href="#/documents">${icon("back", 14)} Documents</a>
-      <select data-pick aria-label="Switch document">${DOCS.map(([g, items]) => `<optgroup label="${g}">${items.map(([did, name]) => `<option value="${did}"${did === id ? " selected" : ""}>${esc(name)}</option>`).join("")}</optgroup>`).join("")}</select>
-      <a class="btn is-quiet is-small" href="/admin/tools/${d[3]}" target="_blank" rel="noopener">${icon("external", 14)} Open on its own</a></div>
-    <iframe class="frame" src="/admin/tools/${d[3]}${query ? `?${esc(query)}` : ""}" title="${esc(d[1])}"></iframe>`;
-  $("[data-pick]", view).addEventListener("change", (e) => (location.hash = `#/documents/${e.target.value}`));
+export function toolView(view, { id, query }) {
+  const t = TOOLS.find((x) => x[0] === (OLD_TOOL[id] || id));
+  if (!t) return (location.hash = "#/brand");
+  const src = `/admin/${t[3]}${query ? `?${esc(query)}` : ""}`;
+  view.innerHTML = `<div class="toolbar-head"><div><h1>${esc(t[1])}</h1><p class="muted">${esc(t[4])}</p></div>
+      <a class="btn is-quiet is-small" href="${src}" target="_blank" rel="noopener">${icon("external", 14)} Open on its own</a></div>
+    <iframe class="frame${t[0] === "pdf" ? " is-tall" : ""}" src="${src}" title="${esc(t[1])}"></iframe>`;
 }
 
 /* ---------- Coming next ---------- */

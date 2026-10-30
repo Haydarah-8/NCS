@@ -1,11 +1,10 @@
 /* The Business Studio's data, by ?action=. Admin only, like /api/admin.
 
-   GET   brand, documents, document, library, locations, campaigns, questions,
-         home, search
+   GET   brand, documents, document, locations, campaigns, questions, home,
+         search
    POST  brand-save, document-save, document-duplicate, document-delete,
-         document-restore, library-save, library-delete, location-save,
-         location-delete, campaign-save, campaign-delete, lead-update,
-         sample-load, sample-remove */
+         document-restore, location-save, location-delete, campaign-save,
+         campaign-delete, lead-update, sample-load, sample-remove */
 
 import { slugify } from "@/lib/md.js";
 import { DEFAULT_BRAND, withDefaults } from "@/lib/server/brandkit";
@@ -18,8 +17,6 @@ export const dynamic = "force-dynamic";
 
 const DOC_STATES = new Set(["draft", "reviewed", "approved"]);
 const LEAD_STATES = new Set(["new", "contacted", "quoted", "won", "closed", "lost"]);
-const LIB_TYPES = new Set(["logo", "photo", "text", "template", "credential", "headshot", "graphic", "document"]);
-const MAX_FILE = 4_000_000; // a data URL, about 3 MB of picture or PDF
 const daysOf = (p: URLSearchParams) => ([7, 30, 90, 365].includes(Number(p.get("days"))) ? Number(p.get("days")) : 30);
 const SINCE = `(((now() at time zone 'Europe/London')::date - ($1::int - 1))::timestamp at time zone 'Europe/London')`;
 const num = (v: unknown) => (v === "" || v == null || Number.isNaN(Number(v)) ? null : Number(v));
@@ -51,15 +48,6 @@ async function get(sql: Sql, action: string | null, p: URLSearchParams) {
       if (!doc) return json({ error: "That document no longer exists." }, 404);
       const versions = await sql`select id, ts, status, note from document_versions where document_id = ${id} order by ts desc limit 50`;
       return json({ document: doc, versions });
-    }
-    case "library": {
-      const rows = await sql`select id, type, title, body, mime, tags, owner, review_date, status, sample, created_at, updated_at,
-        case when length(file) < 400000 then file else null end as file, file is not null as has_file from library order by type, title`;
-      return json({ items: rows });
-    }
-    case "library-file": {
-      const [row] = await sql`select file, mime, title from library where id = ${Number(p.get("id"))}`;
-      return json({ file: row?.file || null, mime: row?.mime, title: row?.title });
     }
     case "locations":
       return json({ locations: await sql`select * from locations order by category, name` });
@@ -97,23 +85,21 @@ async function get(sql: Sql, action: string | null, p: URLSearchParams) {
       return json({ days, services, byService, sources, funnel: funnel[0], byPage });
     }
     case "home": {
-      const [docs, due, lib] = await sql.transaction([
+      const [docs, due] = await sql.transaction([
         sql`select id, kind, title, status, favourite, updated_at from documents order by favourite desc, updated_at desc limit 8`,
         sql`select id, name, company, site, follow_up, status from leads where follow_up is not null and follow_up <= (now() at time zone 'Europe/London')::date + 2 and status not in ('won', 'closed', 'lost') order by follow_up limit 8`,
-        sql`select count(*) filter (where review_date is not null and review_date < now()::date)::int as overdue, count(*)::int as total from library`,
       ]);
-      return json({ documents: docs, followUps: due, library: lib[0] });
+      return json({ documents: docs, followUps: due });
     }
     case "search": {
       const term = `%${clip(p.get("q"), 60).toLowerCase()}%`;
       if (term.length < 4) return json({ results: [] });
-      const [docs, leads, lib, locs] = await sql.transaction([
+      const [docs, leads, locs] = await sql.transaction([
         sql`select id, title, kind from documents where lower(title) like ${term} or lower(data::text) like ${term} order by updated_at desc limit 6`,
         sql`select id, name, company from leads where lower(coalesce(name,'') || ' ' || coalesce(company,'') || ' ' || coalesce(email,'') || ' ' || coalesce(message,'')) like ${term} order by ts desc limit 6`,
-        sql`select id, title, type from library where lower(title || ' ' || coalesce(body,'') || ' ' || coalesce(tags,'')) like ${term} limit 6`,
         sql`select id, name, category from locations where lower(name || ' ' || coalesce(address,'') || ' ' || coalesce(postcode,'')) like ${term} limit 6`,
       ]);
-      return json({ results: [...docs.map((d) => ({ type: "document", ...d })), ...leads.map((l) => ({ type: "enquiry", ...l })), ...lib.map((x) => ({ type: "library", ...x })), ...locs.map((x) => ({ type: "location", ...x }))] });
+      return json({ results: [...docs.map((d) => ({ type: "document", ...d })), ...leads.map((l) => ({ type: "enquiry", ...l })), ...locs.map((x) => ({ type: "location", ...x }))] });
     }
     default:
       return json({ error: "Unknown action" }, 400);
@@ -127,7 +113,7 @@ async function post(sql: Sql, action: string | null, d: Record<string, any>, req
       const current = await brand(sql);
       const next = withDefaults({ ...current, ...(d.brand || {}), version: current.version + 1 });
       const text = JSON.stringify(next);
-      if (text.length > 200_000) return json({ error: "The brand kit is too large. Keep pictures in the library." }, 413);
+      if (text.length > 200_000) return json({ error: "The brand kit is too large. Use smaller pictures." }, 413);
       await sql`insert into settings (key, value) values ('brandkit', ${text}::jsonb) on conflict (key) do update set value = excluded.value, updated_at = now()`;
       await audit("brand kit", true, request, `version ${next.version}`);
       return json({ brand: next });
@@ -178,22 +164,6 @@ async function post(sql: Sql, action: string | null, d: Record<string, any>, req
       await sql`insert into document_versions (document_id, status, note, data) values (${v.document_id}, 'draft', 'Restored an earlier version', ${JSON.stringify(v.data)}::jsonb)`;
       return json({ document: row });
     }
-    case "library-save": {
-      const type = LIB_TYPES.has(d.type) ? d.type : "text";
-      const file = typeof d.file === "string" && d.file.startsWith("data:") ? d.file : null;
-      if (file && file.length > MAX_FILE) return json({ error: "That file is too large (about 3 MB at most)." }, 413);
-      const status = ["draft", "approved", "retired"].includes(d.status) ? d.status : "approved";
-      const f = { title: clip(d.title, 160) || "Untitled", body: clip(d.body, 20_000), tags: clip(d.tags, 200), owner: clip(d.owner, 80), review: clip(d.review_date, 10) || null, mime: clip(d.mime, 80) || null };
-      const [row] = d.id
-        ? file
-          ? await sql`update library set type = ${type}, title = ${f.title}, body = ${f.body}, tags = ${f.tags}, owner = ${f.owner}, review_date = ${f.review}, status = ${status}, file = ${file}, mime = ${f.mime}, updated_at = now() where id = ${Number(d.id)} returning id`
-          : await sql`update library set type = ${type}, title = ${f.title}, body = ${f.body}, tags = ${f.tags}, owner = ${f.owner}, review_date = ${f.review}, status = ${status}, updated_at = now() where id = ${Number(d.id)} returning id`
-        : await sql`insert into library (type, title, body, tags, owner, review_date, status, file, mime) values (${type}, ${f.title}, ${f.body}, ${f.tags}, ${f.owner}, ${f.review}, ${status}, ${file}, ${f.mime}) returning id`;
-      return json({ id: row?.id });
-    }
-    case "library-delete":
-      await sql`delete from library where id = ${Number(d.id)}`;
-      return json({ ok: true });
     case "location-save": {
       const f = {
         name: clip(d.name, 120) || "Untitled location",

@@ -1364,6 +1364,12 @@ async function loadStaff() {
     if (!res.ok) return;
     const { brand } = await res.json();
     staff = (brand?.staff || []).filter((p) => p.name);
+    // Company website and address from the brand kit, unless already changed here.
+    const c = brand?.company || {};
+    const web = (c.web || "").replace(/^https?:\/\//, "").replace(/\/$/, "");
+    if (web && form.elements.web.value === DEFAULTS.web) form.elements.web.value = web;
+    if (c.region && form.elements.area.value === DEFAULTS.area) form.elements.area.value = c.region.slice(0, 48);
+    render();
     if (!staff.length || !staffPick) return;
     staffPick.insertAdjacentHTML("beforeend", staff.map((p) => `<option value="${p.id}">${p.name.replace(/</g, "&lt;")}${p.role ? ` · ${p.role.replace(/</g, "&lt;")}` : ""}${p.sample ? " (sample)" : ""}</option>`).join(""));
     document.querySelector("[data-staff-box]").hidden = false;

@@ -1,0 +1,83 @@
+/* New Concept Security look for the PDF.js viewer. Only colours and the
+   empty state; the viewer's own layout is left alone. */
+
+:root {
+  --toolbar-bg-color: #ffffff;
+  --sidebar-toolbar-bg-color: #f5f5f7;
+  --body-bg-color: #e8e8ed;
+  --toolbar-border-color: rgba(0, 0, 0, 0.1);
+  --progressBar-color: #a01010;
+  --button-primary-bg-color: #a01010;
+  --button-primary-hover-bg-color: #c41616;
+  --button-primary-active-bg-color: #7a0a0a;
+  --button-primary-border-color: #a01010;
+  --button-primary-hover-border-color: #c41616;
+  --button-primary-fg-color: #ffffff;
+  --button-primary-hover-fg-color: #ffffff;
+  --toggled-btn-bg-color: rgba(160, 16, 16, 0.14);
+  --toggled-btn-color: #a01010;
+  --main-color: #1d1d1f;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Helvetica, Arial, sans-serif;
+}
+
+.ncs-empty {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+}
+
+.ncs-empty-card {
+  display: grid;
+  justify-items: center;
+  gap: 12px;
+  max-width: 460px;
+  padding: 36px 32px;
+  border-radius: 22px;
+  background: #ffffff;
+  color: #1d1d1f;
+  text-align: center;
+  box-shadow: 0 30px 70px -36px rgba(0, 0, 0, 0.45);
+}
+
+.ncs-empty-card svg {
+  width: 44px;
+  height: 44px;
+}
+
+.ncs-empty-card h1 {
+  margin: 4px 0 0;
+  font-size: 22px;
+  letter-spacing: -0.02em;
+}
+
+.ncs-empty-card p {
+  margin: 0;
+  color: #6e6e73;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.ncs-empty-card small {
+  color: #86868b;
+  font-size: 12px;
+}
+
+.ncs-open {
+  margin-top: 6px;
+  padding: 11px 22px;
+  border: 0;
+  border-radius: 999px;
+  background: #a01010;
+  color: #ffffff;
+  font: 600 14px/1 inherit;
+  cursor: pointer;
+}
+
+.ncs-open:hover {
+  background: #c41616;
+}

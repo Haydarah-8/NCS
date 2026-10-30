@@ -1808,3 +1808,96 @@
 .kit-brand .ncs-word span {
   font-weight: 400;
 }
+
+/* ---------- Checks, day colours, write-in blanks, numbered sheets ---------- */
+
+.kit-warn {
+  display: grid;
+  gap: 6px;
+  margin-bottom: 14px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: #fff4e5;
+  color: #7a4b00;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.kit-warn p {
+  margin: 0;
+}
+
+.kit-warn a {
+  color: inherit;
+  font-weight: 600;
+}
+
+.kit-days {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.kit-days button {
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+  padding: 5px 10px 5px 6px;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  border-radius: 999px;
+  background: #fff;
+  font: 500 12.5px/1 inherit;
+  cursor: pointer;
+}
+
+.kit-days button i {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--c);
+}
+
+.kit-days button:hover {
+  border-color: var(--c);
+}
+
+.kit-blank {
+  display: block;
+  width: 86%;
+  height: 0.9em;
+  border-bottom: 2px solid currentColor;
+  opacity: 0.45;
+}
+
+.kit-blank.is-thin {
+  width: 70%;
+  border-bottom-width: 1.5px;
+}
+
+.kit-a4 {
+  display: grid;
+  grid-template-columns: repeat(3, 204px);
+  grid-auto-rows: 323.5px;
+  gap: 19px;
+  align-content: center;
+  justify-content: center;
+  width: 794px;
+  height: 1123px;
+  background: #fff;
+}
+
+.kit-a4-card {
+  width: 204px;
+  height: 323.5px;
+  overflow: hidden;
+  outline: 1px dashed #b0b0b8;
+}
+
+.kit-a4 .kit {
+  box-shadow: none;
+}
+
+.kit-warn[hidden] {
+  display: none;
+}

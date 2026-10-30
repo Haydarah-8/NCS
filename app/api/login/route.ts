@@ -52,7 +52,8 @@ export function POST(request: Request) {
       where action = 'sign in' and ok = false and ip = ${ipKey(request)} and ts > now() - interval '15 minutes'`;
     if (fails >= 10) return json({ error: "Too many attempts. Try again in 15 minutes." }, 429);
     // Attempts on the developer's email stay out of everyone else's log.
-    const [known] = email ? await sql`select id, role from accounts where lower(email) = ${email}` : [];
+    const [knownRow] = email ? await sql`select id, role from accounts where lower(email) = ${email}` : [];
+    const known = knownRow ? { id: Number(knownRow.id), role: String(knownRow.role) } : null;
 
     if (action === "forgot") {
       if (!email.includes("@")) return json({ error: "Enter your email address." }, 400);

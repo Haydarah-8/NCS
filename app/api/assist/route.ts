@@ -7,7 +7,8 @@
    suggestion comes back for the user to review; nothing is saved here. */
 
 import Anthropic from "@anthropic-ai/sdk";
-import { audit, guard, isAdmin, json, readBody } from "@/lib/server/http";
+import { requireAdministrator } from "@/lib/server/accounts";
+import { audit, guard, json, readBody } from "@/lib/server/http";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -35,7 +36,8 @@ let client: Anthropic | null = null;
 
 export function POST(request: Request) {
   return guard(async () => {
-    if ((await isAdmin(request)) !== "admin") return json({ error: "Signed out" }, 401);
+    const access = await requireAdministrator(request);
+    if ("response" in access) return access.response;
     const origin = request.headers.get("origin");
     const host = request.headers.get("host") || new URL(request.url).host;
     if (origin && new URL(origin).host !== host) return json({ error: "Wrong origin" }, 403);

@@ -62,6 +62,16 @@ export async function requireAccount(request: Request, section?: Section): Promi
   return { account };
 }
 
+/* Legacy Studio endpoints remain restricted to administrators and developers. */
+export async function requireAdministrator(request: Request) {
+  const result = await requireAccount(request);
+  if ("response" in result) return result;
+  if (result.account.role !== "administrator" && result.account.role !== "developer") {
+    return { response: json({ error: "You don't have access to this." }, 403) };
+  }
+  return result;
+}
+
 /* Same-site check for anything that changes data. */
 export function sameOrigin(request: Request) {
   const origin = request.headers.get("origin");

@@ -9,7 +9,8 @@
 import { slugify } from "@/lib/md.js";
 import { DEFAULT_BRAND, withDefaults } from "@/lib/server/brandkit";
 import { getSql, type Row, type Sql } from "@/lib/server/db";
-import { audit, clip, guard, isAdmin, json, readBody } from "@/lib/server/http";
+import { requireAdministrator } from "@/lib/server/accounts";
+import { audit, clip, guard, json, readBody } from "@/lib/server/http";
 import { SAMPLE } from "@/lib/server/sample";
 
 export const runtime = "nodejs";
@@ -226,7 +227,8 @@ async function post(sql: Sql, action: string | null, d: Record<string, any>, req
 
 export function GET(request: Request) {
   return guard(async () => {
-    if ((await isAdmin(request)) !== "admin") return json({ error: "Signed out" }, 401);
+    const access = await requireAdministrator(request);
+    if ("response" in access) return access.response;
     const p = new URL(request.url).searchParams;
     return get(await getSql(), p.get("action"), p);
   });
@@ -234,7 +236,8 @@ export function GET(request: Request) {
 
 export function POST(request: Request) {
   return guard(async () => {
-    if ((await isAdmin(request)) !== "admin") return json({ error: "Signed out" }, 401);
+    const access = await requireAdministrator(request);
+    if ("response" in access) return access.response;
     const origin = request.headers.get("origin");
     const host = request.headers.get("host") || new URL(request.url).host;
     if (origin && new URL(origin).host !== host) return json({ error: "Wrong origin" }, 403);

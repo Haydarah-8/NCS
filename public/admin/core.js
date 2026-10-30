@@ -5,11 +5,18 @@
 
 export async function api(action, { method = "GET", body, params = {} } = {}) {
   const query = new URLSearchParams({ action, ...params });
-  const res = await fetch(`/api/admin?${query}`, {
-    method,
-    headers: body ? { "content-type": "application/json" } : {},
-    body: body ? JSON.stringify(body) : undefined,
-  });
+  let res;
+  try {
+    res = await fetch(`/api/admin?${query}`, {
+      method,
+      headers: body ? { "content-type": "application/json" } : {},
+      body: body ? JSON.stringify(body) : undefined,
+      // Never spin forever: after 25 seconds the page says so and offers to try again.
+      signal: AbortSignal.timeout(25_000),
+    });
+  } catch (e) {
+    throw new Error(e?.name === "TimeoutError" ? "The server took too long to answer. Try again." : "Couldn't reach the server. Check your connection.");
+  }
   if (res.status === 401) {
     location.href = `/admin/login.html?next=${encodeURIComponent(location.pathname + location.hash)}`;
     throw new Error("Signed out");

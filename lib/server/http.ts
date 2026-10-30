@@ -3,7 +3,7 @@
 
 import { createHash } from "node:crypto";
 import { geolocation, ipAddress } from "@vercel/functions";
-import { getSql, NotConfigured } from "./db";
+import { DatabaseTimeout, getSql, NotConfigured } from "./db";
 import { readCookie, secret, verify } from "./session";
 
 export function json(data: unknown, status = 200, headers: Record<string, string> = {}) {
@@ -40,6 +40,7 @@ export async function guard(work: () => Promise<Response>) {
     if (error instanceof NotConfigured) {
       return json({ error: "The admin database is not set up yet (DATABASE_URL and ADMIN_SECRET)." }, 503);
     }
+    if (error instanceof DatabaseTimeout) return json({ error: "The database didn't answer in time. Try again in a moment." }, 504);
     console.error(error);
     return json({ error: "Something went wrong." }, 500);
   }

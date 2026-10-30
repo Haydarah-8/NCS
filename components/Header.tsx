@@ -112,7 +112,7 @@ export default function Header() {
           <a
             href={company.phoneHref}
             aria-label={`Call ${company.phone}`}
-            className="grid size-11 place-items-center rounded-full text-white hover:text-[#c41616] sm:hidden"
+            className="grid size-11 place-items-center rounded-none text-white hover:text-[#c41616] sm:hidden"
           >
             <Phone className="size-5" />
           </a>

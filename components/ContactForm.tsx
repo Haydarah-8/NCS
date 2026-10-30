@@ -11,12 +11,13 @@ const empty = {
   phone: "",
   email: "",
   service: "General enquiry",
+  customService: "",
   message: "",
 };
 
 const label = "grid gap-2 text-[14px] font-medium text-[#1d1d1f]";
 const field =
-  "h-12 rounded-xl border border-[#d2d2d7] bg-white px-4 text-[16px] font-normal text-[#1d1d1f] outline-none transition placeholder:text-[#a1a1a6] focus:border-[#a01010] focus:ring-4 focus:ring-[#a01010]/10";
+  "h-12 rounded-none border border-[#d2d2d7] bg-white px-4 text-[16px] font-normal text-[#1d1d1f] outline-none transition placeholder:text-[#a1a1a6] focus:border-[#a01010] focus:ring-4 focus:ring-[#a01010]/10";
 
 export default function ContactForm({ defaultService }: { defaultService?: string }) {
   const known = services.some((service) => service.title === defaultService);
@@ -34,6 +35,11 @@ export default function ContactForm({ defaultService }: { defaultService?: strin
       setNote("Add your name, email and a note about the site.");
       return;
     }
+    const selectedService = form.service === "other" ? form.customService.trim() : form.service;
+    if (!selectedService) {
+      setNote("Tell us which service you need.");
+      return;
+    }
     // Saved for the admin panel's enquiries inbox; the email still opens either way.
     fetch("/api/lead", {
       method: "POST",
@@ -44,7 +50,7 @@ export default function ContactForm({ defaultService }: { defaultService?: strin
         email: form.email,
         phone: form.phone,
         company: form.organisation,
-        site: form.service,
+        site: selectedService,
         message: form.message,
         website: (event.currentTarget.elements.namedItem("website") as HTMLInputElement | null)?.value || "",
         source: "contact",
@@ -56,12 +62,12 @@ export default function ContactForm({ defaultService }: { defaultService?: strin
       `Organisation: ${form.organisation || "—"}`,
       `Phone: ${form.phone || "—"}`,
       `Email: ${form.email}`,
-      `Service: ${form.service}`,
+      `Service: ${selectedService}`,
       "",
       form.message,
     ].join("\n");
     window.location.href = `mailto:${company.email}?subject=${encodeURIComponent(
-      `Enquiry from ${form.name} — ${form.service}`,
+      `Enquiry from ${form.name} — ${selectedService}`,
     )}&body=${encodeURIComponent(body)}`;
     setNote("Your email app should open. If it does not, call the office.");
   }
@@ -103,12 +109,27 @@ export default function ContactForm({ defaultService }: { defaultService?: strin
       <label className={`${label} sm:col-span-2`}>
         Service
         <select name="service" value={form.service} onChange={update} className={field}>
+          <option value="other">Other service — please specify</option>
           <option>General enquiry</option>
           {services.map((service) => (
             <option key={service.slug}>{service.title}</option>
           ))}
         </select>
       </label>
+      {form.service === "other" && (
+        <label className={`${label} sm:col-span-2`}>
+          Custom service
+          <input
+            name="customService"
+            value={form.customService}
+            onChange={update}
+            required
+            maxLength={80}
+            placeholder="Tell us which service you need"
+            className={field}
+          />
+        </label>
+      )}
       <label className={`${label} sm:col-span-2`}>
         Message
         <textarea

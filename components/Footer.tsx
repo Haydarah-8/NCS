@@ -11,8 +11,7 @@ export default function Footer() {
       <div className={narrow}>
         <div className="space-y-2 border-b border-[#d2d2d7] py-5">
           <p>
-            {company.legal} holds SIA Approved Contractor Scheme status for Security Guarding, Door Supervision and
-            Key Holding, contractor reference{" "}
+            {company.legal} holds SIA Approved Contractor Scheme status for Security Guarding and Key Holding, contractor reference{" "}
             <a href={company.acs} target="_blank" rel="noreferrer" className="text-[#a01010] hover:underline">
               {company.acsCode}
             </a>
@@ -25,7 +24,7 @@ export default function Footer() {
         </div>
 
         <nav aria-label="Footer" className="grid grid-cols-2 gap-x-6 gap-y-8 py-8 sm:grid-cols-3 lg:grid-cols-5">
-          {serviceGroups.map((group) => (
+          {serviceGroups.filter((group) => group !== "Venues & protection").map((group) => (
             <div key={group}>
               <h3 className={heading}>{group}</h3>
               <ul className="mt-2.5 space-y-2">
@@ -67,7 +66,9 @@ export default function Footer() {
                 </a>
               </li>
             </ul>
-            <h3 className={`${heading} mt-6`}>Contact</h3>
+          </div>
+          <div>
+            <h3 className={heading}>Contact</h3>
             <ul className="mt-2.5 space-y-2">
               <li>
                 <a href={company.phoneHref} className={link}>

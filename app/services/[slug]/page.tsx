@@ -28,8 +28,8 @@ function FeatureGrid({ items }: { items: string[] }) {
     <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
       {items.map((item, index) => (
         <li key={item}>
-          <Reveal delay={(index % 3) * 60} className="flex h-full flex-col rounded-[22px] bg-[#f5f5f7] p-6 md:p-7">
-            <span className="grid size-8 place-items-center rounded-full bg-[#a01010] text-white">
+          <Reveal delay={(index % 3) * 60} className="flex h-full flex-col rounded-none bg-[#f5f5f7] p-6 md:p-7">
+            <span className="grid size-8 place-items-center rounded-none bg-[#a01010] text-white">
               <Check className="size-4" strokeWidth={2.5} aria-hidden="true" />
             </span>
             <span className="mt-5 text-[17px] font-semibold leading-snug tracking-[-0.01em] text-[#1d1d1f] md:text-[19px]">
@@ -190,7 +190,7 @@ export default async function ServicePage({ params }: PageProps) {
                 <Reveal delay={index * 80} className="h-full">
                   <a
                     href={item.href}
-                    className="group flex h-full flex-col items-center rounded-[22px] bg-[#f5f5f7] px-6 py-9 text-center transition hover:bg-[#ebebef]"
+                    className="group flex h-full flex-col items-center rounded-none bg-[#f5f5f7] px-6 py-9 text-center transition hover:bg-[#ebebef]"
                   >
                     <item.icon className="size-7 text-[#a01010]" strokeWidth={1.5} aria-hidden="true" />
                     <span className="mt-4 text-[14px] text-[#6e6e73]">{item.label}</span>
@@ -206,29 +206,21 @@ export default async function ServicePage({ params }: PageProps) {
         </div>
       </section>
 
-      <section className="bg-[#f5f5f7] pb-12 pt-20 md:pt-28">
-        <div className={`${container} flex items-end justify-between gap-6`}>
+      <section id="related-services" className="bg-[#f5f5f7] pb-12 pt-20 md:pt-28">
+        <div className={`${container} flex justify-center text-center`}>
           <Reveal>
             <h2 className="text-[30px] font-semibold tracking-[-0.02em] md:text-[40px]">
               {related.length > 0 ? `Also in ${service.group}.` : "Explore more services."}
             </h2>
           </Reveal>
-          <Link href="/services" className="hidden shrink-0 items-center text-[17px] text-[#a01010] hover:underline sm:inline-flex">
-            All services <ChevronRight className="size-4" aria-hidden="true" />
-          </Link>
         </div>
-        <div
-          className="no-scrollbar mt-8 flex snap-x snap-mandatory gap-5 overflow-x-auto pb-10 pt-2"
-          style={{
-            paddingLeft: "max(1.25rem, calc((100vw - 1136px) / 2))",
-            paddingRight: "1.25rem",
-            scrollPaddingLeft: "max(1.25rem, calc((100vw - 1136px) / 2))",
-          }}
-        >
+        <ul className="mt-10 grid w-full auto-cols-fr grid-flow-col gap-2 px-3 sm:gap-4 sm:px-6 md:mt-14 xl:gap-6 xl:px-10">
           {more.map((item) => (
-            <ServiceCard key={item.slug} service={item} className="w-[min(82vw,360px)] shrink-0 snap-start" />
+            <li key={item.slug} className="min-w-0">
+              <ServiceCard service={item} large className="text-center" />
+            </li>
           ))}
-        </div>
+        </ul>
       </section>
 
       <CtaPanel title={`Get a quote for ${service.title.toLowerCase()}.`} quote={quote} />

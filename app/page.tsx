@@ -6,49 +6,36 @@ import FaqList from "@/components/FaqList";
 import LogoMarquee from "@/components/LogoMarquee";
 import Reveal from "@/components/Reveal";
 import SectionHeading from "@/components/SectionHeading";
-import ServiceIcon from "@/components/ServiceIcon";
+import ServiceMarquee from "@/components/ServiceMarquee";
 import Tile from "@/components/Tile";
+import HomeServiceFeature from "@/components/HomeServiceFeature";
 import TrustStats from "@/components/TrustStats";
 import { btnPrimary, btnSecondaryDark, container, linkMore, narrow } from "@/lib/styles";
 
-const quote = (title: string) => `/our-details?service=${encodeURIComponent(title)}#enquiry`;
-
 const halfTiles = [
   {
-    slug: "door-supervision",
-    title: "Part of the experience you deliver.",
-    intro: "Discreet door teams for venues and private functions.",
+    slug: "mobile-security",
+    title: "Security on the move.",
+    intro: "Nationwide patrols, backed by our 24-hour control room.",
     tone: "dark",
   },
   {
     slug: "key-holding",
-    title: "Professional peace of mind.",
-    intro: "Alarm response in an average of 60 minutes. From £3 a week.",
+    title: "Your keys. Our responsibility.",
+    intro: "Secure key holding and alarm response, from £3 per week.",
     tone: "light",
   },
   {
     slug: "healthcare",
-    title: "Healthcare and NHS security.",
+    title: "A safer place to care.",
     intro: "Hospital security, patient watch and portering.",
     tone: "light",
   },
   {
     slug: "cctv-and-alarms",
-    title: "Reliable, next-day CCTV.",
-    intro: "No broadband, mains or generator required.",
+    title: "Keep watch. Stay in control.",
+    intro: "CCTV, wireless systems and access control for your premises.",
     tone: "dark",
-  },
-  {
-    slug: "event-security",
-    title: "Complete peace of mind.",
-    intro: "From wedding venues to festival arenas.",
-    tone: "dark",
-  },
-  {
-    slug: "personal-security",
-    title: "Close protection, day and night.",
-    intro: "For executives, public figures and key clients.",
-    tone: "light",
   },
 ] as const;
 
@@ -80,7 +67,7 @@ export default function HomePage() {
             <div className="mt-8 flex flex-wrap items-center justify-center gap-8">
               <Link
                 href="/our-details"
-                className="inline-flex h-12 items-center rounded-full bg-[#a01010] px-8 text-[17px] font-medium text-white hover:bg-[#c41616]"
+                className="inline-flex h-12 items-center ncs-button rounded-none bg-[#a01010] px-8 text-[17px] font-medium text-white hover:bg-[#c41616]"
               >
                 Get Started
               </Link>
@@ -98,19 +85,16 @@ export default function HomePage() {
           eyebrow="Security Personnel"
           title="Security staff to suit your needs."
           intro="Bespoke teams for premises and people, in a uniform that gets the right image for your brand."
-          href="/services/security-personnel"
-          quote={quote("Security Personnel")}
-          image="/images/art/security-personnel.svg"
+          href="/services/security-personnel"          image="/images/art/security-personnel.svg"
           imageAlt="Two New Concept Security officers in a building reception"
         />
-        <Tile
-          size="full"
+        <HomeServiceFeature
+          featured
           tone="dark"
           eyebrow="Site Security"
           title="Every site, surveyed first."
-          intro="On-site CCTV and perimeter patrols that cover the blind spots, day, night and weekends."
+          intro="Site surveys, CCTV and perimeter patrols. Protection built around your premises."
           href="/services/site-security"
-          quote={quote("Site Security")}
           image="/images/art/site-security.svg"
           imageAlt="Construction site with keep out and CCTV signs on perimeter fencing"
         />
@@ -118,15 +102,13 @@ export default function HomePage() {
           {halfTiles.map((tile) => {
             const service = bySlug[tile.slug];
             return (
-              <Tile
+              <HomeServiceFeature
                 key={tile.slug}
                 tone={tile.tone}
                 eyebrow={service.title}
                 title={tile.title}
                 intro={tile.intro}
-                href={`/services/${service.slug}`}
-                quote={quote(service.title)}
-                image={service.image}
+                href={`/services/${service.slug}`}                image={service.image}
                 imageAlt={service.imageAlt}
               />
             );
@@ -194,7 +176,7 @@ export default function HomePage() {
         </Reveal>
       </section>
 
-      <section className="bg-[#f5f5f7] py-24 md:py-32">
+      <section id="services" className="bg-[#f5f5f7] py-24 md:py-32">
         <div className={container}>
           <Reveal>
             <SectionHeading
@@ -202,23 +184,9 @@ export default function HomePage() {
               intro="Every security solution we recommend is entirely bespoke. If a more cost-effective service will do the job, we will tell you."
             />
           </Reveal>
-          <Reveal delay={100}>
-            <ul className="mx-auto mt-14 grid max-w-[1000px] grid-cols-3 gap-x-4 gap-y-10 sm:grid-cols-4 lg:grid-cols-5">
-              {services.map((service) => (
-                <li key={service.slug}>
-                  <Link href={`/services/${service.slug}`} className="group flex flex-col items-center text-center">
-                    <span className="grid size-16 place-items-center rounded-full bg-white text-[#1d1d1f] shadow-[0_2px_12px_rgba(0,0,0,0.06)] transition duration-300 group-hover:bg-[#a01010] group-hover:text-white md:size-[72px]">
-                      <ServiceIcon slug={service.slug} className="size-7" />
-                    </span>
-                    <span className="mt-3 text-[13px] font-semibold leading-snug text-[#1d1d1f] md:text-[14px]">
-                      {service.title}
-                    </span>
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </Reveal>
+
         </div>
+        <ServiceMarquee services={services.filter((service) => service.slug !== "personal-security")} />
       </section>
 
       <section className="py-24 md:py-28">

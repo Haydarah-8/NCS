@@ -59,11 +59,11 @@ export default function PrivacyPage() {
           </p>
           <p>We use your name and email address for the following purposes:</p>
           <ul>
-            <li>To inform you of any events, activities or news that is directly relevant to you.</li>
+            <li>To inform you of any activities or news that is directly relevant to you.</li>
           </ul>
           <h2 id="basis">3. What is the legal basis for processing your personal data?</h2>
           <p>
-            Explicit consent of the data subject so that we can keep you informed about any events,
+            Explicit consent of the data subject so that we can keep you informed about any activities,
             activities or news that is directly relevant to you.
           </p>
           <h2 id="sharing">4. Sharing your personal data</h2>
@@ -114,7 +114,7 @@ export default function PrivacyPage() {
             whenever necessary, we will seek your prior consent to the new processing.
           </p>
           <h2 id="contact">8. Contact details</h2>
-          <p className="rounded-[20px] bg-[#f5f5f7] px-6 py-5 text-[#1d1d1f]">
+          <p className="rounded-none bg-[#f5f5f7] px-6 py-5 text-[#1d1d1f]">
             To exercise all relevant rights, queries or complaints please in the first instance contact the
             Data Controller at <a href={`mailto:${company.email}`}>{company.email}</a> or write to our Data
             Controller at {company.address.join(", ")}.

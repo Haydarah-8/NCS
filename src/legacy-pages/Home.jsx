@@ -5,7 +5,7 @@ import { useTitle } from "../components/Shell";
 const facts = [
   { value: "2017", label: "Founded in Blackpool, working across the UK" },
   { value: "24/7", label: "Control room, 365 days a year" },
-  { value: "ACS", label: "Approved for guarding, doors and key holding" },
+  { value: "ACS", label: "Approved for guarding and key holding" },
   { value: "60 min", label: "Average alarm response, in a liveried vehicle" },
 ];
 
@@ -20,7 +20,7 @@ const stance = [
   },
   {
     title: "Approved for the work that carries risk",
-    body: "SIA Approved Contractor Scheme status for Security Guarding, Door Supervision and Key Holding. Officers are SIA licensed.",
+    body: "SIA Approved Contractor Scheme status for Security Guarding and Key Holding. Officers are SIA licensed.",
   },
 ];
 
@@ -34,8 +34,6 @@ const paths = [
     slugs: [
       "guarding",
       "static-guards",
-      "door-supervision",
-      "event-security",
       "retail-guarding",
       "healthcare",
       "personal-security",
@@ -93,7 +91,7 @@ export default function Home() {
             Security, held to a <em>higher standard.</em>
           </h1>
           <p className="home-lede">
-            Manned guarding, door supervision and key holding for public and
+            Manned guarding and key holding for public and
             private organisations. Based at Concept House in Blackpool since{" "}
             {company.founded}, with a national footprint.
           </p>
@@ -109,9 +107,9 @@ export default function Home() {
         <figure className="home-hero-figure">
           <img
             src="/images/street.jpg"
-            alt="A New Concept Security door supervisor outside a venue"
+            alt="A New Concept Security security officer at a building entrance"
           />
-          <figcaption>Door supervision, on the street.</figcaption>
+          <figcaption>Security officers, on site.</figcaption>
         </figure>
       </section>
 

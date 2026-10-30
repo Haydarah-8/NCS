@@ -24,7 +24,9 @@ export async function readBody(request: Request): Promise<Record<string, any>> {
   }
 }
 
-/* The signed-in role ("admin", "manager" or "officer"), or false. */
+/* The signed-in session ({ id, role, sections }), or false. Route handlers
+   that read or change data use requireAccount (accounts.ts), which checks
+   the account in the database as well. */
 export const isAdmin = (request: Request) => verify(readCookie(request));
 
 /* A string from the visitor, trimmed and cut to length. */
@@ -106,7 +108,10 @@ export function device(ua = "") {
 export const isBot = (ua = "") =>
   !ua || /bot|crawl|spider|slurp|headless|lighthouse|pagespeed|preview|facebookexternalhit|curl|wget|python|node-fetch|axios|monitor/i.test(ua);
 
-export async function audit(action: string, ok: boolean, request: Request, detail = "") {
+/* One line in the activity log. The developer's own lines are hidden from
+   everyone else. */
+export async function audit(action: string, ok: boolean, request: Request, detail = "", who?: { id: number | string; role: string } | null) {
   const sql = await getSql();
-  await sql`insert into admin_log (action, ok, ip, detail) values (${action}, ${ok}, ${ipKey(request)}, ${clip(detail, 200)})`;
+  await sql`insert into admin_log (action, ok, ip, detail, account_id, hidden)
+    values (${action}, ${ok}, ${ipKey(request)}, ${clip(detail, 200)}, ${who ? Number(who.id) : null}, ${who?.role === "developer"})`;
 }

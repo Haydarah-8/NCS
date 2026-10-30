@@ -32,7 +32,7 @@ export default function AboutPage() {
         image="/images/art/fleet-night.svg"
         imageAlt="New Concept Security vans lined up outside Concept House at night"
       >
-        <Link href="/services" className={btnPrimary}>
+        <Link href="/#services" className={btnPrimary}>
           Our services
         </Link>
         <Link href="/careers" className={btnSecondary}>
@@ -90,7 +90,7 @@ export default function AboutPage() {
               const Icon = strengthIcons[index] ?? ShieldCheck;
               return (
                 <li key={item}>
-                  <Reveal delay={(index % 4) * 60} className="flex h-full flex-col rounded-[22px] bg-[#f5f5f7] p-7">
+                  <Reveal delay={(index % 4) * 60} className="flex h-full flex-col rounded-none bg-[#f5f5f7] p-7">
                     <Icon className="size-8 text-[#a01010]" strokeWidth={1.5} aria-hidden="true" />
                     <p className="mt-6 text-[17px] font-semibold leading-snug tracking-[-0.01em] md:text-[19px]">{item}</p>
                   </Reveal>
@@ -108,7 +108,7 @@ export default function AboutPage() {
               tone="dark"
               eyebrow="Accreditation"
               title="SIA Approved Contractor."
-              intro={`${company.legal} holds Approved Contractor Scheme status for Security Guarding, Door Supervision and Key Holding. Officers are SIA licensed. Contractor reference ${company.acsCode}.`}
+              intro={`${company.legal} holds Approved Contractor Scheme status for Security Guarding and Key Holding. Officers are SIA licensed. Contractor reference ${company.acsCode}.`}
             />
           </Reveal>
           <Reveal className="mt-8 flex justify-center" delay={80}>

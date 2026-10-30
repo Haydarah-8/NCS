@@ -110,7 +110,7 @@ export default function SiteSignals() {
             </a>
           )}
         </p>
-        <button type="button" onClick={() => setHidden(true)} aria-label="Close the announcement" className="rounded-full px-2 text-[20px] leading-none hover:bg-white/15">
+        <button type="button" onClick={() => setHidden(true)} aria-label="Close the announcement" className="rounded-none px-2 text-[20px] leading-none hover:bg-white/15">
           ×
         </button>
       </div>

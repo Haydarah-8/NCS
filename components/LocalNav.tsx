@@ -32,7 +32,7 @@ export default function LocalNav({
           )}
           <Link
             href={cta.href}
-            className="rounded-full bg-[#a01010] px-3.5 py-[5px] text-[12px] text-white transition-colors hover:bg-[#c41616]"
+            className="ncs-button rounded-none bg-[#a01010] px-3.5 py-[5px] text-[12px] text-white transition-colors hover:bg-[#c41616]"
           >
             {cta.label}
           </Link>

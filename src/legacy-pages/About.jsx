@@ -36,12 +36,12 @@ export default function About() {
         </p>
         <p>
           {company.legal} holds SIA Approved Contractor Scheme status for
-          Security Guarding, Door Supervision and Key Holding. Officers are SIA
+          Security Guarding and Key Holding. Officers are SIA
           licensed. The control room at Concept House runs 24 hours a day, 365
           days a year. Company number {company.number}.
         </p>
         <p>
-          <Link className="button large" to="/services">
+          <Link className="button large" to="/#services">
             See the services
           </Link>
         </p>

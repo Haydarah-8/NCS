@@ -94,7 +94,7 @@ const TYPES = {
       { k: "role", label: "Role", type: "select", options: ROLES },
       { k: "number", label: "Staff number" },
       { k: "licence", label: "Licence number" },
-      { k: "licenceType", label: "Licence type", type: "select", options: ["Security guarding", "Door supervision", "CCTV (public space)", "Key holding", "Close protection"] },
+      { k: "licenceType", label: "Licence type", type: "select", options: ["Security guarding", "CCTV (public space)", "Key holding", "Close protection"] },
       { k: "expiry", label: "Licence expires", type: "date" },
       { k: "issued", label: "Card issued (blank = today)", type: "date" },
       { k: "qr", label: "QR code on the back", type: "check" },

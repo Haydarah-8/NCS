@@ -39,7 +39,7 @@ export default function Careers() {
       </div>
       <div className="copy prose">
         <p>
-          Posts cover static guarding, mobile patrols, door supervision, events,
+          Posts cover static guarding, mobile patrols,
           healthcare (including patient watch) and key holding. Officers need to
           be SIA licensed. Patient watch also needs an enhanced DBS check and
           restraint training.

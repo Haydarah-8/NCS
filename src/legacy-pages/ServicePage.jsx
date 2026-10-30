@@ -6,7 +6,7 @@ export default function ServicePage() {
   const { slug } = useParams();
   const service = getService(slug);
   useTitle(service ? service.title : "Service");
-  if (!service) return <Navigate to="/services" replace />;
+  if (!service) return <Navigate to="/#services" replace />;
 
   const related = services
     .filter(
@@ -18,7 +18,7 @@ export default function ServicePage() {
     <article className="page">
       <header className="page-intro">
         <p className="eyebrow">
-          <Link to="/services">Services</Link> · {service.group}
+          <Link to="/#services">Services</Link> · {service.group}
         </p>
         <h1>{service.title}.</h1>
         <p className="dek">{service.summary}</p>

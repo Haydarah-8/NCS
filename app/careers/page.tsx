@@ -34,8 +34,8 @@ export default function CareersPage() {
         eyebrow="Careers"
         title="Start your career in security."
         intro="Looking for a career in security, or additional contract work? Concept House is recruiting."
-        image="/images/art/event-security.svg"
-        imageAlt="Event security stewards in high-visibility vests facing a crowd"
+        image="/images/art/careers-banner.svg"
+        imageAlt="Security officer: start your career in security"
       >
         <a href={company.careers} target="_blank" rel="noreferrer" className={btnPrimary}>
           Apply now
@@ -50,7 +50,7 @@ export default function CareersPage() {
           <Reveal>
             <SectionHeading
               title="Where you could work."
-              intro="Posts cover static guarding, mobile patrols, door supervision, events, healthcare and key holding."
+              intro="Posts cover static guarding, mobile patrols, healthcare and key holding."
             />
           </Reveal>
           <ul className="mt-14 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -58,7 +58,7 @@ export default function CareersPage() {
               const Icon = roleIcons[index] ?? ShieldCheck;
               return (
                 <li key={role.title}>
-                  <Reveal delay={(index % 3) * 60} className="flex h-full flex-col rounded-[22px] bg-[#f5f5f7] p-8">
+                  <Reveal delay={(index % 3) * 60} className="flex h-full flex-col rounded-none bg-[#f5f5f7] p-8">
                     <Icon className="size-8 text-[#a01010]" strokeWidth={1.5} aria-hidden="true" />
                     <h3 className="mt-6 text-[21px] font-semibold tracking-[-0.015em]">{role.title}</h3>
                     <p className="mt-2 text-[17px] leading-relaxed text-[#6e6e73]">{role.body}</p>
@@ -84,7 +84,7 @@ export default function CareersPage() {
             <ul className="mt-8 space-y-4">
               {requirements.map((item) => (
                 <li key={item} className="flex items-center gap-4 text-[19px] font-semibold tracking-[-0.01em]">
-                  <span className="grid size-8 shrink-0 place-items-center rounded-full bg-[#a01010] text-white">
+                  <span className="grid size-8 shrink-0 place-items-center rounded-none bg-[#a01010] text-white">
                     <Check className="size-4" strokeWidth={2.5} aria-hidden="true" />
                   </span>
                   {item}
@@ -110,7 +110,7 @@ export default function CareersPage() {
               ["Start your shifts", "Staff manage their shifts through the staff portal."],
             ].map(([title, body], index) => (
               <li key={title}>
-                <Reveal delay={index * 80} className="h-full rounded-[22px] bg-black p-8 text-white">
+                <Reveal delay={index * 80} className="h-full rounded-none bg-black p-8 text-white">
                   <span className="text-[48px] font-semibold leading-none tracking-[-0.03em] text-[#ff5a5a]">
                     {index + 1}
                   </span>

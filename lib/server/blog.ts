@@ -8,7 +8,7 @@ import { getSql } from "./db";
 export const TOPICS: Record<string, string> = {
   guarding: "Guarding",
   construction: "Construction",
-  venues: "Venues and events",
+  venues: "Venues and protection",
   healthcare: "Healthcare",
   technology: "CCTV and technology",
   news: "Company news",

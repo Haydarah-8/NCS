@@ -1,17 +1,19 @@
-/* Everything the admin panel reads and writes, by ?action=. Every request
-   checks the signed-in session itself, whatever the middleware did.
+/* Website analytics, enquiries and the site announcement, by ?action=.
+   Every request loads the signed-in account and checks it may open the
+   section the action belongs to, whatever the middleware did.
 
-   GET    me, stats, page, speed, uptime, leads, posts, settings, log,
-          counts, export, backup
-   POST   lead-save, lead-delete, post-save, post-delete, settings-save
+   GET    stats, page, speed, uptime        (overview or insights)
+          leads                              (enquiries)
+          settings                           (announcement)
+          counts                             (anyone signed in)
+          export                             (enquiries or insights)
+   POST   lead-save, lead-delete             (enquiries)
+          settings-save                      (announcement) */
 
-   The panel follows Aevion View: traffic and visitors, where they come
-   from, enquiries and conversions, speed and uptime. Plus the blog, the
-   site announcement and the document builders (which need no server). */
-
-import { slugify } from "@/lib/md.js";
+import type { Section } from "@/lib/server/access";
+import { requireAccount, sameOrigin, sectionsOf, type Account } from "@/lib/server/accounts";
 import { getSql, type Row, type Sql } from "@/lib/server/db";
-import { audit, clip, guard, isAdmin, json, readBody } from "@/lib/server/http";
+import { audit, clip, guard, json, readBody } from "@/lib/server/http";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -199,8 +201,6 @@ function download(body: string, type: string, name: string) {
 
 async function get(sql: Sql, action: string | null, p: URLSearchParams) {
   switch (action) {
-    case "me":
-      return json({ role: "admin" });
     case "stats":
       return json(await stats(sql, daysOf(p)));
     case "page":
@@ -211,18 +211,13 @@ async function get(sql: Sql, action: string | null, p: URLSearchParams) {
       return json(await uptime(sql, daysOf(p)));
     case "leads":
       return json({ leads: await sql`select * from leads order by ts desc limit 500` });
-    case "posts":
-      return json({ posts: await sql`select * from posts order by coalesce(published_at, updated_at) desc limit 300` });
     case "settings": {
       const rows = await sql`select key, value from settings`;
       return json({ settings: Object.fromEntries(rows.map((r) => [r.key, r.value])) });
     }
-    case "log":
-      return json({ log: await sql`select ts, action, ok, detail from admin_log order by ts desc limit 40` });
     case "counts": {
       const [c] = await sql`select
           (select count(*)::int from leads where status = 'new') as new_leads,
-          (select count(*)::int from posts where status = 'draft') as drafts,
           (select count(distinct visitor)::int from views where ts > now() - interval '5 minutes') as live`;
       return json(c);
     }
@@ -236,14 +231,6 @@ async function get(sql: Sql, action: string | null, p: URLSearchParams) {
             : await sql`select ts, path, title, referrer, utm_source, utm_medium, utm_campaign, country, city, device, browser, os, duration, ttfb, lcp, load from views where ts > now() - interval '365 days' order by ts desc`;
       return download(csv(rows), "text/csv", `ncs-${what === "leads" || what === "events" ? what : "views"}-${today()}.csv`);
     }
-    case "backup": {
-      const [posts, leads, settings] = await sql.transaction([
-        sql`select * from posts order by id`,
-        sql`select * from leads order by id`,
-        sql`select key, value from settings`,
-      ]);
-      return download(JSON.stringify({ made: new Date().toISOString(), posts, leads, settings }, null, 1), "application/json", `ncs-admin-backup-${today()}.json`);
-    }
     default:
       return json({ error: "Unknown action" }, 400);
   }
@@ -256,7 +243,7 @@ const validDate = (v: unknown) => {
 const jsonOf = (v: unknown) => JSON.stringify(v && typeof v === "object" ? v : {});
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-async function post(sql: Sql, action: string | null, d: Record<string, any>, request: Request) {
+async function post(sql: Sql, me: Account, action: string | null, d: Record<string, any>, request: Request) {
   switch (action) {
     case "lead-save": {
       const status = LEAD_STATES.has(d.status) ? d.status : "new";
@@ -265,32 +252,7 @@ async function post(sql: Sql, action: string | null, d: Record<string, any>, req
     }
     case "lead-delete": {
       const [row] = await sql`delete from leads where id = ${Number(d.id)} returning name`;
-      await audit("delete enquiry", Boolean(row), request, row?.name);
-      return json({ ok: Boolean(row) });
-    }
-    case "post-save": {
-      const title = clip(d.title, 200);
-      if (!title) return json({ error: "A post needs a title." }, 400);
-      const slug = slugify(d.slug || title);
-      if (!slug) return json({ error: "The address can only use letters and numbers." }, 400);
-      const status = d.status === "published" ? "published" : "draft";
-      const when = validDate(d.published_at);
-      const published = status === "published" ? when || new Date().toISOString() : when;
-      const [clash] = await sql`select id from posts where slug = ${slug} and id <> ${Number(d.id) || 0}`;
-      if (clash) return json({ error: "Another post already uses that address." }, 409);
-      const f = { dek: clip(d.dek, 400), topic: clip(d.topic, 40), cover: clip(d.cover, 60), body: clip(d.body, 100_000) };
-      const [row] = d.id
-        ? await sql`update posts set slug = ${slug}, title = ${title}, dek = ${f.dek}, topic = ${f.topic}, cover = ${f.cover},
-              body = ${f.body}, status = ${status}, published_at = ${published}, updated_at = now() where id = ${Number(d.id)} returning *`
-        : await sql`insert into posts (slug, title, dek, topic, cover, body, status, published_at)
-              values (${slug}, ${title}, ${f.dek}, ${f.topic}, ${f.cover}, ${f.body}, ${status}, ${published}) returning *`;
-      if (!row) return json({ error: "That post no longer exists." }, 404);
-      await audit(status === "published" ? "publish post" : "save draft", true, request, title);
-      return json({ post: row });
-    }
-    case "post-delete": {
-      const [row] = await sql`delete from posts where id = ${Number(d.id)} returning title`;
-      await audit("delete post", Boolean(row), request, row?.title);
+      await audit("delete enquiry", Boolean(row), request, row?.name, me);
       return json({ ok: Boolean(row) });
     }
     case "settings-save": {
@@ -299,7 +261,7 @@ async function post(sql: Sql, action: string | null, d: Record<string, any>, req
       const value = { on: Boolean(a.on), text: clip(a.text, 200), link: clip(a.link, 300), label: clip(a.label, 40), until: clip(a.until, 30) };
       await sql`insert into settings (key, value) values ('announcement', ${jsonOf(value)}::jsonb)
         on conflict (key) do update set value = excluded.value, updated_at = now()`;
-      await audit("announcement", true, request, value.on ? value.text : "off");
+      await audit("announcement", true, request, value.on ? value.text : "off", me);
       return json({ value });
     }
     default:
@@ -307,21 +269,51 @@ async function post(sql: Sql, action: string | null, d: Record<string, any>, req
   }
 }
 
+/* The section each action belongs to. Analytics open from the overview or
+   insights; an export follows what it exports. */
+function allowed(account: Account, action: string | null, p?: URLSearchParams) {
+  const has = (s: Section) => sectionsOf(account).includes(s);
+  switch (action) {
+    case "stats":
+    case "page":
+    case "speed":
+    case "uptime":
+      return has("overview") || has("insights");
+    case "leads":
+    case "lead-save":
+    case "lead-delete":
+      return has("enquiries");
+    case "settings":
+    case "settings-save":
+      return has("announcement");
+    case "export":
+      return p?.get("what") === "leads" ? has("enquiries") : has("insights");
+    case "counts":
+      return true;
+    default:
+      return false;
+  }
+}
+
 export function GET(request: Request) {
   return guard(async () => {
-    if ((await isAdmin(request)) !== "admin") return json({ error: "Signed out" }, 401);
+    const r = await requireAccount(request);
+    if ("response" in r) return r.response;
     const params = new URL(request.url).searchParams;
-    return get(await getSql(), params.get("action"), params);
+    const action = params.get("action");
+    if (!allowed(r.account, action, params)) return json({ error: "You don't have access to this." }, 403);
+    return get(await getSql(), action, params);
   });
 }
 
 export function POST(request: Request) {
   return guard(async () => {
-    if ((await isAdmin(request)) !== "admin") return json({ error: "Signed out" }, 401);
+    const r = await requireAccount(request);
+    if ("response" in r) return r.response;
     /* Same-site check: a form on another site can't act as the admin. */
-    const origin = request.headers.get("origin");
-    const host = request.headers.get("host") || new URL(request.url).host;
-    if (origin && new URL(origin).host !== host) return json({ error: "Wrong origin" }, 403);
-    return post(await getSql(), new URL(request.url).searchParams.get("action"), await readBody(request), request);
+    if (!sameOrigin(request)) return json({ error: "Wrong origin" }, 403);
+    const action = new URL(request.url).searchParams.get("action");
+    if (!allowed(r.account, action)) return json({ error: "You don't have access to this." }, 403);
+    return post(await getSql(), r.account, action, await readBody(request), request);
   });
 }

@@ -11,7 +11,7 @@ export const metadata: Metadata = {
     template: "%s - New Concept Security",
   },
   description:
-    "New Concept Security is an SIA Approved Contractor based in Blackpool. Manned guarding, site security, door supervision, healthcare security, key holding and CCTV across the UK.",
+    "New Concept Security is an SIA Approved Contractor based in Blackpool. Manned guarding, site security, healthcare security, key holding and CCTV across the UK.",
 };
 
 export const viewport: Viewport = {

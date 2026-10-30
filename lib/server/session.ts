@@ -1,12 +1,15 @@
-/* The admin session: a cookie holding an expiry time and a role
-   (administrator, management or officer) signed with ADMIN_SECRET
-   (HMAC-SHA256). Web Crypto only, so the same code runs in the middleware
-   and in the route handlers. */
+/* The admin session: a cookie holding an expiry time, the account, its role
+   and the sections it can open, signed with ADMIN_SECRET (HMAC-SHA256). Web
+   Crypto only, so the same code runs in the middleware and in the route
+   handlers. The database stays the authority: route handlers load the
+   account again, and the panel refreshes the cookie when access changes. */
+
+import { fromBits, isRole, toBits, type Role, type Section } from "./access";
 
 export const COOKIE = "ncs_admin";
 export const HOURS = 12;
-export const ROLES = ["admin", "manager", "officer"] as const;
-export type Role = (typeof ROLES)[number];
+
+export type Session = { id: number; role: Role; sections: Section[] };
 
 /* In local development without a secret, a fixed one stands in, so the
    panel can be tried before anything is configured. Never in production. */
@@ -35,21 +38,22 @@ function same(a: string, b: string) {
   return diff === 0;
 }
 
-export async function sign(role: Role = "admin", hours = HOURS) {
-  const body = `${Math.floor(Date.now() / 1000) + hours * 3600}.${b64url(crypto.getRandomValues(new Uint8Array(9)))}.${ROLES.includes(role) ? role : "officer"}`;
+export async function sign(s: Session, hours = HOURS) {
+  const body = [Math.floor(Date.now() / 1000) + hours * 3600, b64url(crypto.getRandomValues(new Uint8Array(9))), Math.trunc(s.id), s.role, toBits(s.sections)].join(".");
   return `${body}.${await hmac(body, secret())}`;
 }
 
-/* The session's role, or false when there is no valid session. */
-export async function verify(token: string | undefined | null): Promise<Role | false> {
+/* The session, or false when there is no valid one. */
+export async function verify(token: string | undefined | null): Promise<Session | false> {
   const key = secret();
   if (!token || !key) return false;
   const parts = token.split(".");
-  if (parts.length !== 4) return false;
+  if (parts.length !== 6) return false;
   const sig = parts.pop()!;
-  const [exp, , role] = parts;
-  if (!/^\d+$/.test(exp) || Number(exp) < Date.now() / 1000 || !ROLES.includes(role as Role)) return false;
-  return same(sig, await hmac(parts.join("."), key)) ? (role as Role) : false;
+  const [exp, , id, role, bits] = parts;
+  if (!/^\d+$/.test(exp) || Number(exp) < Date.now() / 1000 || !/^\d+$/.test(id) || !isRole(role) || !/^[0-9a-f]+$/.test(bits)) return false;
+  if (!same(sig, await hmac(parts.join("."), key))) return false;
+  return { id: Number(id), role, sections: fromBits(bits) };
 }
 
 export function readCookie(request: Request, name = COOKIE) {

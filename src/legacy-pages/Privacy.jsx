@@ -32,14 +32,14 @@ export default function Privacy() {
         <p>We use your name and email address for the following purposes:</p>
         <ul>
           <li>
-            To inform you of any events, activities or news that is directly
+            To inform you of any activities or news that is directly
             relevant to you.
           </li>
         </ul>
         <h3>3. What is the legal basis for processing your personal data?</h3>
         <p>
           Explicit consent of the data subject so that we can keep you informed
-          about any events, activities or news that is directly relevant to you.
+          about any activities or news that is directly relevant to you.
         </p>
         <h3>4. Sharing your personal data</h3>
         <p>

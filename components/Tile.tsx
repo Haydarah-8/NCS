@@ -1,15 +1,14 @@
 import Link from "next/link";
 import Reveal from "@/components/Reveal";
 import { artSrc } from "@/lib/art";
-import { btnPrimary, btnSecondary, btnSecondaryDark } from "@/lib/styles";
+import { btnPrimary } from "@/lib/styles";
 
-/** Apple-style promo tile: centred copy, two actions, and the illustration rising from the bottom edge. */
+/** Apple-style promo tile: centred copy, one action, and the illustration rising from the bottom edge. */
 export default function Tile({
   eyebrow,
   title,
   intro,
   href,
-  quote,
   image,
   imageAlt = "",
   tone = "light",
@@ -19,7 +18,6 @@ export default function Tile({
   title: string;
   intro: string;
   href: string;
-  quote: string;
   image: string;
   imageAlt?: string;
   tone?: "light" | "dark";
@@ -54,9 +52,6 @@ export default function Tile({
         <div className="mt-6 flex flex-wrap justify-center gap-3.5">
           <Link href={href} className={btnPrimary}>
             Learn more
-          </Link>
-          <Link href={quote} className={dark ? btnSecondaryDark : btnSecondary}>
-            Get a quote
           </Link>
         </div>
       </Reveal>

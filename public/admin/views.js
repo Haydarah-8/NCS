@@ -14,7 +14,7 @@ import {
 const TOPICS = [
   ["guarding", "Guarding"],
   ["construction", "Construction"],
-  ["venues", "Venues and events"],
+  ["venues", "Venues and protection"],
   ["healthcare", "Healthcare"],
   ["technology", "CCTV and technology"],
   ["news", "Company news"],
@@ -657,7 +657,7 @@ export async function announcement(view) {
         "Message",
         `<form class="form" data-ann>
           <label class="switch"><input type="checkbox" name="on"${a.on ? " checked" : ""}><span></span>Show it on the website</label>
-          <label class="field"><span>Text</span><input name="text" maxlength="200" value="${esc(a.text || "")}" placeholder="We're recruiting SIA licensed door supervisors in Blackpool"></label>
+          <label class="field"><span>Text</span><input name="text" maxlength="200" value="${esc(a.text || "")}" placeholder="We're recruiting SIA licensed security officers in Blackpool"></label>
           <div class="grid is-2 is-flat">
             <label class="field"><span>Link <em>optional</em></span><input name="link" maxlength="300" value="${esc(a.link || "")}" placeholder="/careers"></label>
             <label class="field"><span>Link words</span><input name="label" maxlength="40" value="${esc(a.label || "")}" placeholder="Apply now"></label>

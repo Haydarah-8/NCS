@@ -44,7 +44,7 @@ export default async function OurDetailsPage({ searchParams }: PageProps) {
                   href={method.href}
                   target={method.external ? "_blank" : undefined}
                   rel={method.external ? "noreferrer" : undefined}
-                  className="group flex h-full flex-col items-center rounded-[22px] bg-[#f5f5f7] px-6 py-9 text-center transition hover:bg-[#ebebef]"
+                  className="group flex h-full flex-col items-center rounded-none bg-[#f5f5f7] px-6 py-9 text-center transition hover:bg-[#ebebef]"
                 >
                   <method.icon className="size-7 text-[#a01010]" strokeWidth={1.5} aria-hidden="true" />
                   <span className="mt-4 text-[14px] text-[#6e6e73]">{method.label}</span>
@@ -95,7 +95,7 @@ export default async function OurDetailsPage({ searchParams }: PageProps) {
               </div>
             </dl>
           </Reveal>
-          <Reveal delay={100} className="rounded-[28px] bg-white p-6 shadow-[0_4px_24px_rgba(0,0,0,0.06)] sm:p-10">
+          <Reveal delay={100} className="rounded-none bg-white p-6 shadow-[0_4px_24px_rgba(0,0,0,0.06)] sm:p-10">
             <ContactForm defaultService={service} />
           </Reveal>
         </div>
@@ -103,7 +103,7 @@ export default async function OurDetailsPage({ searchParams }: PageProps) {
 
       <section className="py-20 md:py-28">
         <div className={container}>
-          <Reveal className="grid items-center overflow-hidden rounded-[30px] bg-black text-white md:grid-cols-2">
+          <Reveal className="grid items-center overflow-hidden rounded-none bg-black text-white md:grid-cols-2">
             <div className="p-10 md:p-14">
               <p className="text-[17px] font-semibold text-[#ff5a5a]">Careers</p>
               <h2 className="mt-1.5 text-[32px] font-semibold leading-[1.1] tracking-[-0.02em] md:text-[40px]">

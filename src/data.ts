@@ -52,8 +52,6 @@ export const clients = [
   { name: "Vivienne Westwood", src: "/images/clients/viv.png" },
   { name: "Wigan Council", src: "/images/clients/wigan-council.png" },
   { name: "First Leisure", src: "/images/clients/first-leisure.png" },
-  { name: "Stonegate Pub Company", src: "/images/clients/stonegate.png" },
-  { name: "Rekom UK", src: "/images/clients/rekom.png" },
 ];
 
 export const services: Service[] = [
@@ -94,7 +92,7 @@ export const services: Service[] = [
     paragraphs: [
       "With years of industry experience, New Concept is proud to be a proactive and reliable supplier of security guard services around the UK.",
       "We work thoroughly with companies and individuals in a varied range of industries to ensure the protection of their property, possessions and people. When you hire security officers with us, you can expect expert customer service and a security solution made around your own needs.",
-      "Our SIA-licensed security guards and officers are trained to the very best standards and offer a comprehensive portfolio of services. From crowd control and mobile patrols to CCTV monitoring and concierge duties, we have you covered.",
+      "Our SIA-licensed security guards and officers are trained to the very best standards and offer a comprehensive portfolio of services. From static guarding and mobile patrols to CCTV monitoring and concierge duties, we have you covered.",
       "Security guarding is still one of the most proven measures to ensure the safety of your premises and personnel.",
       "Whether you need dedicated gatehouse security for an industrial facility or professionals to control access to a corporate office, our guards will take care of your concerns. Their dual-role capabilities, including performing risk assessments and health and safety checks, mean we can tailor our security solutions to a whole range of needs.",
       "Providing more than a straightforward security presence and frequent patrol, New Concept security officers take an active and specialised approach, so you get the results you expect.",
@@ -137,7 +135,7 @@ export const services: Service[] = [
     ],
     paragraphs: [
       "Security patrols are the ultimate low-cost security service. At New Concept Security, our guards are experienced, licensed and instantly recognisable in their distinctive uniforms.",
-      "Mobile patrols are also used alongside static guarding, event arenas and healthcare premises, visiting sites on an agreed pattern and providing a visible deterrent when a full-time officer is not required.",
+      "Mobile patrols are also used alongside static guarding and healthcare premises, visiting sites on an agreed pattern and providing a visible deterrent when a full-time officer is not required.",
       "The patrols run nationwide. Officers attend in signed mobile security vans, and the unit can be reached on 01253 982211.",
     ],
   },
@@ -186,47 +184,13 @@ export const services: Service[] = [
     ],
   },
   {
-    slug: "door-supervision",
-    group: "Venues & events",
-    title: "Door Supervision",
-    headline: "Part of the experience you deliver.",
-    kicker: "Venues",
-    summary:
-      "Discreet door teams for venues and private functions, with a dedicated account manager.",
-    image: "/images/art/door-supervision.svg",
-    imageAlt: "Two door supervisors outside a venue entrance at night",
-    paragraphs: [
-      "New Concept Security officers and door supervisors are well known for being able to manage events discreetly. Our door staff are present in the entertainment industry and, increasingly, at private functions.",
-      "We know how hard our clients work to deliver the ultimate experience and we want to be part of that picture. With a vast experience of looking after some of the biggest brands in the UK, we know we can add value to your customers’ journey.",
-      "We are committed to tailoring the right security team to complement your venue, and tailoring the uniform that gets the correct image for your brand.",
-      "You will have a dedicated account manager. We prioritise building relationships at all levels, whether we are supplying you in one town or city, or offering a full national service.",
-      "While customer service is a priority for every customer, our clients also trust us to ensure that licensing and local authorities are highly satisfied with our compliance systems and communication. Risk assessments and site induction training are tailored to your venue.",
-    ],
-  },
-  {
-    slug: "event-security",
-    group: "Venues & events",
-    title: "Event Security",
-    headline: "Fully bespoke. Complete peace of mind.",
-    kicker: "Events",
-    summary:
-      "SIA-licensed officers for weddings, festivals, crowd control, ticket management and risk assessments.",
-    image: "/images/art/event-security.svg",
-    imageAlt: "Stewards in high-visibility vests facing a crowd at a night event",
-    paragraphs: [
-      "With a vastly experienced management team and a qualified, suitably licensed workforce, New Concept Security delivers fully bespoke event security — and complete peace of mind.",
-      "We provide comprehensive security services for events of all sizes. Whether you require security officers to guard the entrance to your wedding venue, mobile patrols to monitor a large festival arena, or security guards to carry out crowd control, ticket management or risk assessments, we have you covered.",
-      "Each of our security officers is SIA licensed and trained to the highest standards.",
-    ],
-  },
-  {
     slug: "personal-security",
-    group: "Venues & events",
+    group: "Venues & protection",
     title: "Personal Security",
     headline: "Close protection, wherever you go.",
     kicker: "Close protection",
     summary:
-      "Close protection and static officers for executives, public figures, events and commercial sites.",
+      "Close protection and static officers for executives, public figures and commercial sites.",
     image: "/images/art/close-protection.svg",
     imageAlt: "Close protection officer in a dark overcoat beside a car",
     paragraphs: [
@@ -236,9 +200,7 @@ export const services: Service[] = [
       "In the first instance, to speak to one of our managers, please call 07496 320245.",
     ],
     points: [
-      "Special and sporting events",
       "Bank and corporate security",
-      "Crowd control",
       "VIP and celebrity bodyguard protection",
       "Commercial premises and high-rise complexes",
       "Gatehouse duties and retail security",
@@ -481,17 +443,6 @@ export const serviceGroups = [
   ...new Set(services.map((service) => service.group)),
 ];
 
-export const groupIntros: Record<string, string> = {
-  "Manned guarding":
-    "SIA-licensed officers on static posts, mobile patrols, retail floors and construction sites.",
-  "Venues & events":
-    "Door teams, event security and close protection, briefed to the venue and the brand.",
-  Healthcare:
-    "Hospital security, patient watch and portering for the NHS and private care.",
-  Response:
-    "Key holding, alarm response, CCTV and fire safety, run from the 24-hour control room.",
-};
-
 export const stats = [
   { value: "97%", label: "Customer retention rate" },
   { value: "15k", label: "Alarm call-outs responded to last year" },
@@ -526,7 +477,7 @@ export const approach = [
 ];
 
 export const strengths = [
-  "SIA Approved Contractor for guarding, door supervision and key holding",
+  "SIA Approved Contractor for guarding and key holding",
   "Fully vetted, SIA-licensed officers",
   "A dedicated account manager for every client",
   "Control room at Concept House, 24 hours, 365 days a year",
@@ -539,7 +490,6 @@ export const strengths = [
 export const featured = [
   "security-personnel",
   "site-security",
-  "door-supervision",
   "healthcare",
   "key-holding",
   "cctv-and-alarms",
@@ -553,14 +503,6 @@ export const roles = [
   {
     title: "Mobile patrols",
     body: "Nationwide patrols in signed vans, including key holding and alarm response.",
-  },
-  {
-    title: "Door supervision",
-    body: "Door teams for venues and private functions across the North West.",
-  },
-  {
-    title: "Event security",
-    body: "Stewarding, crowd control and ticket management at events of every size.",
   },
   {
     title: "Healthcare",
@@ -580,11 +522,9 @@ export const mainNav = [
   { slug: "personal-security", label: "Personal Security" },
   { slug: "cctv-and-alarms", label: "CCTV and Alarms" },
   { slug: "standalone-cameras", label: "Stand Alone Cameras" },
-  { slug: "door-supervision", label: "Door Supervision" },
   { slug: "fire-services", label: "Fire Services" },
   { slug: "guarding", label: "Guarding" },
   { slug: "healthcare", label: "Health Care Services" },
-  { slug: "event-security", label: "Event Security" },
 ];
 
 export function getService(slug: string) {
@@ -602,7 +542,7 @@ export const faqs = [
   },
   {
     q: "Are you an approved contractor?",
-    a: "Yes. New Concept Security holds SIA Approved Contractor Scheme status for Security Guarding, Door Supervision and Key Holding. Officers are SIA licensed. The ACS contractor reference is NECOSESC01.",
+    a: "Yes. New Concept Security holds SIA Approved Contractor Scheme status for Security Guarding and Key Holding. Officers are SIA licensed. The ACS contractor reference is NECOSESC01.",
   },
   {
     q: "How fast is alarm response?",
@@ -614,11 +554,11 @@ export const faqs = [
   },
   {
     q: "What do you actually provide?",
-    a: "Security personnel, static and mobile guarding, retail guarding, construction site security, door supervision, event security, close protection, healthcare and NHS security including patient watch and portering, key holding, lock and unlock, CCTV and alarms, stand-alone solar camera units, access control, and waking watch fire services.",
+    a: "Security personnel, static and mobile guarding, retail guarding, construction site security, close protection, healthcare and NHS security including patient watch and portering, key holding, lock and unlock, CCTV and alarms, stand-alone solar camera units, access control, and waking watch fire services.",
   },
   {
     q: "How do I get a quote?",
-    a: "Call the head office on 01253 982211 or email mattbaron@newconceptsecurity.co.uk. Key holding is advertised from £3 per week. Site security, CCTV and door supervision are quoted after we understand the venue.",
+    a: "Call the head office on 01253 982211 or email mattbaron@newconceptsecurity.co.uk. Key holding is advertised from £3 per week. Site security and CCTV are quoted after we understand your premises.",
   },
   {
     q: "Do you lock and unlock premises?",

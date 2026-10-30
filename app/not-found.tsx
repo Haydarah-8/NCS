@@ -15,7 +15,7 @@ export default function NotFound() {
         <Link href="/" className={btnPrimary}>
           Back to home
         </Link>
-        <Link href="/services" className={btnSecondary}>
+        <Link href="/#services" className={btnSecondary}>
           Our services
         </Link>
       </PageHero>

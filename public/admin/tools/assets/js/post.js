@@ -27,11 +27,11 @@
     hiring: {
       label: "We're hiring",
       kicker: "We're hiring",
-      headline: "SIA door supervisors and security officers",
+      headline: "SIA licensed security officers",
       body: "Blackpool, Preston and the Fylde coast\nDays, nights and weekends\nFull and part time",
       cta: "Apply at newconceptsecurity.co.uk/careers",
       photo: "venue",
-      caption: "We're growing and looking for SIA licensed door supervisors and security officers across Blackpool, Preston and the Fylde coast. Full and part-time shifts, days, nights and weekends. Apply through the link in our bio or call 01253 982211.",
+      caption: "We're growing and looking for SIA licensed security officers and security officers across Blackpool, Preston and the Fylde coast. Full and part-time shifts, days, nights and weekends. Apply through the link in our bio or call 01253 982211.",
       tags: "#SecurityJobs #SIA #DoorSupervisor #BlackpoolJobs #PrestonJobs #NowHiring",
     },
     spotlight: {
@@ -89,16 +89,6 @@
       caption: "Security tip: with darker evenings on the way, walk your perimeter, test your lighting and check every gate locks properly. Want a second pair of eyes? We offer free site surveys.",
       tags: "#SecurityTips #BusinessSecurity #CrimePrevention #Blackpool",
     },
-    event: {
-      label: "Event sign",
-      kicker: "Event security",
-      headline: "Bag searches in operation",
-      body: "Please have your ticket ready\nNo glass beyond this point\nAsk any steward for help",
-      cta: "",
-      photo: "venue",
-      caption: "Licensed security on duty at today's event. Please arrive early and have your ticket ready.",
-      tags: "#EventSecurity #SIA #Blackpool",
-    },
     photo: {
       label: "Photo and words",
       kicker: "",
@@ -106,7 +96,7 @@
       body: "",
       cta: "",
       photo: "hero-skyline",
-      caption: "Professional security, done properly. Manned guarding, door supervision, key holding and CCTV across the North West.",
+      caption: "Professional security, done properly. Manned guarding, key holding and CCTV across the North West.",
       tags: "#Security #Blackpool #Preston #NorthWest #SIA",
     },
   };

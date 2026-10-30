@@ -164,7 +164,7 @@ export default function Contact() {
         </p>
         <p>
           SIA Approved Contractor Scheme (ACS) status for the provision of
-          Security Guarding, Door Supervision and Key Holding.
+          Security Guarding and Key Holding.
         </p>
       </div>
     </article>

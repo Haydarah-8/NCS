@@ -23,8 +23,6 @@ const icons: Record<string, LucideIcon> = {
   "mobile-security": Truck,
   "retail-guarding": Store,
   "site-security": HardHat,
-  "door-supervision": DoorOpen,
-  "event-security": Users,
   "personal-security": UserCheck,
   healthcare: HeartPulse,
   "key-holding": KeyRound,

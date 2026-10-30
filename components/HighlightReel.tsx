@@ -51,7 +51,7 @@ export default function HighlightReel({ slides }: { slides: HighlightSlide[] }) 
           {slides.map((slide) => (
             <article
               key={slide.title}
-              className="flex w-[min(86vw,1080px)] shrink-0 flex-col overflow-hidden rounded-[28px] bg-black"
+              className="flex w-[min(86vw,1080px)] shrink-0 flex-col overflow-hidden rounded-none bg-transparent"
             >
               <div className="px-8 pt-10 md:px-12 md:pt-14">
                 <h3 className="max-w-[16ch] text-[32px] font-semibold leading-[1.05] tracking-[-0.03em] md:text-[44px]">
@@ -83,7 +83,7 @@ export default function HighlightReel({ slides }: { slides: HighlightSlide[] }) 
         </div>
       </div>
       <div className="mt-8 flex items-center justify-center gap-3">
-        <div className="flex h-11 items-center gap-2.5 rounded-full bg-[#2c2c2e] px-4">
+        <div className="flex h-11 items-center gap-2.5 rounded-none bg-[#2c2c2e] px-4">
           {slides.map((slide, index) => (
             <button
               key={slide.title}
@@ -94,7 +94,7 @@ export default function HighlightReel({ slides }: { slides: HighlightSlide[] }) 
               className="grid h-6 place-items-center"
             >
               {index === active ? (
-                <span className="relative block h-[3px] w-7 overflow-hidden rounded-full bg-white/30">
+                <span className="relative block h-[3px] w-7 overflow-hidden rounded-none bg-white/30">
                   <span
                     key={`${active}-${paused ? "paused" : "play"}`}
                     className={`absolute inset-0 origin-left bg-white ${
@@ -103,7 +103,7 @@ export default function HighlightReel({ slides }: { slides: HighlightSlide[] }) 
                   />
                 </span>
               ) : (
-                <span className="block size-1.5 rounded-full bg-white/80" />
+                <span className="block size-1.5 rounded-none bg-white/80" />
               )}
             </button>
           ))}
@@ -112,7 +112,7 @@ export default function HighlightReel({ slides }: { slides: HighlightSlide[] }) 
           type="button"
           aria-label={paused ? "Play highlights" : "Pause highlights"}
           onClick={() => setPaused((value) => !value)}
-          className="grid size-11 place-items-center rounded-full bg-[#2c2c2e] text-white"
+          className="grid size-11 place-items-center rounded-none bg-[#2c2c2e] text-white"
         >
           {paused ? (
             <Play className="size-4 fill-current" />

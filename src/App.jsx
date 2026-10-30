@@ -2,7 +2,6 @@ import { Route, Routes } from "react-router-dom";
 import Shell from "./components/Shell";
 import Home from "./pages/Home";
 import About from "./pages/About";
-import Services from "./pages/Services";
 import ServicePage from "./pages/ServicePage";
 import Contact from "./pages/Contact";
 import Careers from "./pages/Careers";
@@ -16,7 +15,6 @@ export default function App() {
       <Route element={<Shell />}>
         <Route index element={<Home />} />
         <Route path="about" element={<About />} />
-        <Route path="services" element={<Services />} />
         <Route path="services/:slug" element={<ServicePage />} />
         <Route path="our-details" element={<Contact />} />
         <Route path="contact" element={<Contact />} />

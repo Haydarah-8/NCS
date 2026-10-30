@@ -25,7 +25,7 @@ export default async function BlogPage() {
               const src = coverSrc(p.cover);
               return (
                 <li key={p.slug}>
-                  <Link href={`/blog/${p.slug}`} className="group block overflow-hidden rounded-[28px] bg-[#f5f5f7] transition hover:bg-[#ececee]">
+                  <Link href={`/blog/${p.slug}`} className="group block overflow-hidden rounded-none bg-[#f5f5f7] transition hover:bg-[#ececee]">
                     <div className="aspect-[16/10] overflow-hidden bg-black">
                       {src && <img src={src} alt="" loading="lazy" className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.03]" />}
                     </div>

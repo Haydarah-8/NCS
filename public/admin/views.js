@@ -554,15 +554,22 @@ export const DOCS = [
     ["letterhead", "Letterhead", "mail", "kit.html?type=letterhead", "With or without a letter"],
     ["badge", "Officer ID badge", "badge", "kit.html?type=badge", "Photo, SIA licence, front and back"],
     ["certificate", "Certificate", "spark", "kit.html?type=certificate", "Training and long service"],
-    ["sign", "Site sign", "sign", "kit.html?type=sign", "CCTV, guarded, no entry and more, A4 or A3"],
+    ["sign", "Site signs", "sign", "sign.html", "Safety and security signs to UK standards, A5 to hoarding banner"],
     ["pass", "Visitor pass", "badge", "kit.html?type=pass", "Colour of the day, escort and contractor"],
+  ]],
+  ["Marketing", [
+    ["email", "Email templates", "mail", "email.html", "Quotes, reminders, incidents, news and your email signature"],
+    ["post", "Social posts", "megaphone", "post.html", "Instagram, LinkedIn, Facebook and X, at every size"],
+  ]],
+  ["Tools", [
+    ["pdf", "PDF editor", "pen", "pdf.html", "Sign, fill in, mark up, merge, reorder and split any PDF"],
   ]],
 ];
 const ALL_DOCS = DOCS.flatMap(([, items]) => items);
 
 export function documents(view) {
   view.innerHTML =
-    head("Documents.", "Every document and print piece, in the NCS brand. Drafts stay in this browser; download a PDF or PNG to send or print.") +
+    head("Documents.", "Paperwork, print, marketing and the PDF editor, all in the NCS brand. Drafts stay in this browser.") +
     DOCS.map(([group, items]) => `<h2 class="group-title">${group}</h2><div class="docs">${items.map(([id, name, ic, , text]) => `<a href="#/documents/${id}"><span class="doc-ico">${icon(ic, 22)}</span><b>${name}</b><span>${text}</span></a>`).join("")}</div>`).join("");
 }
 

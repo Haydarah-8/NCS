@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Site signs · New Concept Security</title>
+  <link rel="icon" href="/icon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&amp;display=swap">
+  <link rel="stylesheet" href="assets/css/studio.css">
+  <link rel="stylesheet" href="assets/css/sign.css">
+</head>
+<body>
+  <header class="st-head">
+    <div>
+      <p class="st-eyebrow">Brand and print</p>
+      <h1 class="st-title">Site signs.</h1>
+    </div>
+    <div class="st-actions">
+      <details class="st-menu">
+        <summary class="st-btn">Export</summary>
+        <div class="st-menu-list">
+          <button type="button" data-export="print"><b>Print</b><span>At the real size, through the browser</span></button>
+          <button type="button" data-export="png"><b>PNG image</b><span>High resolution, for screens and messages</span></button>
+          <button type="button" data-export="reset"><b>Start again</b><span>Back to the CCTV sign</span></button>
+        </div>
+      </details>
+      <button class="st-btn is-solid" type="button" data-export="pdf">Download PDF</button>
+    </div>
+  </header>
+
+  <div class="st-app">
+    <div class="st-controls" data-controls></div>
+    <div class="st-work">
+      <div class="st-stage" data-stage></div>
+      <p class="st-meta" data-meta></p>
+    </div>
+  </div>
+
+  <div class="st-print" aria-hidden="true"></div>
+
+  <script src="assets/js/exporter.js" defer></script>
+  <script src="assets/js/sign.js" defer></script>
+</body>
+</html>

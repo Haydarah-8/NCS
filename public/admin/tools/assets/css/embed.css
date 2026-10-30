@@ -1,22 +1,27 @@
-/* The brand tools (the document makers, business cards and design kit) in
-   the admin's look: the light grey workspace, white cards with a hairline
-   and soft corners, pill buttons in NCS red, and the website's system type.
-   Their own top bar goes; the admin's sidebar does that job. The documents
-   themselves are not touched. */
+/* New Concept Security studio: the one look every maker shares, inside the
+   admin panel or on its own. Minimal and seamless: no boxes, no borders, no
+   card shadows. The editor's sections sit straight on the grey, divided by
+   hairlines; the page being made is the only object with a shadow. The
+   section rail (studio.js) runs along the top of the editor. */
 
 :root {
+  --st-bg: #f5f5f7;
+  --st-ink: #1d1d1f;
+  --st-ink-2: #6e6e73;
+  --st-ink-3: #86868b;
+  --st-line: rgba(0, 0, 0, 0.08);
+  --st-fill: rgba(0, 0, 0, 0.045);
+  --st-fill-2: rgba(0, 0, 0, 0.075);
+  --st-red: #a01010;
+  --st-red-2: #c41616;
   --ds-btn: #a01010;
   --ds-btn-ink: #ffffff;
   --ds-btn-hover: #c41616;
   --ds-ink: #1d1d1f;
   --ds-ink-2: #6e6e73;
   --ds-ink-3: #86868b;
-  --ds-line: #e8e8ed;
-  --ds-line-strong: #d2d2d7;
-  --ds-r-xl: 20px;
-  --ds-r-lg: 18px;
-  --ds-r-md: 14px;
-  --ds-r-sm: 12px;
+  --ds-line: rgba(0, 0, 0, 0.08);
+  --ds-line-strong: rgba(0, 0, 0, 0.14);
   --font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Inter, Helvetica, Arial, sans-serif;
 }
 
@@ -24,111 +29,326 @@
   display: none !important;
 }
 
+html,
 body,
 body.doc-app {
-  background: #f5f5f7 !important;
-  color: #1d1d1f;
+  background: var(--st-bg) !important;
+  color: var(--st-ink);
   font-family: var(--font);
   letter-spacing: -0.01em;
 }
 
 ::selection {
-  background: #a01010;
+  background: var(--st-red);
   color: #fff;
+}
+
+/* ---------- Head: a slim bar that stays in reach ---------- */
+
+.dc-head {
+  position: sticky;
+  z-index: 40;
+  top: 0;
+  align-items: center !important;
+  margin-bottom: 0.5rem;
+  padding-top: 1.1rem !important;
+  padding-bottom: 1.1rem !important;
+  background: rgba(245, 245, 247, 0.82);
+  -webkit-backdrop-filter: saturate(1.6) blur(18px);
+  backdrop-filter: saturate(1.6) blur(18px);
 }
 
 .dc-eyebrow,
 [class*="eyebrow"] {
-  color: #a01010 !important;
-  font-size: 13px !important;
+  color: var(--st-red) !important;
+  font-size: 12px !important;
   font-weight: 600 !important;
-  letter-spacing: 0.02em !important;
-  text-transform: none;
+  letter-spacing: 0.04em !important;
+  text-transform: uppercase;
 }
 
 .dc-title,
 .ds-title {
+  font-size: clamp(1.6rem, 2.4vw, 2.1rem) !important;
   font-weight: 600 !important;
   letter-spacing: -0.03em !important;
+  line-height: 1.1 !important;
 }
 
+/* ---------- Buttons ---------- */
+
 .ds-btn {
+  min-height: 38px;
   border-radius: 999px !important;
+  font-size: 14px !important;
   font-weight: 500 !important;
 }
 
 .ds-btn.is-solid {
-  border-color: #a01010 !important;
-  background: #a01010 !important;
+  border-color: var(--st-red) !important;
+  background: var(--st-red) !important;
   color: #fff !important;
 }
 
 .ds-btn.is-solid:hover {
-  border-color: #c41616 !important;
-  background: #c41616 !important;
+  border-color: var(--st-red-2) !important;
+  background: var(--st-red-2) !important;
 }
 
 .ds-btn.is-outline,
 .dc-actions .ds-btn.is-outline {
-  border-color: #d2d2d7 !important;
-  background: #fff !important;
-  color: #1d1d1f !important;
+  border-color: transparent !important;
+  background: var(--st-fill) !important;
+  color: var(--st-ink) !important;
 }
 
 .ds-btn.is-outline:hover {
-  background: #f5f5f7 !important;
+  background: var(--st-fill-2) !important;
 }
 
-/* Each editor panel is a white card, as in the admin. */
+/* ---------- Editor: sections on the grey, hairlines between ---------- */
+
+.dc-layout {
+  gap: clamp(1.5rem, 3vw, 3rem) !important;
+}
+
+.dc-editor {
+  gap: 0 !important;
+}
+
 .dc-card {
-  border: 1px solid #e8e8ed !important;
-  border-radius: 20px !important;
-  background: #fff !important;
+  padding: 1.1rem 0 1.35rem !important;
+  border: 0 !important;
+  border-top: 1px solid var(--st-line) !important;
+  border-radius: 0 !important;
+  background: transparent !important;
   box-shadow: none !important;
+  scroll-margin-top: 140px;
+}
+
+.dc-card:first-child,
+.st-rail + .dc-card {
+  border-top: 0 !important;
+}
+
+.dc-card > h2 {
+  font-size: 15px !important;
+  font-weight: 600 !important;
+}
+
+.dc-card > h2 small {
+  color: var(--st-ink-3);
+  font-weight: 400;
+}
+
+/* Collapsible: studio.js marks each heading as the toggle. */
+.dc-card[data-st] > h2 {
+  cursor: pointer;
+  user-select: none;
+}
+
+.dc-card[data-st] > h2::after {
+  content: "";
+  flex: none;
+  width: 7px;
+  height: 7px;
+  margin-left: auto;
+  border-right: 1.6px solid var(--st-ink-3);
+  border-bottom: 1.6px solid var(--st-ink-3);
+  transform: rotate(45deg) translateY(-3px);
+  transition: transform 0.2s;
+}
+
+.dc-card[data-st] > h2 > .dc-link,
+.dc-card[data-st] > h2 > button {
+  margin-left: auto;
+}
+
+.dc-card[data-st] > h2 > .dc-link + ::after {
+  margin-left: 12px;
+}
+
+.dc-card.is-closed > h2::after {
+  transform: rotate(-45deg);
+}
+
+.dc-card.is-closed > :not(h2) {
+  display: none !important;
+}
+
+.dc-card.is-closed {
+  padding-bottom: 1.1rem !important;
+}
+
+/* The section rail */
+.st-rail {
+  position: sticky;
+  z-index: 30;
+  top: 76px;
+  display: flex;
+  gap: 4px;
+  margin: 0 0 6px;
+  padding: 6px 0 10px;
+  overflow-x: auto;
+  background: linear-gradient(var(--st-bg) 80%, rgba(245, 245, 247, 0));
+  scrollbar-width: none;
+}
+
+.st-rail::-webkit-scrollbar {
+  display: none;
+}
+
+.st-rail button {
+  flex: none;
+  padding: 7px 12px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--st-ink-2);
+  font: 500 13px var(--font);
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.st-rail button:hover {
+  background: var(--st-fill);
+  color: var(--st-ink);
+}
+
+.st-rail button[aria-current="true"] {
+  background: var(--st-ink);
+  color: #fff;
+}
+
+.st-rail .st-all {
+  margin-left: auto;
+  color: var(--st-ink-3);
+}
+
+/* ---------- Fields: soft fills, no outlines until focus ---------- */
+
+.dc-field,
+.bc-field span,
+.bc-control {
+  color: var(--st-ink-2) !important;
 }
 
 .dc-field input,
 .dc-field select,
-.dc-field textarea {
-  border: 1px solid #d2d2d7 !important;
+.dc-field textarea,
+.bc-field input,
+.bc-control select,
+.bc-control input:not([type="range"]):not([type="color"]):not([type="checkbox"]) {
+  border: 1px solid transparent !important;
   border-radius: 12px !important;
-  background: #fff !important;
+  background: var(--st-fill) !important;
+  color: var(--st-ink) !important;
+  transition: background-color 0.15s, box-shadow 0.15s;
+}
+
+.dc-field input:hover,
+.dc-field select:hover,
+.dc-field textarea:hover {
+  background: var(--st-fill-2) !important;
 }
 
 input:focus,
 select:focus,
 textarea:focus {
-  border-color: #a01010 !important;
+  border-color: var(--st-red) !important;
   outline: none !important;
+  background: #fff !important;
   box-shadow: 0 0 0 4px rgba(160, 16, 16, 0.1) !important;
 }
 
+/* Line items and saved lists: rows, not boxes. */
+.dc-item,
+.dc-entry,
+.dc-saved li {
+  border: 0 !important;
+  border-radius: 14px !important;
+  background: var(--st-fill) !important;
+  box-shadow: none !important;
+}
+
+/* ---------- Choosing a design ---------- */
+
 .kit-design,
 .dc-template {
-  border: 1px solid #e8e8ed !important;
+  border: 0 !important;
   border-radius: 14px !important;
-  background: #fff !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.kit-design:hover,
+.dc-template:hover {
+  background: var(--st-fill) !important;
 }
 
 .kit-design[aria-pressed="true"],
 .dc-template[aria-pressed="true"] {
-  border-color: #a01010 !important;
-  box-shadow: 0 0 0 3px rgba(160, 16, 16, 0.15) !important;
+  background: #fff !important;
+  box-shadow: 0 0 0 2px var(--st-red), 0 10px 24px -14px rgba(0, 0, 0, 0.3) !important;
+}
+
+.dc-template-art svg,
+.kit-thumb {
+  border-radius: 6px;
+  box-shadow: 0 4px 14px -8px rgba(0, 0, 0, 0.35);
+}
+
+.kit-types {
+  gap: 4px !important;
 }
 
 .kit-types button {
+  border: 0 !important;
   border-radius: 999px !important;
-  background: #ececee !important;
-  border-color: transparent !important;
+  background: transparent !important;
+  color: var(--st-ink-2) !important;
+  font-weight: 500 !important;
+}
+
+.kit-types button:hover {
+  background: var(--st-fill) !important;
 }
 
 .kit-types button[aria-pressed="true"] {
-  background: #1d1d1f !important;
+  background: var(--st-ink) !important;
   color: #fff !important;
 }
 
+/* ---------- The page being made: the one object with depth ---------- */
+
 .dc-stage,
 .kit-stage {
-  border-radius: 20px !important;
-  background: #ececee !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  padding: 1.25rem 0 !important;
+}
+
+.dc-scaler .doc,
+.kit-scaler .kit {
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06), 0 30px 70px -30px rgba(0, 0, 0, 0.35) !important;
+}
+
+.dc-preview {
+  top: 96px !important;
+}
+
+.dc-meta {
+  color: var(--st-ink-3);
+  font-size: 12.5px;
+}
+
+/* Business card page: the same calm. */
+.bc-panel {
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.bc-hero {
+  padding-bottom: 1rem !important;
 }

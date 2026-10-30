@@ -2164,3 +2164,163 @@ button {
   font: 12.5px var(--mono);
   word-break: break-all;
 }
+
+/* ---------- Seamless: sections sit on the grey, hairlines between ---------- */
+
+.card {
+  border: 0;
+  border-top: 1px solid var(--line-2);
+  border-radius: 0;
+  background: transparent;
+}
+
+.card-head {
+  padding: 20px 0 0;
+}
+
+.card-head h2 {
+  font-size: 17px;
+}
+
+.card-body {
+  padding: 14px 0 8px;
+}
+
+.main > .card,
+.main > section.card {
+  margin-top: 30px;
+}
+
+.grid {
+  gap: 0 40px;
+  margin-top: 30px;
+}
+
+.grid > .card {
+  min-width: 0;
+}
+
+.card.is-next {
+  margin-top: 30px;
+  border-style: solid;
+  border-color: var(--line-2);
+}
+
+.kpis {
+  gap: 0;
+  overflow: visible;
+  border: 0;
+  border-top: 1px solid var(--line-2);
+  border-radius: 0;
+  background: transparent;
+}
+
+.kpi {
+  padding: 18px 18px 14px 0;
+  background: transparent;
+}
+
+.kpi + .kpi {
+  padding-left: 18px;
+  box-shadow: inset 1px 0 0 var(--line-2);
+}
+
+.kpis.is-3 {
+  border-top: 0;
+}
+
+.docs > a,
+.docs > div {
+  border: 0;
+  border-radius: 18px;
+  background: transparent;
+}
+
+.docs > a:hover {
+  background: #fff;
+  transform: translateY(-2px);
+  box-shadow: 0 18px 40px -24px rgba(0, 0, 0, 0.3);
+}
+
+.docs.is-next > div {
+  border: 1px dashed var(--line-2);
+}
+
+.inbox {
+  border: 0;
+  border-top: 1px solid var(--line-2);
+  border-radius: 0;
+  background: transparent;
+}
+
+.inbox-list {
+  border-right-color: var(--line-2);
+}
+
+.mail a {
+  border-top-color: var(--line);
+}
+
+.inbox-read {
+  background: transparent;
+}
+
+.message {
+  background: #fff;
+}
+
+.frame {
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  height: calc(100vh - 72px);
+}
+
+.docbar {
+  margin: -16px 0 4px;
+}
+
+.posts li a:hover,
+.list li > a:hover,
+.bars li > a:hover {
+  background: rgba(0, 0, 0, 0.04);
+}
+
+.editor-main.card {
+  border-top: 0;
+}
+
+.editor-main .card-body {
+  padding-top: 0;
+}
+
+.editor-side .card:first-child {
+  border-top: 0;
+}
+
+@media (max-width: 1240px) {
+  .kpi:nth-child(3n + 1) {
+    padding-left: 0;
+    box-shadow: none;
+  }
+
+  .kpi:nth-child(n + 4) {
+    border-top: 1px solid var(--line-2);
+  }
+}
+
+@media (max-width: 640px) {
+  .kpi:nth-child(3n + 1) {
+    padding-left: 18px;
+    box-shadow: inset 1px 0 0 var(--line-2);
+  }
+
+  .kpi:nth-child(2n + 1) {
+    padding-left: 0;
+    box-shadow: none;
+  }
+
+  .kpi:nth-child(n + 3) {
+    border-top: 1px solid var(--line-2);
+  }
+}

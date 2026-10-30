@@ -1,10 +1,10 @@
 /* New Concept Security: the design kit. Letterhead,
-   officer ID badge, training certificate, site sign and visitor pass, all
+   officer ID badge, training certificate and visitor pass, all
    in the brand and all from one small engine: the form on the left edits a
    state object, the item on the right is drawn from it at its printed size,
    and it downloads as a PDF or PNG or goes to the printer. Drafts stay in
    this browser. The page picks the item from ?type= (letterhead,
-   badge, certificate, sign, pass). */
+   badge, certificate, pass). Site signs have their own studio (sign.js). */
 
 const W_PATH = "M210 8L297.35 95.35V301.72L148.09 69.91ZM210 412L122.65 324.65V118.28L271.91 350.09Z";
 const R_PATHS =
@@ -125,35 +125,6 @@ const TYPES = {
       { k: "role2", label: "Their role" },
     ],
   },
-  sign: {
-    label: "Site sign",
-    w: 794,
-    h: 1123,
-    pt: [595.28, 841.89],
-    print: "A4",
-    designs: { brand: "Brand", warning: "Warning", prohibition: "Prohibition", info: "Information", mandatory: "Mandatory", minimal: "Minimal", hazard: "Hazard border", dark: "Night" },
-    sample: {
-      design: "warning",
-      preset: "cctv",
-      icon: "camera",
-      headline: "24-hour CCTV in operation",
-      sub: "This site is monitored and patrolled",
-      body: "Images are recorded for the prevention and detection of crime and to keep people safe.",
-      contact: "Control room, day and night: 0800 000 0000",
-      paper: "a4",
-      logo: true,
-    },
-    fields: [
-      { k: "preset", label: "Start from", type: "select", options: [["cctv", "CCTV in operation"], ["guarded", "Guarded site"], ["noentry", "No unauthorised entry"], ["patrol", "Patrolled site"], ["dogs", "Guard dogs on patrol"], ["keyholding", "Alarm and key holding"], ["report", "Visitors report to the gatehouse"], ["hivis", "Hi-vis must be worn"]], wide: true },
-      { k: "icon", label: "Symbol", type: "select", options: [["camera", "Camera"], ["shield", "Shield"], ["noentry", "No entry"], ["patrol", "Patrol car"], ["dog", "Dog"], ["bell", "Alarm bell"], ["eye", "Eye"], ["person", "Person"], ["vest", "Hi-vis vest"]] },
-      { k: "paper", label: "Paper", type: "select", options: [["a4", "A4"], ["a3", "A3"]] },
-      { k: "headline", label: "Headline", wide: true },
-      { k: "sub", label: "Second line", wide: true },
-      { k: "body", label: "Small print", type: "textarea", wide: true },
-      { k: "contact", label: "Contact line", wide: true },
-      { k: "logo", label: "Show the logo", type: "check" },
-    ],
-  },
   pass: {
     label: "Visitor pass",
     ...CARD,
@@ -187,16 +158,6 @@ const TYPES = {
   },
 };
 
-const PRESETS = {
-  cctv: { icon: "camera", design: "warning", headline: "24-hour CCTV in operation", sub: "This site is monitored and patrolled", body: "Images are recorded for the prevention and detection of crime and to keep people safe." },
-  guarded: { icon: "shield", design: "brand", headline: "Security officers on site", sub: "Guarded 24 hours a day", body: "All visitors and deliveries must report to the gatehouse." },
-  noentry: { icon: "noentry", design: "prohibition", headline: "No unauthorised entry", sub: "Trespassers will be reported to the police", body: "This site is monitored by CCTV and patrolled by security officers." },
-  patrol: { icon: "patrol", design: "info", headline: "Patrolled site", sub: "Mobile patrols day and night", body: "Officers visit at random times and every visit is logged." },
-  dogs: { icon: "dog", design: "warning", headline: "Guard dogs on patrol", sub: "Do not enter this site", body: "Dogs are under the control of a licensed handler at all times." },
-  keyholding: { icon: "bell", design: "info", headline: "Alarm response and key holding", sub: "These premises are protected", body: "Alarm activations are answered by our response officers." },
-  report: { icon: "person", design: "mandatory", headline: "All visitors must report to the gatehouse", sub: "Sign in before entering the site", body: "You will be given a pass and a short safety briefing." },
-  hivis: { icon: "vest", design: "mandatory", headline: "Hi-vis clothing must be worn", sub: "Beyond this point at all times", body: "Ask at the gatehouse if you need a vest." },
-};
 
 /* ---------- State ---------- */
 
@@ -398,36 +359,6 @@ const DRAW = {
     if (it.design === "elegant") return [`<div class="kit-cert-frame is-elegant"><i></i><i></i><i></i><i></i><div class="kit-cert-in">${inner}</div></div>`];
     if (it.design === "dark") return [`<div class="kit-cert-frame is-dark"><div class="kit-cert-in">${inner}</div></div>`];
     return [`<div class="kit-cert-frame"><div class="kit-cert-in">${inner}</div></div>`];
-  },
-
-  sign(it) {
-    const tone = { warning: "#1D1D1F", prohibition: it.icon === "noentry" ? "#D4111B" : "#1D1D1F", info: "#FFFFFF", mandatory: "#FFFFFF", minimal: state.main, hazard: "#1D1D1F" }[it.design] || state.accent;
-    const icon = `<svg class="kit-sign-icon" viewBox="0 0 120 120" aria-hidden="true" style="color:${tone}">${ICONS[it.icon] || ICONS.camera}</svg>`;
-    const logo = it.logo ? `<div class="kit-sign-logo">${brand(["brand", "dark"].includes(it.design))}</div>` : "";
-    const words = `<h1 class="kit-sign-head">${esc(it.headline)}</h1>${it.sub ? `<p class="kit-sign-sub">${esc(it.sub)}</p>` : ""}${it.body ? `<p class="kit-sign-body">${esc(it.body)}</p>` : ""}`;
-    const contact = it.contact ? `<p class="kit-sign-contact">${esc(it.contact)}</p>` : "";
-    if (it.design === "warning") {
-      return [`<div class="kit-sign-panel is-warning"><svg class="kit-sign-tri" viewBox="0 0 240 210" aria-hidden="true"><path d="M120 10L230 200H10z" fill="#FFD200" stroke="#1D1D1F" stroke-width="14" stroke-linejoin="round"/></svg><div class="kit-sign-tri-icon">${icon}</div></div><div class="kit-sign-text">${words}${contact}</div>${logo}`];
-    }
-    if (it.design === "prohibition") {
-      return [`<div class="kit-sign-panel is-prohibition">${it.icon === "noentry" ? icon : `<div class="kit-sign-ring">${icon}</div>`}</div><div class="kit-sign-text">${words}${contact}</div>${logo}`];
-    }
-    if (it.design === "hazard") {
-      return [`${stripes("#FFD200", "#1D1D1F", 26)}<div class="kit-sign-inner"><div class="kit-sign-panel is-hazard">${icon}</div><div class="kit-sign-text">${words}${contact}</div>${logo}</div>`];
-    }
-    if (it.design === "dark") {
-      return [`<div class="kit-sign-panel is-dark">${icon}</div><div class="kit-sign-text">${words}${contact}</div>${logo}`];
-    }
-    if (it.design === "mandatory") {
-      return [`<div class="kit-sign-panel is-mandatory"><div class="kit-sign-disc">${icon}</div></div><div class="kit-sign-text">${words}${contact}</div>${logo}`];
-    }
-    if (it.design === "minimal") {
-      return [`<div class="kit-sign-min"><div class="kit-sign-tile">${icon}</div><div class="kit-sign-rule"></div>${words}${contact}</div>${logo}`];
-    }
-    if (it.design === "info") {
-      return [`<div class="kit-sign-panel is-info">${icon}</div><div class="kit-sign-text">${words}${contact}</div>${logo}`];
-    }
-    return [`<div class="kit-sign-panel is-brand">${icon}</div><div class="kit-sign-text">${words}${contact}</div>${logo}`];
   },
 
   pass(it) {
@@ -694,10 +625,6 @@ function init() {
     if (!el.dataset.k) return;
     set(el.dataset.k, el.type === "checkbox" ? el.checked : el.value);
     if (el.dataset.k === "main" || el.dataset.k === "accent") state.palette = "custom";
-    if (el.dataset.k === "items.sign.preset") {
-      Object.assign(item(), PRESETS[el.value]);
-      fill();
-    }
     render();
   });
   document.addEventListener("change", (e) => {

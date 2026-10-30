@@ -16,7 +16,10 @@ const NAV = [
     ["#/blog", "pen", "Blog", "drafts"],
     ["#/announcement", "megaphone", "Announcement"],
   ]],
-  ["Tools", [["#/documents", "file", "Documents"]]],
+  ["Tools", [
+    ["#/documents", "file", "Documents"],
+    ["#/documents/pdf", "pen", "PDF editor"],
+  ]],
 ];
 const FOOT = [
   ["#/next", "spark", "Coming next"],
@@ -45,7 +48,8 @@ let counts = {};
 
 function drawSide() {
   const here = location.hash.split("?")[0] || "#/";
-  const active = (href) => (href === "#/" ? here === "#/" || here === "#" || here === "" : here === href || here.startsWith(`${href}/`));
+  const active = (href) =>
+    href === "#/" ? here === "#/" || here === "#" || here === "" : here === href || (here.startsWith(`${href}/`) && !NAV.some(([, items]) => items.some(([h]) => h !== href && h.startsWith(href) && (here === h || here.startsWith(`${h}/`)))));
   const link = ([href, ic, label, badge]) => {
     const n = badge === "leads" ? counts.new_leads : badge === "drafts" ? counts.drafts : 0;
     return `<a href="${href}"${active(href) ? ' aria-current="page"' : ""}>${icon(ic, 18)}<span>${label}</span>${n ? `<b class="badge">${n}</b>` : ""}</a>`;

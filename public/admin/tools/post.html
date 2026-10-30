@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Social posts · New Concept Security</title>
+  <link rel="icon" href="/icon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&amp;display=swap">
+  <link rel="stylesheet" href="assets/css/studio.css">
+  <style>
+    /* The post: every size in --u, a hundredth of its short side. */
+    .pm { position: relative; overflow: hidden; background: #000 center / cover no-repeat; color: var(--ink); font-family: "Montserrat", -apple-system, "Segoe UI", Arial, sans-serif; box-shadow: 0 30px 70px -30px rgba(0,0,0,.45); }
+    .pm-shade { position: absolute; inset: 0; }
+    .pm-rule { position: absolute; left: 0; right: 0; bottom: 0; height: calc(var(--u) * 1.1); background: #c41616; }
+    .t-red .pm-rule { background: #fff; }
+    .pm-in { position: relative; display: grid; grid-template-rows: auto 1fr auto; height: 100%; padding: calc(var(--u) * 7); }
+    .pm-logo { display: flex; align-items: center; gap: calc(var(--u) * 1.8); }
+    .pm-logo svg { width: calc(var(--u) * 8.5); height: calc(var(--u) * 8.5); }
+    .pm-logo b { display: block; font-size: calc(var(--u) * 4.2); font-weight: 400; line-height: 1; }
+    .pm-logo b i { font-style: normal; font-weight: 800; }
+    .pm-logo small { display: block; margin-top: calc(var(--u) * .7); font-size: calc(var(--u) * 1.9); font-weight: 500; letter-spacing: .42em; opacity: .85; }
+    .pm-main { display: flex; flex-direction: column; justify-content: flex-end; min-height: 0; overflow: hidden; padding: calc(var(--u) * 4) 0; }
+    .pm-kicker { margin: 0 0 calc(var(--u) * 2.4); color: #ff4d4d; font-size: calc(var(--u) * 3.1 * var(--fit, 1)); font-weight: 700; letter-spacing: .12em; text-transform: uppercase; }
+    .t-red .pm-kicker { color: #fff; opacity: .85; }
+    .t-light .pm-kicker { color: #a01010; }
+    .pm-tipno { margin-left: calc(var(--u) * 1.2); padding: calc(var(--u) * .4) calc(var(--u) * 1.4); border: calc(var(--u) * .3) solid currentColor; border-radius: 99em; }
+    .pm-head { margin: 0; font-size: calc(var(--u) * 8.2 * var(--fit, 1)); font-weight: 800; letter-spacing: -.02em; line-height: 1.04; }
+    .pm-body { margin: calc(var(--u) * 3) 0 0; font-size: calc(var(--u) * 3.9 * var(--fit, 1)); font-weight: 500; line-height: 1.4; opacity: .92; max-width: 36em; }
+    .pm-list { margin: calc(var(--u) * 3.4) 0 0; padding: 0; list-style: none; }
+    .pm-list li { position: relative; margin-top: calc(var(--u) * 1.4); padding-left: calc(var(--u) * 4.5); font-size: calc(var(--u) * 3.8 * var(--fit, 1)); font-weight: 600; }
+    .pm-list li::before { content: ""; position: absolute; left: 0; top: .45em; width: calc(var(--u) * 2); height: calc(var(--u) * 2); background: #c41616; clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%); }
+    .t-red .pm-list li::before { background: #fff; }
+    .pm-stat { margin: 0; font-size: calc(var(--u) * 30 * var(--fit, 1)); font-weight: 800; letter-spacing: -.05em; line-height: .9; }
+    .pm-stat-label { margin: calc(var(--u) * 3) 0 0; font-size: calc(var(--u) * 4.6 * var(--fit, 1)); font-weight: 600; max-width: 18em; }
+    .pm-mark { margin: 0; height: calc(var(--u) * 12); color: #c41616; font-size: calc(var(--u) * 26 * var(--fit, 1)); font-weight: 800; line-height: 1; }
+    .t-red .pm-mark { color: #fff; }
+    .pm-quote { margin: 0; font-size: calc(var(--u) * 5.6 * var(--fit, 1)); font-weight: 600; line-height: 1.28; }
+    .pm-author { margin: calc(var(--u) * 3) 0 0; font-size: calc(var(--u) * 3.2 * var(--fit, 1)); font-weight: 600; letter-spacing: .06em; opacity: .8; text-transform: uppercase; }
+    .pm-foot { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: calc(var(--u) * 2) calc(var(--u) * 4); }
+    .pm-cta { margin: 0; padding: calc(var(--u) * 2) calc(var(--u) * 3.6); border-radius: 99em; background: #c41616; color: #fff; font-size: calc(var(--u) * 3.1); font-weight: 700; }
+    .t-red .pm-cta { background: #fff; color: #a01010; }
+    .pm-contact { display: grid; justify-items: end; gap: calc(var(--u) * .5); font-size: calc(var(--u) * 2.6); font-weight: 600; opacity: .9; }
+    .s-wide .pm-in { padding: calc(var(--u) * 6) calc(var(--u) * 8); }
+    .s-wide .pm-main { max-width: 64%; }
+    .s-wide .pm-head { font-size: calc(var(--u) * 9 * var(--fit, 1)); }
+    .s-tall .pm-in { padding: calc(var(--u) * 9) calc(var(--u) * 7) calc(var(--u) * 14); }
+    .s-tall .pm-head { font-size: calc(var(--u) * 10 * var(--fit, 1)); }
+    .s-tall .pm-foot { flex-direction: column; align-items: flex-start; }
+    .s-tall .pm-contact { justify-items: start; }
+    .l-photo .pm-main { justify-content: flex-end; }
+    .l-stat .pm-main, .l-quote .pm-main { justify-content: center; }
+    .pm-photos { display: grid; grid-template-columns: repeat(auto-fill, minmax(56px, 1fr)); gap: 6px; }
+    .pm-photos button { aspect-ratio: 1; border: 0; border-radius: 10px; background: #ddd center / cover; opacity: .75; }
+    .pm-photos button:hover { opacity: 1; }
+    .pm-photos button[aria-pressed="true"] { opacity: 1; box-shadow: 0 0 0 2px #fff, 0 0 0 4px var(--red); }
+    .pm-thumb .pm { box-shadow: none; }
+  </style>
+</head>
+<body>
+  <header class="st-head">
+    <div>
+      <p class="st-eyebrow">Marketing</p>
+      <h1 class="st-title">Social posts.</h1>
+    </div>
+    <div class="st-actions">
+      <details class="st-menu">
+        <summary class="st-btn">More</summary>
+        <div class="st-menu-list">
+          <button type="button" data-export="all"><b>Every size</b><span>Square, portrait, story, landscape and wide</span></button>
+          <button type="button" data-export="reset"><b>Start again</b><span>Back to the hiring post</span></button>
+        </div>
+      </details>
+      <button class="st-btn is-solid" type="button" data-export="png">Download PNG</button>
+    </div>
+  </header>
+
+  <div class="st-app">
+    <div class="st-controls" data-controls></div>
+    <div class="st-work">
+      <div class="st-stage" data-stage></div>
+      <p class="st-meta" data-meta></p>
+    </div>
+  </div>
+
+  <script src="assets/js/exporter.js" defer></script>
+  <script src="assets/js/post.js" defer></script>
+</body>
+</html>
